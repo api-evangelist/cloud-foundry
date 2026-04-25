@@ -1,0 +1,166 @@
+aid: cloud-foundry
+name: Cloud Foundry
+description: >-
+  Cloud Foundry is an open-source, multi-cloud Platform as a Service
+  (PaaS) governed by the Cloud Foundry Foundation. It provides a
+  developer-friendly application platform where operators push source
+  code or container images and Cloud Foundry handles staging,
+  routing, scaling, and lifecycle management. The CF API
+  (api.cloudfoundry.org) is the primary control plane and is
+  documented at v3.cloudfoundry.org/version/release-candidate. The
+  ecosystem also includes the User Account and Authentication
+  (UAA) OAuth 2.0 server, the Loggregator log and metric pipeline,
+  the Diego container scheduler, the Open Service Broker API for
+  marketplace services, and the Eirini Kubernetes-based scheduler.
+type: Index
+image: https://kinlane-productions.s3.amazonaws.com/apis-json/apis-json-logo.jpg
+url: https://raw.githubusercontent.com/api-evangelist/cloud-foundry/refs/heads/main/apis.yml
+created: '2024-01-01'
+modified: '2026-04-23'
+specificationVersion: '0.19'
+x-type: opensource
+tags:
+  - Cloud Foundry Foundation
+  - Containers
+  - Multi-Cloud
+  - Open Source
+  - PaaS
+  - Platform
+apis:
+  - aid: cloud-foundry:cloud-controller-api-v3
+    name: Cloud Foundry Cloud Controller API v3
+    tags:
+      - Apps
+      - PaaS
+      - Platform
+      - REST
+    image: https://kinlane-productions2.s3.amazonaws.com/apis-json/apis-json-logo.jpg
+    humanURL: https://v3-apidocs.cloudfoundry.org/
+    properties:
+      - url: https://v3-apidocs.cloudfoundry.org/
+        type: Documentation
+      - url: https://github.com/cloudfoundry/cloud_controller_ng
+        type: Source Code
+      - url: openapi/cloud-foundry-cloud-controller-api-v3-openapi.yml
+        type: OpenAPI
+    description: >-
+      The Cloud Controller API v3 is the primary REST control plane
+      for Cloud Foundry. It manages organizations, spaces,
+      applications, processes, builds, droplets, packages, routes,
+      domains, service instances, service brokers, tasks, users,
+      roles, and platform metadata. Authentication is delegated to
+      UAA via OAuth 2.0 bearer tokens.
+  - aid: cloud-foundry:uaa
+    name: Cloud Foundry UAA
+    tags:
+      - Authentication
+      - Identity
+      - OAuth 2.0
+      - Security
+    image: https://kinlane-productions2.s3.amazonaws.com/apis-json/apis-json-logo.jpg
+    humanURL: https://docs.cloudfoundry.org/uaa/
+    properties:
+      - url: https://docs.cloudfoundry.org/uaa/
+        type: Documentation
+      - url: https://github.com/cloudfoundry/uaa
+        type: Source Code
+      - url: https://docs.cloudfoundry.org/api/uaa/
+        type: Reference
+    description: >-
+      The User Account and Authentication (UAA) server is Cloud
+      Foundry's identity provider and OAuth 2.0 authorization server.
+      It issues tokens consumed by the Cloud Controller, brokers, and
+      operator tooling, and supports SAML and LDAP federation,
+      multifactor authentication, and SCIM-style user and group
+      management.
+  - aid: cloud-foundry:loggregator
+    name: Cloud Foundry Loggregator
+    tags:
+      - Logs
+      - Metrics
+      - Observability
+      - Streaming
+    image: https://kinlane-productions2.s3.amazonaws.com/apis-json/apis-json-logo.jpg
+    humanURL: https://docs.cloudfoundry.org/loggregator/
+    properties:
+      - url: https://docs.cloudfoundry.org/loggregator/
+        type: Documentation
+      - url: https://github.com/cloudfoundry/loggregator-release
+        type: Source Code
+      - url: asyncapi/cloud-foundry-loggregator-asyncapi.yml
+        type: AsyncAPI
+    description: >-
+      Loggregator is Cloud Foundry's distributed log and metric
+      pipeline that aggregates application logs, platform component
+      logs, and metrics for streaming consumption by users and
+      external sinks. It exposes a WebSocket Firehose, a v2 gRPC
+      egress API, and the Reverse Log Proxy.
+  - aid: cloud-foundry:open-service-broker-api
+    name: Open Service Broker API
+    tags:
+      - Marketplace
+      - Open Standard
+      - Service Broker
+    image: https://kinlane-productions2.s3.amazonaws.com/apis-json/apis-json-logo.jpg
+    humanURL: https://www.openservicebrokerapi.org/
+    properties:
+      - url: https://www.openservicebrokerapi.org/
+        type: Documentation
+      - url: https://github.com/openservicebrokerapi/servicebroker
+        type: Specification
+    description: >-
+      The Open Service Broker API is the open specification originally
+      developed by Cloud Foundry and now used by Kubernetes and other
+      platforms to provision and manage backing services through a
+      common HTTP interface. Brokers expose a catalog and lifecycle
+      operations for service instances and bindings.
+  - aid: cloud-foundry:bosh
+    name: BOSH Director API
+    tags:
+      - Deployment
+      - Infrastructure
+      - Lifecycle
+      - Releases
+    image: https://kinlane-productions2.s3.amazonaws.com/apis-json/apis-json-logo.jpg
+    humanURL: https://bosh.io/docs/director-api-v1/
+    properties:
+      - url: https://bosh.io/docs/director-api-v1/
+        type: Documentation
+      - url: https://github.com/cloudfoundry/bosh
+        type: Source Code
+    description: >-
+      BOSH is Cloud Foundry's release engineering tool for packaging,
+      deploying, and managing distributed software. The BOSH Director
+      API exposes deployment, stemcell, release, task, and VM
+      lifecycle operations used by operators and CI tooling to
+      manage Cloud Foundry itself and the workloads it depends on.
+common:
+  - type: Website
+    url: https://www.cloudfoundry.org/
+  - type: Documentation
+    url: https://docs.cloudfoundry.org/
+  - type: GitHub
+    url: https://github.com/cloudfoundry
+  - type: Foundation
+    url: https://www.cloudfoundry.org/foundation/
+  - type: Community
+    url: https://www.cloudfoundry.org/community/
+  - type: Slack
+    url: https://slack.cloudfoundry.org/
+  - type: Blog
+    url: https://www.cloudfoundry.org/blog/
+  - type: Events
+    url: https://www.cloudfoundry.org/events/
+  - type: Privacy Policy
+    url: https://www.cloudfoundry.org/privacy-policy/
+  - type: Trademark
+    url: https://www.cloudfoundry.org/trademark-policy/
+  - type: JSON-LD
+    url: json-ld/cloud-foundry-context.jsonld
+  - type: Spectral
+    url: rules/cloud-foundry-rules.yml
+  - type: Naftiko Capabilities
+    url: capabilities/cloud-foundry.yaml
+maintainers:
+  - FN: Kin Lane
+    email: kinlane@gmail.com

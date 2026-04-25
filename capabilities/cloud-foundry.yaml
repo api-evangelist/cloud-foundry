@@ -1,0 +1,143 @@
+# Naftiko capabilities profile for Cloud Foundry.
+# Capabilities map verbs against the high-value operations in the
+# Cloud Controller API v3 (https://v3-apidocs.cloudfoundry.org/).
+provider: cloud-foundry
+name: Cloud Foundry
+description: >-
+  Cloud Foundry is an open-source Platform as a Service. These
+  capabilities cover the core lifecycle of organizations, spaces,
+  applications, builds, droplets, routes, and service instances
+  through the Cloud Controller API v3.
+capabilities:
+  - id: cloud-foundry.orgs.list
+    name: List organizations
+    description: Return organizations visible to the authenticated user.
+    api: cloud-foundry:cloud-controller-api-v3
+    operationRef: openapi/cloud-foundry-cloud-controller-api-v3-openapi.yml#/paths/~1organizations/get
+    inputs:
+      - page
+      - per_page
+      - names
+    outputs:
+      - resources
+      - pagination
+
+  - id: cloud-foundry.spaces.list
+    name: List spaces
+    description: Return spaces in an organization.
+    api: cloud-foundry:cloud-controller-api-v3
+    operationRef: openapi/cloud-foundry-cloud-controller-api-v3-openapi.yml#/paths/~1spaces/get
+    inputs:
+      - organization_guids
+      - page
+      - per_page
+    outputs:
+      - resources
+      - pagination
+
+  - id: cloud-foundry.apps.create
+    name: Create application
+    description: Register a new application in a space.
+    api: cloud-foundry:cloud-controller-api-v3
+    operationRef: openapi/cloud-foundry-cloud-controller-api-v3-openapi.yml#/paths/~1apps/post
+    inputs:
+      - name
+      - relationships
+      - lifecycle
+      - environment_variables
+    outputs:
+      - guid
+
+  - id: cloud-foundry.apps.start
+    name: Start application
+    description: Start an existing application's web process.
+    api: cloud-foundry:cloud-controller-api-v3
+    operationRef: openapi/cloud-foundry-cloud-controller-api-v3-openapi.yml#/paths/~1apps~1{guid}~1actions~1start/post
+    inputs:
+      - guid
+    outputs:
+      - state
+
+  - id: cloud-foundry.apps.stop
+    name: Stop application
+    description: Stop a running application.
+    api: cloud-foundry:cloud-controller-api-v3
+    operationRef: openapi/cloud-foundry-cloud-controller-api-v3-openapi.yml#/paths/~1apps~1{guid}~1actions~1stop/post
+    inputs:
+      - guid
+    outputs:
+      - state
+
+  - id: cloud-foundry.packages.upload
+    name: Upload package
+    description: Upload application source bits or a docker reference as a package.
+    api: cloud-foundry:cloud-controller-api-v3
+    operationRef: openapi/cloud-foundry-cloud-controller-api-v3-openapi.yml#/paths/~1packages/post
+    inputs:
+      - type
+      - relationships
+      - data
+    outputs:
+      - guid
+
+  - id: cloud-foundry.builds.create
+    name: Create build
+    description: Stage a build (droplet) from an uploaded package.
+    api: cloud-foundry:cloud-controller-api-v3
+    operationRef: openapi/cloud-foundry-cloud-controller-api-v3-openapi.yml#/paths/~1builds/post
+    inputs:
+      - package
+      - lifecycle
+    outputs:
+      - guid
+      - state
+
+  - id: cloud-foundry.routes.create
+    name: Create route
+    description: Reserve a route in a space and domain for an application.
+    api: cloud-foundry:cloud-controller-api-v3
+    operationRef: openapi/cloud-foundry-cloud-controller-api-v3-openapi.yml#/paths/~1routes/post
+    inputs:
+      - host
+      - path
+      - relationships
+    outputs:
+      - guid
+      - url
+
+  - id: cloud-foundry.service-instances.create
+    name: Create service instance
+    description: Provision a service instance from a marketplace plan.
+    api: cloud-foundry:cloud-controller-api-v3
+    operationRef: openapi/cloud-foundry-cloud-controller-api-v3-openapi.yml#/paths/~1service_instances/post
+    inputs:
+      - name
+      - type
+      - relationships
+      - parameters
+    outputs:
+      - guid
+
+  - id: cloud-foundry.tasks.run
+    name: Run task
+    description: Run a one-off task against an application's droplet.
+    api: cloud-foundry:cloud-controller-api-v3
+    operationRef: openapi/cloud-foundry-cloud-controller-api-v3-openapi.yml#/paths/~1apps~1{guid}~1tasks/post
+    inputs:
+      - guid
+      - command
+      - name
+      - memory_in_mb
+    outputs:
+      - guid
+      - state
+
+  - id: cloud-foundry.logs.stream
+    name: Stream application logs
+    description: Stream Loggregator log and metric envelopes for an app.
+    api: cloud-foundry:loggregator
+    operationRef: asyncapi/cloud-foundry-loggregator-asyncapi.yml#/channels/firehose
+    inputs:
+      - source-id
+    outputs:
+      - envelopes

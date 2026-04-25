@@ -1,0 +1,157 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "cf": "https://v3-apidocs.cloudfoundry.org/ns/",
+    "schema": "https://schema.org/",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "dcterms": "http://purl.org/dc/terms/",
+
+    "Organization": {
+      "@id": "cf:Organization",
+      "@context": {
+        "guid": "cf:guid",
+        "name": "schema:name",
+        "createdAt": {
+          "@id": "dcterms:created",
+          "@type": "xsd:dateTime"
+        },
+        "updatedAt": {
+          "@id": "dcterms:modified",
+          "@type": "xsd:dateTime"
+        },
+        "suspended": "cf:suspended"
+      }
+    },
+
+    "Space": {
+      "@id": "cf:Space",
+      "@context": {
+        "guid": "cf:guid",
+        "name": "schema:name",
+        "organizationGuid": "cf:organization_guid",
+        "createdAt": {
+          "@id": "dcterms:created",
+          "@type": "xsd:dateTime"
+        }
+      }
+    },
+
+    "App": {
+      "@id": "cf:App",
+      "@context": {
+        "guid": "cf:guid",
+        "name": "schema:name",
+        "state": "cf:state",
+        "lifecycle": "cf:lifecycle",
+        "spaceGuid": "cf:space_guid",
+        "createdAt": {
+          "@id": "dcterms:created",
+          "@type": "xsd:dateTime"
+        },
+        "updatedAt": {
+          "@id": "dcterms:modified",
+          "@type": "xsd:dateTime"
+        }
+      }
+    },
+
+    "Process": {
+      "@id": "cf:Process",
+      "@context": {
+        "guid": "cf:guid",
+        "type": "cf:process_type",
+        "instances": "cf:instances",
+        "memoryInMb": "cf:memory_in_mb",
+        "diskInMb": "cf:disk_in_mb",
+        "command": "cf:command"
+      }
+    },
+
+    "Build": {
+      "@id": "cf:Build",
+      "@context": {
+        "guid": "cf:guid",
+        "state": "cf:state",
+        "packageGuid": "cf:package_guid",
+        "dropletGuid": "cf:droplet_guid",
+        "createdAt": {
+          "@id": "dcterms:created",
+          "@type": "xsd:dateTime"
+        }
+      }
+    },
+
+    "Droplet": {
+      "@id": "cf:Droplet",
+      "@context": {
+        "guid": "cf:guid",
+        "state": "cf:state",
+        "buildpacks": {
+          "@id": "cf:buildpacks",
+          "@container": "@set"
+        },
+        "stack": "cf:stack"
+      }
+    },
+
+    "Route": {
+      "@id": "cf:Route",
+      "@context": {
+        "guid": "cf:guid",
+        "host": "cf:host",
+        "path": "schema:urlTemplate",
+        "url": {
+          "@id": "schema:url",
+          "@type": "@id"
+        },
+        "domainGuid": "cf:domain_guid",
+        "spaceGuid": "cf:space_guid"
+      }
+    },
+
+    "Domain": {
+      "@id": "cf:Domain",
+      "@context": {
+        "guid": "cf:guid",
+        "name": "schema:name",
+        "internal": "cf:internal"
+      }
+    },
+
+    "ServiceInstance": {
+      "@id": "cf:ServiceInstance",
+      "@context": {
+        "guid": "cf:guid",
+        "name": "schema:name",
+        "type": "cf:type",
+        "tags": {
+          "@id": "schema:keywords",
+          "@container": "@set"
+        }
+      }
+    },
+
+    "ServiceBroker": {
+      "@id": "cf:ServiceBroker",
+      "@context": {
+        "guid": "cf:guid",
+        "name": "schema:name",
+        "url": {
+          "@id": "schema:url",
+          "@type": "@id"
+        }
+      }
+    },
+
+    "Task": {
+      "@id": "cf:Task",
+      "@context": {
+        "guid": "cf:guid",
+        "name": "schema:name",
+        "command": "cf:command",
+        "state": "cf:state",
+        "memoryInMb": "cf:memory_in_mb"
+      }
+    }
+  }
+}

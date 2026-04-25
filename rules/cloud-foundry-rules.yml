@@ -1,0 +1,111 @@
+extends:
+  - spectral:oas
+
+# Spectral linting rules for Cloud Foundry CAPI v3.
+# https://v3-apidocs.cloudfoundry.org/ — OAuth 2.0 secured REST API.
+rules:
+  cf-info-contact:
+    description: API contact information must be present.
+    severity: error
+    given: "$.info"
+    then:
+      field: contact
+      function: truthy
+
+  cf-info-license:
+    description: API license must be declared.
+    severity: warn
+    given: "$.info"
+    then:
+      field: license
+      function: truthy
+
+  cf-server-https:
+    description: All server URLs must use HTTPS.
+    severity: error
+    given: "$.servers[*].url"
+    then:
+      function: pattern
+      functionOptions:
+        match: "^https://"
+
+  cf-server-versioned:
+    description: Cloud Controller server URLs should include /v3.
+    severity: warn
+    given: "$.servers[*].url"
+    then:
+      function: pattern
+      functionOptions:
+        match: "/v3$"
+
+  cf-oauth-security:
+    description: OAuth 2.0 must be the declared security scheme.
+    severity: error
+    given: "$.components.securitySchemes[*].type"
+    then:
+      function: enumeration
+      functionOptions:
+        values:
+          - oauth2
+          - http
+
+  cf-operation-tags:
+    description: Every operation must declare at least one tag.
+    severity: warn
+    given: "$.paths[*][get,post,put,patch,delete]"
+    then:
+      field: tags
+      function: schema
+      functionOptions:
+        schema:
+          type: array
+          minItems: 1
+
+  cf-operation-summary:
+    description: Every operation must include a short summary.
+    severity: warn
+    given: "$.paths[*][get,post,put,patch,delete]"
+    then:
+      field: summary
+      function: truthy
+
+  cf-operation-id:
+    description: Every operation must declare a unique operationId.
+    severity: error
+    given: "$.paths[*][get,post,put,patch,delete]"
+    then:
+      field: operationId
+      function: truthy
+
+  cf-error-responses:
+    description: Mutating operations should declare 4xx error responses.
+    severity: warn
+    given: "$.paths[*][post,put,patch,delete].responses"
+    then:
+      function: schema
+      functionOptions:
+        schema:
+          type: object
+          anyOf:
+            - required: ["400"]
+            - required: ["401"]
+            - required: ["403"]
+            - required: ["404"]
+            - required: ["422"]
+
+  cf-pagination-fields:
+    description: List endpoints should support page, per_page, and order_by parameters.
+    severity: info
+    given: "$.paths[?(@property.match(/apps$|spaces$|organizations$|routes$|service_instances$/))].get.parameters[*].name"
+    then:
+      function: enumeration
+      functionOptions:
+        values:
+          - page
+          - per_page
+          - order_by
+          - names
+          - guids
+          - space_guids
+          - organization_guids
+          - label_selector
