@@ -18,7 +18,7 @@ url: https://raw.githubusercontent.com/api-evangelist/cloud-foundry/refs/heads/m
 created: '2024-01-01'
 modified: '2026-04-23'
 specificationVersion: '0.19'
-x-type: opensource
+kind: opensource
 tags:
   - Cloud Foundry Foundation
   - Containers
@@ -151,11 +151,11 @@ common:
     url: https://www.cloudfoundry.org/blog/
   - type: Events
     url: https://www.cloudfoundry.org/events/
-  - type: Privacy Policy
+  - type: PrivacyPolicy
     url: https://www.cloudfoundry.org/privacy-policy/
   - type: Trademark
     url: https://www.cloudfoundry.org/trademark-policy/
-  - type: JSON-LD
+  - type: JSONLD
     url: json-ld/cloud-foundry-context.jsonld
   - type: Spectral
     url: rules/cloud-foundry-rules.yml
