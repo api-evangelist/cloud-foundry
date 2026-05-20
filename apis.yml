@@ -135,6 +135,8 @@ apis:
       lifecycle operations used by operators and CI tooling to
       manage Cloud Foundry itself and the workloads it depends on.
 common:
+  - type: LinkedIn
+    url: https://www.linkedin.com/company/cloud-foundry
   - type: Website
     url: https://www.cloudfoundry.org/
   - type: Documentation
