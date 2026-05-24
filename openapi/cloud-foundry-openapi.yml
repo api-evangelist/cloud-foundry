@@ -1,0 +1,442 @@
+openapi: 3.1.0
+info:
+  title: Cloud Foundry Cloud Controller API v3
+  description: |
+    Cloud Foundry Cloud Controller API v3 is the primary control plane of
+    Cloud Foundry. It manages apps, packages, droplets, processes, tasks,
+    organizations, spaces, service instances, and related resources.
+    Requests authenticate with OAuth 2.0 bearer tokens issued by the
+    Cloud Foundry UAA server.
+  version: "3.220.0"
+servers:
+  - url: https://api.cloudfoundry.org
+    description: Public Cloud Foundry CC API endpoint (replace with your foundation host)
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    GuidParam:
+      name: guid
+      in: path
+      required: true
+      schema:
+        type: string
+    Page:
+      name: page
+      in: query
+      schema:
+        type: integer
+        default: 1
+    PerPage:
+      name: per_page
+      in: query
+      schema:
+        type: integer
+        default: 50
+  schemas:
+    App:
+      type: object
+      properties:
+        guid:
+          type: string
+        name:
+          type: string
+        state:
+          type: string
+          enum: [STARTED, STOPPED]
+        lifecycle:
+          type: object
+        relationships:
+          type: object
+    Organization:
+      type: object
+      properties:
+        guid:
+          type: string
+        name:
+          type: string
+        suspended:
+          type: boolean
+    Space:
+      type: object
+      properties:
+        guid:
+          type: string
+        name:
+          type: string
+        relationships:
+          type: object
+    ServiceInstance:
+      type: object
+      properties:
+        guid:
+          type: string
+        name:
+          type: string
+        type:
+          type: string
+        relationships:
+          type: object
+    PaginatedResponse:
+      type: object
+      properties:
+        pagination:
+          type: object
+          properties:
+            total_results:
+              type: integer
+            total_pages:
+              type: integer
+            first:
+              type: object
+            last:
+              type: object
+            next:
+              type: object
+            previous:
+              type: object
+        resources:
+          type: array
+          items:
+            type: object
+security:
+  - bearerAuth: []
+paths:
+  /:
+    get:
+      summary: API root
+      description: Returns links to V2 and V3 endpoints and other metadata.
+      security: []
+      responses:
+        '200':
+          description: Root links
+          content:
+            application/json:
+              schema:
+                type: object
+  /v3:
+    get:
+      summary: V3 root
+      responses:
+        '200':
+          description: V3 links
+          content:
+            application/json:
+              schema:
+                type: object
+  /v3/apps:
+    get:
+      summary: List apps
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PerPage'
+        - name: names
+          in: query
+          schema:
+            type: string
+        - name: space_guids
+          in: query
+          schema:
+            type: string
+        - name: organization_guids
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Paginated list of apps
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedResponse'
+    post:
+      summary: Create app
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/App'
+      responses:
+        '201':
+          description: App created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/App'
+  /v3/apps/{guid}:
+    parameters:
+      - $ref: '#/components/parameters/GuidParam'
+    get:
+      summary: Get app
+      responses:
+        '200':
+          description: App
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/App'
+    patch:
+      summary: Update app
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/App'
+      responses:
+        '200':
+          description: Updated
+    delete:
+      summary: Delete app
+      responses:
+        '202':
+          description: Accepted (asynchronous)
+  /v3/apps/{guid}/actions/start:
+    parameters:
+      - $ref: '#/components/parameters/GuidParam'
+    post:
+      summary: Start app
+      responses:
+        '200':
+          description: Started
+  /v3/apps/{guid}/actions/stop:
+    parameters:
+      - $ref: '#/components/parameters/GuidParam'
+    post:
+      summary: Stop app
+      responses:
+        '200':
+          description: Stopped
+  /v3/organizations:
+    get:
+      summary: List organizations
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PerPage'
+        - name: names
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Organizations page
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedResponse'
+    post:
+      summary: Create organization
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Organization'
+      responses:
+        '201':
+          description: Organization created
+  /v3/organizations/{guid}:
+    parameters:
+      - $ref: '#/components/parameters/GuidParam'
+    get:
+      summary: Get organization
+      responses:
+        '200':
+          description: Organization
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Organization'
+    patch:
+      summary: Update organization
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Organization'
+      responses:
+        '200':
+          description: Updated
+    delete:
+      summary: Delete organization
+      responses:
+        '202':
+          description: Accepted
+  /v3/spaces:
+    get:
+      summary: List spaces
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PerPage'
+        - name: names
+          in: query
+          schema:
+            type: string
+        - name: organization_guids
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Spaces page
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedResponse'
+    post:
+      summary: Create space
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Space'
+      responses:
+        '201':
+          description: Space created
+  /v3/spaces/{guid}:
+    parameters:
+      - $ref: '#/components/parameters/GuidParam'
+    get:
+      summary: Get space
+      responses:
+        '200':
+          description: Space
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Space'
+    patch:
+      summary: Update space
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Space'
+      responses:
+        '200':
+          description: Updated
+    delete:
+      summary: Delete space
+      responses:
+        '202':
+          description: Accepted
+  /v3/service_instances:
+    get:
+      summary: List service instances
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PerPage'
+      responses:
+        '200':
+          description: Service instances page
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedResponse'
+    post:
+      summary: Create service instance
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ServiceInstance'
+      responses:
+        '202':
+          description: Accepted (asynchronous)
+  /v3/service_instances/{guid}:
+    parameters:
+      - $ref: '#/components/parameters/GuidParam'
+    get:
+      summary: Get service instance
+      responses:
+        '200':
+          description: Service instance
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceInstance'
+    patch:
+      summary: Update service instance
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ServiceInstance'
+      responses:
+        '202':
+          description: Accepted
+    delete:
+      summary: Delete service instance
+      responses:
+        '202':
+          description: Accepted
+  /v3/builds:
+    get:
+      summary: List builds
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PerPage'
+      responses:
+        '200':
+          description: Builds page
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedResponse'
+    post:
+      summary: Create build
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '201':
+          description: Build created
+  /v3/deployments:
+    get:
+      summary: List deployments
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PerPage'
+      responses:
+        '200':
+          description: Deployments page
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedResponse'
+    post:
+      summary: Create deployment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '201':
+          description: Deployment created
+  /v3/jobs/{guid}:
+    parameters:
+      - $ref: '#/components/parameters/GuidParam'
+    get:
+      summary: Get job
+      description: Long-running asynchronous job status.
+      responses:
+        '200':
+          description: Job state
+          content:
+            application/json:
+              schema:
+                type: object
