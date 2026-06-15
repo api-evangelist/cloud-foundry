@@ -1,0 +1,582 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Cloud Foundry Cloud Controller API v3",
+    "version": "3.220.0"
+  },
+  "request": {
+    "auth": {
+      "type": "bearer",
+      "token": "{{bearerToken}}"
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "API root",
+        "type": "http"
+      },
+      "http": {
+        "method": "GET",
+        "url": "https://api.cloudfoundry.org/"
+      },
+      "docs": "Returns links to V2 and V3 endpoints and other metadata."
+    },
+    {
+      "info": {
+        "name": "V3 root",
+        "type": "http"
+      },
+      "http": {
+        "method": "GET",
+        "url": "https://api.cloudfoundry.org/v3"
+      },
+      "docs": "V3 root"
+    },
+    {
+      "info": {
+        "name": "List apps",
+        "type": "http"
+      },
+      "http": {
+        "method": "GET",
+        "url": "https://api.cloudfoundry.org/v3/apps",
+        "params": [
+          {
+            "name": "page",
+            "value": "",
+            "type": "query"
+          },
+          {
+            "name": "per_page",
+            "value": "",
+            "type": "query"
+          },
+          {
+            "name": "names",
+            "value": "",
+            "type": "query"
+          },
+          {
+            "name": "space_guids",
+            "value": "",
+            "type": "query"
+          },
+          {
+            "name": "organization_guids",
+            "value": "",
+            "type": "query"
+          }
+        ]
+      },
+      "docs": "List apps"
+    },
+    {
+      "info": {
+        "name": "Create app",
+        "type": "http"
+      },
+      "http": {
+        "method": "POST",
+        "url": "https://api.cloudfoundry.org/v3/apps",
+        "body": {
+          "type": "json",
+          "data": "{}"
+        }
+      },
+      "docs": "Create app"
+    },
+    {
+      "info": {
+        "name": "Get app",
+        "type": "http"
+      },
+      "http": {
+        "method": "GET",
+        "url": "https://api.cloudfoundry.org/v3/apps/:guid",
+        "params": [
+          {
+            "name": "guid",
+            "value": "",
+            "type": "path"
+          }
+        ]
+      },
+      "docs": "Get app"
+    },
+    {
+      "info": {
+        "name": "Update app",
+        "type": "http"
+      },
+      "http": {
+        "method": "PATCH",
+        "url": "https://api.cloudfoundry.org/v3/apps/:guid",
+        "params": [
+          {
+            "name": "guid",
+            "value": "",
+            "type": "path"
+          }
+        ],
+        "body": {
+          "type": "json",
+          "data": "{}"
+        }
+      },
+      "docs": "Update app"
+    },
+    {
+      "info": {
+        "name": "Delete app",
+        "type": "http"
+      },
+      "http": {
+        "method": "DELETE",
+        "url": "https://api.cloudfoundry.org/v3/apps/:guid",
+        "params": [
+          {
+            "name": "guid",
+            "value": "",
+            "type": "path"
+          }
+        ]
+      },
+      "docs": "Delete app"
+    },
+    {
+      "info": {
+        "name": "Start app",
+        "type": "http"
+      },
+      "http": {
+        "method": "POST",
+        "url": "https://api.cloudfoundry.org/v3/apps/:guid/actions/start",
+        "params": [
+          {
+            "name": "guid",
+            "value": "",
+            "type": "path"
+          }
+        ]
+      },
+      "docs": "Start app"
+    },
+    {
+      "info": {
+        "name": "Stop app",
+        "type": "http"
+      },
+      "http": {
+        "method": "POST",
+        "url": "https://api.cloudfoundry.org/v3/apps/:guid/actions/stop",
+        "params": [
+          {
+            "name": "guid",
+            "value": "",
+            "type": "path"
+          }
+        ]
+      },
+      "docs": "Stop app"
+    },
+    {
+      "info": {
+        "name": "List organizations",
+        "type": "http"
+      },
+      "http": {
+        "method": "GET",
+        "url": "https://api.cloudfoundry.org/v3/organizations",
+        "params": [
+          {
+            "name": "page",
+            "value": "",
+            "type": "query"
+          },
+          {
+            "name": "per_page",
+            "value": "",
+            "type": "query"
+          },
+          {
+            "name": "names",
+            "value": "",
+            "type": "query"
+          }
+        ]
+      },
+      "docs": "List organizations"
+    },
+    {
+      "info": {
+        "name": "Create organization",
+        "type": "http"
+      },
+      "http": {
+        "method": "POST",
+        "url": "https://api.cloudfoundry.org/v3/organizations",
+        "body": {
+          "type": "json",
+          "data": "{}"
+        }
+      },
+      "docs": "Create organization"
+    },
+    {
+      "info": {
+        "name": "Get organization",
+        "type": "http"
+      },
+      "http": {
+        "method": "GET",
+        "url": "https://api.cloudfoundry.org/v3/organizations/:guid",
+        "params": [
+          {
+            "name": "guid",
+            "value": "",
+            "type": "path"
+          }
+        ]
+      },
+      "docs": "Get organization"
+    },
+    {
+      "info": {
+        "name": "Update organization",
+        "type": "http"
+      },
+      "http": {
+        "method": "PATCH",
+        "url": "https://api.cloudfoundry.org/v3/organizations/:guid",
+        "params": [
+          {
+            "name": "guid",
+            "value": "",
+            "type": "path"
+          }
+        ],
+        "body": {
+          "type": "json",
+          "data": "{}"
+        }
+      },
+      "docs": "Update organization"
+    },
+    {
+      "info": {
+        "name": "Delete organization",
+        "type": "http"
+      },
+      "http": {
+        "method": "DELETE",
+        "url": "https://api.cloudfoundry.org/v3/organizations/:guid",
+        "params": [
+          {
+            "name": "guid",
+            "value": "",
+            "type": "path"
+          }
+        ]
+      },
+      "docs": "Delete organization"
+    },
+    {
+      "info": {
+        "name": "List spaces",
+        "type": "http"
+      },
+      "http": {
+        "method": "GET",
+        "url": "https://api.cloudfoundry.org/v3/spaces",
+        "params": [
+          {
+            "name": "page",
+            "value": "",
+            "type": "query"
+          },
+          {
+            "name": "per_page",
+            "value": "",
+            "type": "query"
+          },
+          {
+            "name": "names",
+            "value": "",
+            "type": "query"
+          },
+          {
+            "name": "organization_guids",
+            "value": "",
+            "type": "query"
+          }
+        ]
+      },
+      "docs": "List spaces"
+    },
+    {
+      "info": {
+        "name": "Create space",
+        "type": "http"
+      },
+      "http": {
+        "method": "POST",
+        "url": "https://api.cloudfoundry.org/v3/spaces",
+        "body": {
+          "type": "json",
+          "data": "{}"
+        }
+      },
+      "docs": "Create space"
+    },
+    {
+      "info": {
+        "name": "Get space",
+        "type": "http"
+      },
+      "http": {
+        "method": "GET",
+        "url": "https://api.cloudfoundry.org/v3/spaces/:guid",
+        "params": [
+          {
+            "name": "guid",
+            "value": "",
+            "type": "path"
+          }
+        ]
+      },
+      "docs": "Get space"
+    },
+    {
+      "info": {
+        "name": "Update space",
+        "type": "http"
+      },
+      "http": {
+        "method": "PATCH",
+        "url": "https://api.cloudfoundry.org/v3/spaces/:guid",
+        "params": [
+          {
+            "name": "guid",
+            "value": "",
+            "type": "path"
+          }
+        ],
+        "body": {
+          "type": "json",
+          "data": "{}"
+        }
+      },
+      "docs": "Update space"
+    },
+    {
+      "info": {
+        "name": "Delete space",
+        "type": "http"
+      },
+      "http": {
+        "method": "DELETE",
+        "url": "https://api.cloudfoundry.org/v3/spaces/:guid",
+        "params": [
+          {
+            "name": "guid",
+            "value": "",
+            "type": "path"
+          }
+        ]
+      },
+      "docs": "Delete space"
+    },
+    {
+      "info": {
+        "name": "List service instances",
+        "type": "http"
+      },
+      "http": {
+        "method": "GET",
+        "url": "https://api.cloudfoundry.org/v3/service_instances",
+        "params": [
+          {
+            "name": "page",
+            "value": "",
+            "type": "query"
+          },
+          {
+            "name": "per_page",
+            "value": "",
+            "type": "query"
+          }
+        ]
+      },
+      "docs": "List service instances"
+    },
+    {
+      "info": {
+        "name": "Create service instance",
+        "type": "http"
+      },
+      "http": {
+        "method": "POST",
+        "url": "https://api.cloudfoundry.org/v3/service_instances",
+        "body": {
+          "type": "json",
+          "data": "{}"
+        }
+      },
+      "docs": "Create service instance"
+    },
+    {
+      "info": {
+        "name": "Get service instance",
+        "type": "http"
+      },
+      "http": {
+        "method": "GET",
+        "url": "https://api.cloudfoundry.org/v3/service_instances/:guid",
+        "params": [
+          {
+            "name": "guid",
+            "value": "",
+            "type": "path"
+          }
+        ]
+      },
+      "docs": "Get service instance"
+    },
+    {
+      "info": {
+        "name": "Update service instance",
+        "type": "http"
+      },
+      "http": {
+        "method": "PATCH",
+        "url": "https://api.cloudfoundry.org/v3/service_instances/:guid",
+        "params": [
+          {
+            "name": "guid",
+            "value": "",
+            "type": "path"
+          }
+        ],
+        "body": {
+          "type": "json",
+          "data": "{}"
+        }
+      },
+      "docs": "Update service instance"
+    },
+    {
+      "info": {
+        "name": "Delete service instance",
+        "type": "http"
+      },
+      "http": {
+        "method": "DELETE",
+        "url": "https://api.cloudfoundry.org/v3/service_instances/:guid",
+        "params": [
+          {
+            "name": "guid",
+            "value": "",
+            "type": "path"
+          }
+        ]
+      },
+      "docs": "Delete service instance"
+    },
+    {
+      "info": {
+        "name": "List builds",
+        "type": "http"
+      },
+      "http": {
+        "method": "GET",
+        "url": "https://api.cloudfoundry.org/v3/builds",
+        "params": [
+          {
+            "name": "page",
+            "value": "",
+            "type": "query"
+          },
+          {
+            "name": "per_page",
+            "value": "",
+            "type": "query"
+          }
+        ]
+      },
+      "docs": "List builds"
+    },
+    {
+      "info": {
+        "name": "Create build",
+        "type": "http"
+      },
+      "http": {
+        "method": "POST",
+        "url": "https://api.cloudfoundry.org/v3/builds",
+        "body": {
+          "type": "json",
+          "data": "{}"
+        }
+      },
+      "docs": "Create build"
+    },
+    {
+      "info": {
+        "name": "List deployments",
+        "type": "http"
+      },
+      "http": {
+        "method": "GET",
+        "url": "https://api.cloudfoundry.org/v3/deployments",
+        "params": [
+          {
+            "name": "page",
+            "value": "",
+            "type": "query"
+          },
+          {
+            "name": "per_page",
+            "value": "",
+            "type": "query"
+          }
+        ]
+      },
+      "docs": "List deployments"
+    },
+    {
+      "info": {
+        "name": "Create deployment",
+        "type": "http"
+      },
+      "http": {
+        "method": "POST",
+        "url": "https://api.cloudfoundry.org/v3/deployments",
+        "body": {
+          "type": "json",
+          "data": "{}"
+        }
+      },
+      "docs": "Create deployment"
+    },
+    {
+      "info": {
+        "name": "Get job",
+        "type": "http"
+      },
+      "http": {
+        "method": "GET",
+        "url": "https://api.cloudfoundry.org/v3/jobs/:guid",
+        "params": [
+          {
+            "name": "guid",
+            "value": "",
+            "type": "path"
+          }
+        ]
+      },
+      "docs": "Long-running asynchronous job status."
+    }
+  ],
+  "bundled": true
+}
