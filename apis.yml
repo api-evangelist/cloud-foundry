@@ -8,7 +8,7 @@ description: >-
   Account and Authentication (UAA) OAuth 2.0 server, the Loggregator log and metric pipeline, the Diego container
   scheduler, the Open Service Broker API for marketplace services, and the Eirini Kubernetes-based scheduler.
 type: Index
-image: https://kinlane-productions.s3.amazonaws.com/apis-json/apis-json-logo.jpg
+image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
 url: https://raw.githubusercontent.com/api-evangelist/cloud-foundry/refs/heads/main/apis.yml
 created: '2024-01-01'
 modified: '2026-04-23'
@@ -29,7 +29,7 @@ apis:
       - PaaS
       - Platform
       - REST
-    image: https://kinlane-productions2.s3.amazonaws.com/apis-json/apis-json-logo.jpg
+    image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
     humanURL: https://v3-apidocs.cloudfoundry.org/
     properties:
       - url: https://v3-apidocs.cloudfoundry.org/
@@ -49,7 +49,7 @@ apis:
       - Identity
       - OAuth 2.0
       - Security
-    image: https://kinlane-productions2.s3.amazonaws.com/apis-json/apis-json-logo.jpg
+    image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
     humanURL: https://docs.cloudfoundry.org/uaa/
     properties:
       - url: https://docs.cloudfoundry.org/uaa/
@@ -69,7 +69,7 @@ apis:
       - Metrics
       - Observability
       - Streaming
-    image: https://kinlane-productions2.s3.amazonaws.com/apis-json/apis-json-logo.jpg
+    image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
     humanURL: https://docs.cloudfoundry.org/loggregator/
     properties:
       - url: https://docs.cloudfoundry.org/loggregator/
@@ -88,7 +88,7 @@ apis:
       - Marketplace
       - Open Standard
       - Service Broker
-    image: https://kinlane-productions2.s3.amazonaws.com/apis-json/apis-json-logo.jpg
+    image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
     humanURL: https://www.openservicebrokerapi.org/
     properties:
       - url: https://www.openservicebrokerapi.org/
@@ -106,7 +106,7 @@ apis:
       - Infrastructure
       - Lifecycle
       - Releases
-    image: https://kinlane-productions2.s3.amazonaws.com/apis-json/apis-json-logo.jpg
+    image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
     humanURL: https://bosh.io/docs/director-api-v1/
     properties:
       - url: https://bosh.io/docs/director-api-v1/
