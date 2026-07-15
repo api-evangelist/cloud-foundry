@@ -118,6 +118,8 @@ apis:
       BOSH Director API exposes deployment, stemcell, release, task, and VM lifecycle operations used by operators and
       CI tooling to manage Cloud Foundry itself and the workloads it depends on.
 common:
+  - type: AgenticAccess
+    url: agentic-access/cloud-foundry-agentic-access.yml
   - type: DomainSecurity
     url: security/cloud-foundry-domain-security.yml
   - type: Authentication
