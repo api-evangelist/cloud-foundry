@@ -1,0 +1,150 @@
+openapi: 3.1.0
+info:
+  title: Cloud Foundry Cloud Controller API v3 Apps Spaces API
+  description: 'Cloud Foundry Cloud Controller API v3 is the primary control plane of
+
+    Cloud Foundry. It manages apps, packages, droplets, processes, tasks,
+
+    organizations, spaces, service instances, and related resources.
+
+    Requests authenticate with OAuth 2.0 bearer tokens issued by the
+
+    Cloud Foundry UAA server.
+
+    '
+  version: 3.220.0
+servers:
+- url: https://api.cloudfoundry.org
+  description: Public Cloud Foundry CC API endpoint (replace with your foundation host)
+security:
+- bearerAuth: []
+tags:
+- name: Spaces
+paths:
+  /v3/spaces:
+    get:
+      summary: List spaces
+      parameters:
+      - $ref: '#/components/parameters/Page'
+      - $ref: '#/components/parameters/PerPage'
+      - name: names
+        in: query
+        schema:
+          type: string
+      - name: organization_guids
+        in: query
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Spaces page
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedResponse'
+      tags:
+      - Spaces
+    post:
+      summary: Create space
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Space'
+      responses:
+        '201':
+          description: Space created
+      tags:
+      - Spaces
+  /v3/spaces/{guid}:
+    parameters:
+    - $ref: '#/components/parameters/GuidParam'
+    get:
+      summary: Get space
+      responses:
+        '200':
+          description: Space
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Space'
+      tags:
+      - Spaces
+    patch:
+      summary: Update space
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Space'
+      responses:
+        '200':
+          description: Updated
+      tags:
+      - Spaces
+    delete:
+      summary: Delete space
+      responses:
+        '202':
+          description: Accepted
+      tags:
+      - Spaces
+components:
+  parameters:
+    PerPage:
+      name: per_page
+      in: query
+      schema:
+        type: integer
+        default: 50
+    Page:
+      name: page
+      in: query
+      schema:
+        type: integer
+        default: 1
+    GuidParam:
+      name: guid
+      in: path
+      required: true
+      schema:
+        type: string
+  schemas:
+    Space:
+      type: object
+      properties:
+        guid:
+          type: string
+        name:
+          type: string
+        relationships:
+          type: object
+    PaginatedResponse:
+      type: object
+      properties:
+        pagination:
+          type: object
+          properties:
+            total_results:
+              type: integer
+            total_pages:
+              type: integer
+            first:
+              type: object
+            last:
+              type: object
+            next:
+              type: object
+            previous:
+              type: object
+        resources:
+          type: array
+          items:
+            type: object
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

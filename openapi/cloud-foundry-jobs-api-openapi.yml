@@ -1,0 +1,51 @@
+openapi: 3.1.0
+info:
+  title: Cloud Foundry Cloud Controller API v3 Apps Jobs API
+  description: 'Cloud Foundry Cloud Controller API v3 is the primary control plane of
+
+    Cloud Foundry. It manages apps, packages, droplets, processes, tasks,
+
+    organizations, spaces, service instances, and related resources.
+
+    Requests authenticate with OAuth 2.0 bearer tokens issued by the
+
+    Cloud Foundry UAA server.
+
+    '
+  version: 3.220.0
+servers:
+- url: https://api.cloudfoundry.org
+  description: Public Cloud Foundry CC API endpoint (replace with your foundation host)
+security:
+- bearerAuth: []
+tags:
+- name: Jobs
+paths:
+  /v3/jobs/{guid}:
+    parameters:
+    - $ref: '#/components/parameters/GuidParam'
+    get:
+      summary: Get job
+      description: Long-running asynchronous job status.
+      responses:
+        '200':
+          description: Job state
+          content:
+            application/json:
+              schema:
+                type: object
+      tags:
+      - Jobs
+components:
+  parameters:
+    GuidParam:
+      name: guid
+      in: path
+      required: true
+      schema:
+        type: string
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

@@ -1,0 +1,93 @@
+openapi: 3.1.0
+info:
+  title: Cloud Foundry Cloud Controller API v3 Apps Deployments API
+  description: 'Cloud Foundry Cloud Controller API v3 is the primary control plane of
+
+    Cloud Foundry. It manages apps, packages, droplets, processes, tasks,
+
+    organizations, spaces, service instances, and related resources.
+
+    Requests authenticate with OAuth 2.0 bearer tokens issued by the
+
+    Cloud Foundry UAA server.
+
+    '
+  version: 3.220.0
+servers:
+- url: https://api.cloudfoundry.org
+  description: Public Cloud Foundry CC API endpoint (replace with your foundation host)
+security:
+- bearerAuth: []
+tags:
+- name: Deployments
+paths:
+  /v3/deployments:
+    get:
+      summary: List deployments
+      parameters:
+      - $ref: '#/components/parameters/Page'
+      - $ref: '#/components/parameters/PerPage'
+      responses:
+        '200':
+          description: Deployments page
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedResponse'
+      tags:
+      - Deployments
+    post:
+      summary: Create deployment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '201':
+          description: Deployment created
+      tags:
+      - Deployments
+components:
+  parameters:
+    Page:
+      name: page
+      in: query
+      schema:
+        type: integer
+        default: 1
+    PerPage:
+      name: per_page
+      in: query
+      schema:
+        type: integer
+        default: 50
+  schemas:
+    PaginatedResponse:
+      type: object
+      properties:
+        pagination:
+          type: object
+          properties:
+            total_results:
+              type: integer
+            total_pages:
+              type: integer
+            first:
+              type: object
+            last:
+              type: object
+            next:
+              type: object
+            previous:
+              type: object
+        resources:
+          type: array
+          items:
+            type: object
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

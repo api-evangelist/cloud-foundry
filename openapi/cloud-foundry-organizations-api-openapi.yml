@@ -1,0 +1,146 @@
+openapi: 3.1.0
+info:
+  title: Cloud Foundry Cloud Controller API v3 Apps Organizations API
+  description: 'Cloud Foundry Cloud Controller API v3 is the primary control plane of
+
+    Cloud Foundry. It manages apps, packages, droplets, processes, tasks,
+
+    organizations, spaces, service instances, and related resources.
+
+    Requests authenticate with OAuth 2.0 bearer tokens issued by the
+
+    Cloud Foundry UAA server.
+
+    '
+  version: 3.220.0
+servers:
+- url: https://api.cloudfoundry.org
+  description: Public Cloud Foundry CC API endpoint (replace with your foundation host)
+security:
+- bearerAuth: []
+tags:
+- name: Organizations
+paths:
+  /v3/organizations:
+    get:
+      summary: List organizations
+      parameters:
+      - $ref: '#/components/parameters/Page'
+      - $ref: '#/components/parameters/PerPage'
+      - name: names
+        in: query
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Organizations page
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedResponse'
+      tags:
+      - Organizations
+    post:
+      summary: Create organization
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Organization'
+      responses:
+        '201':
+          description: Organization created
+      tags:
+      - Organizations
+  /v3/organizations/{guid}:
+    parameters:
+    - $ref: '#/components/parameters/GuidParam'
+    get:
+      summary: Get organization
+      responses:
+        '200':
+          description: Organization
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Organization'
+      tags:
+      - Organizations
+    patch:
+      summary: Update organization
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Organization'
+      responses:
+        '200':
+          description: Updated
+      tags:
+      - Organizations
+    delete:
+      summary: Delete organization
+      responses:
+        '202':
+          description: Accepted
+      tags:
+      - Organizations
+components:
+  parameters:
+    PerPage:
+      name: per_page
+      in: query
+      schema:
+        type: integer
+        default: 50
+    Page:
+      name: page
+      in: query
+      schema:
+        type: integer
+        default: 1
+    GuidParam:
+      name: guid
+      in: path
+      required: true
+      schema:
+        type: string
+  schemas:
+    Organization:
+      type: object
+      properties:
+        guid:
+          type: string
+        name:
+          type: string
+        suspended:
+          type: boolean
+    PaginatedResponse:
+      type: object
+      properties:
+        pagination:
+          type: object
+          properties:
+            total_results:
+              type: integer
+            total_pages:
+              type: integer
+            first:
+              type: object
+            last:
+              type: object
+            next:
+              type: object
+            previous:
+              type: object
+        resources:
+          type: array
+          items:
+            type: object
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

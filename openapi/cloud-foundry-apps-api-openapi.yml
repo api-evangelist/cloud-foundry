@@ -1,0 +1,185 @@
+openapi: 3.1.0
+info:
+  title: Cloud Foundry Cloud Controller API v3 Apps API
+  description: 'Cloud Foundry Cloud Controller API v3 is the primary control plane of
+
+    Cloud Foundry. It manages apps, packages, droplets, processes, tasks,
+
+    organizations, spaces, service instances, and related resources.
+
+    Requests authenticate with OAuth 2.0 bearer tokens issued by the
+
+    Cloud Foundry UAA server.
+
+    '
+  version: 3.220.0
+servers:
+- url: https://api.cloudfoundry.org
+  description: Public Cloud Foundry CC API endpoint (replace with your foundation host)
+security:
+- bearerAuth: []
+tags:
+- name: Apps
+paths:
+  /v3/apps:
+    get:
+      summary: List apps
+      parameters:
+      - $ref: '#/components/parameters/Page'
+      - $ref: '#/components/parameters/PerPage'
+      - name: names
+        in: query
+        schema:
+          type: string
+      - name: space_guids
+        in: query
+        schema:
+          type: string
+      - name: organization_guids
+        in: query
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Paginated list of apps
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedResponse'
+      tags:
+      - Apps
+    post:
+      summary: Create app
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/App'
+      responses:
+        '201':
+          description: App created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/App'
+      tags:
+      - Apps
+  /v3/apps/{guid}:
+    parameters:
+    - $ref: '#/components/parameters/GuidParam'
+    get:
+      summary: Get app
+      responses:
+        '200':
+          description: App
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/App'
+      tags:
+      - Apps
+    patch:
+      summary: Update app
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/App'
+      responses:
+        '200':
+          description: Updated
+      tags:
+      - Apps
+    delete:
+      summary: Delete app
+      responses:
+        '202':
+          description: Accepted (asynchronous)
+      tags:
+      - Apps
+  /v3/apps/{guid}/actions/start:
+    parameters:
+    - $ref: '#/components/parameters/GuidParam'
+    post:
+      summary: Start app
+      responses:
+        '200':
+          description: Started
+      tags:
+      - Apps
+  /v3/apps/{guid}/actions/stop:
+    parameters:
+    - $ref: '#/components/parameters/GuidParam'
+    post:
+      summary: Stop app
+      responses:
+        '200':
+          description: Stopped
+      tags:
+      - Apps
+components:
+  schemas:
+    App:
+      type: object
+      properties:
+        guid:
+          type: string
+        name:
+          type: string
+        state:
+          type: string
+          enum:
+          - STARTED
+          - STOPPED
+        lifecycle:
+          type: object
+        relationships:
+          type: object
+    PaginatedResponse:
+      type: object
+      properties:
+        pagination:
+          type: object
+          properties:
+            total_results:
+              type: integer
+            total_pages:
+              type: integer
+            first:
+              type: object
+            last:
+              type: object
+            next:
+              type: object
+            previous:
+              type: object
+        resources:
+          type: array
+          items:
+            type: object
+  parameters:
+    PerPage:
+      name: per_page
+      in: query
+      schema:
+        type: integer
+        default: 50
+    Page:
+      name: page
+      in: query
+      schema:
+        type: integer
+        default: 1
+    GuidParam:
+      name: guid
+      in: path
+      required: true
+      schema:
+        type: string
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

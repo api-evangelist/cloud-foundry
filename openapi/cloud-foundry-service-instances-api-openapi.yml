@@ -1,0 +1,144 @@
+openapi: 3.1.0
+info:
+  title: Cloud Foundry Cloud Controller API v3 Apps Service Instances API
+  description: 'Cloud Foundry Cloud Controller API v3 is the primary control plane of
+
+    Cloud Foundry. It manages apps, packages, droplets, processes, tasks,
+
+    organizations, spaces, service instances, and related resources.
+
+    Requests authenticate with OAuth 2.0 bearer tokens issued by the
+
+    Cloud Foundry UAA server.
+
+    '
+  version: 3.220.0
+servers:
+- url: https://api.cloudfoundry.org
+  description: Public Cloud Foundry CC API endpoint (replace with your foundation host)
+security:
+- bearerAuth: []
+tags:
+- name: Service Instances
+paths:
+  /v3/service_instances:
+    get:
+      summary: List service instances
+      parameters:
+      - $ref: '#/components/parameters/Page'
+      - $ref: '#/components/parameters/PerPage'
+      responses:
+        '200':
+          description: Service instances page
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedResponse'
+      tags:
+      - Service Instances
+    post:
+      summary: Create service instance
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ServiceInstance'
+      responses:
+        '202':
+          description: Accepted (asynchronous)
+      tags:
+      - Service Instances
+  /v3/service_instances/{guid}:
+    parameters:
+    - $ref: '#/components/parameters/GuidParam'
+    get:
+      summary: Get service instance
+      responses:
+        '200':
+          description: Service instance
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceInstance'
+      tags:
+      - Service Instances
+    patch:
+      summary: Update service instance
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ServiceInstance'
+      responses:
+        '202':
+          description: Accepted
+      tags:
+      - Service Instances
+    delete:
+      summary: Delete service instance
+      responses:
+        '202':
+          description: Accepted
+      tags:
+      - Service Instances
+components:
+  parameters:
+    PerPage:
+      name: per_page
+      in: query
+      schema:
+        type: integer
+        default: 50
+    Page:
+      name: page
+      in: query
+      schema:
+        type: integer
+        default: 1
+    GuidParam:
+      name: guid
+      in: path
+      required: true
+      schema:
+        type: string
+  schemas:
+    ServiceInstance:
+      type: object
+      properties:
+        guid:
+          type: string
+        name:
+          type: string
+        type:
+          type: string
+        relationships:
+          type: object
+    PaginatedResponse:
+      type: object
+      properties:
+        pagination:
+          type: object
+          properties:
+            total_results:
+              type: integer
+            total_pages:
+              type: integer
+            first:
+              type: object
+            last:
+              type: object
+            next:
+              type: object
+            previous:
+              type: object
+        resources:
+          type: array
+          items:
+            type: object
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

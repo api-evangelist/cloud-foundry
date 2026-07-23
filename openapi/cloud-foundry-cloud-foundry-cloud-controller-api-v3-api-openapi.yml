@@ -1,0 +1,55 @@
+openapi: 3.1.0
+info:
+  title: Apps Cloud Foundry Cloud Controller API V3 API
+  description: 'Cloud Foundry Cloud Controller API v3 is the primary control plane of
+
+    Cloud Foundry. It manages apps, packages, droplets, processes, tasks,
+
+    organizations, spaces, service instances, and related resources.
+
+    Requests authenticate with OAuth 2.0 bearer tokens issued by the
+
+    Cloud Foundry UAA server.
+
+    '
+  version: 3.220.0
+servers:
+- url: https://api.cloudfoundry.org
+  description: Public Cloud Foundry CC API endpoint (replace with your foundation host)
+security:
+- bearerAuth: []
+tags:
+- name: Cloud Foundry Cloud Controller API V3
+paths:
+  /:
+    get:
+      summary: API root
+      description: Returns links to V2 and V3 endpoints and other metadata.
+      security: []
+      responses:
+        '200':
+          description: Root links
+          content:
+            application/json:
+              schema:
+                type: object
+      tags:
+      - Cloud Foundry Cloud Controller API V3
+  /v3:
+    get:
+      summary: V3 root
+      responses:
+        '200':
+          description: V3 links
+          content:
+            application/json:
+              schema:
+                type: object
+      tags:
+      - Cloud Foundry Cloud Controller API V3
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
