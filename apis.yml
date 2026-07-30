@@ -8,7 +8,19 @@ description: >-
   Account and Authentication (UAA) OAuth 2.0 server, the Loggregator log and metric pipeline, the Diego container
   scheduler, the Open Service Broker API for marketplace services, and the Eirini Kubernetes-based scheduler.
 type: Index
-image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
+accessModel:
+  pricing: unknown
+  onboarding: self-serve
+  trial: false
+  try_now: false
+  public: false
+  label: Self-serve signup
+  confidence: medium
+  source:
+  - authentication
+  generated: '2026-07-22'
+  method: derived
+image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/icons/cloud-foundry.png
 url: https://raw.githubusercontent.com/api-evangelist/cloud-foundry/refs/heads/main/apis.yml
 created: '2024-01-01'
 modified: '2026-04-23'
@@ -22,101 +34,187 @@ tags:
   - PaaS
   - Platform
 apis:
-  - aid: cloud-foundry:cloud-controller-api-v3
-    name: Cloud Foundry Cloud Controller API v3
-    tags:
-      - Apps
-      - PaaS
-      - Platform
-      - REST
-    image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
-    humanURL: https://v3-apidocs.cloudfoundry.org/
-    properties:
-      - url: https://v3-apidocs.cloudfoundry.org/
-        type: Documentation
-      - url: https://github.com/cloudfoundry/cloud_controller_ng
-        type: Source Code
-      - url: openapi/cloud-foundry-cloud-controller-api-v3-openapi.yml
-        type: OpenAPI
-    description: >-
-      The Cloud Controller API v3 is the primary REST control plane for Cloud Foundry. It manages organizations, spaces,
-      applications, processes, builds, droplets, packages, routes, domains, service instances, service brokers, tasks,
-      users, roles, and platform metadata. Authentication is delegated to UAA via OAuth 2.0 bearer tokens.
-  - aid: cloud-foundry:uaa
-    name: Cloud Foundry UAA
-    tags:
-      - Authentication
-      - Identity
-      - OAuth 2.0
-      - Security
-    image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
-    humanURL: https://docs.cloudfoundry.org/uaa/
-    properties:
-      - url: https://docs.cloudfoundry.org/uaa/
-        type: Documentation
-      - url: https://github.com/cloudfoundry/uaa
-        type: Source Code
-      - url: https://docs.cloudfoundry.org/api/uaa/
-        type: Reference
-    description: >-
-      The User Account and Authentication (UAA) server is Cloud Foundry's identity provider and OAuth 2.0 authorization
-      server. It issues tokens consumed by the Cloud Controller, brokers, and operator tooling, and supports SAML and
-      LDAP federation, multifactor authentication, and SCIM-style user and group management.
-  - aid: cloud-foundry:loggregator
-    name: Cloud Foundry Loggregator
-    tags:
-      - Logs
-      - Metrics
-      - Observability
-      - Streaming
-    image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
-    humanURL: https://docs.cloudfoundry.org/loggregator/
-    properties:
-      - url: https://docs.cloudfoundry.org/loggregator/
-        type: Documentation
-      - url: https://github.com/cloudfoundry/loggregator-release
-        type: Source Code
-      - url: asyncapi/cloud-foundry-loggregator-asyncapi.yml
-        type: AsyncAPI
-    description: >-
-      Loggregator is Cloud Foundry's distributed log and metric pipeline that aggregates application logs, platform
-      component logs, and metrics for streaming consumption by users and external sinks. It exposes a WebSocket
-      Firehose, a v2 gRPC egress API, and the Reverse Log Proxy.
-  - aid: cloud-foundry:open-service-broker-api
-    name: Open Service Broker API
-    tags:
-      - Marketplace
-      - Open Standard
-      - Service Broker
-    image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
-    humanURL: https://www.openservicebrokerapi.org/
-    properties:
-      - url: https://www.openservicebrokerapi.org/
-        type: Documentation
-      - url: https://github.com/openservicebrokerapi/servicebroker
-        type: Specification
-    description: >-
-      The Open Service Broker API is the open specification originally developed by Cloud Foundry and now used by
-      Kubernetes and other platforms to provision and manage backing services through a common HTTP interface. Brokers
-      expose a catalog and lifecycle operations for service instances and bindings.
-  - aid: cloud-foundry:bosh
-    name: BOSH Director API
-    tags:
-      - Deployment
-      - Infrastructure
-      - Lifecycle
-      - Releases
-    image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
-    humanURL: https://bosh.io/docs/director-api-v1/
-    properties:
-      - url: https://bosh.io/docs/director-api-v1/
-        type: Documentation
-      - url: https://github.com/cloudfoundry/bosh
-        type: Source Code
-    description: >-
-      BOSH is Cloud Foundry's release engineering tool for packaging, deploying, and managing distributed software. The
-      BOSH Director API exposes deployment, stemcell, release, task, and VM lifecycle operations used by operators and
-      CI tooling to manage Cloud Foundry itself and the workloads it depends on.
+- aid: cloud-foundry:uaa
+  name: Cloud Foundry UAA
+  tags:
+  - Authentication
+  - Identity
+  - OAuth 2.0
+  - Security
+  image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
+  humanURL: https://docs.cloudfoundry.org/uaa/
+  properties:
+  - url: https://docs.cloudfoundry.org/uaa/
+    type: Documentation
+  - url: https://github.com/cloudfoundry/uaa
+    type: Source Code
+  - url: https://docs.cloudfoundry.org/api/uaa/
+    type: Reference
+  description: >-
+    The User Account and Authentication (UAA) server is Cloud Foundry's identity provider and OAuth 2.0
+    authorization server. It issues tokens consumed by the Cloud Controller, brokers, and operator tooling,
+    and supports SAML and LDAP federation, multifactor authentication, and SCIM-style user and group management.
+- aid: cloud-foundry:loggregator
+  name: Cloud Foundry Loggregator
+  tags:
+  - Logs
+  - Metrics
+  - Observability
+  - Streaming
+  image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
+  humanURL: https://docs.cloudfoundry.org/loggregator/
+  properties:
+  - url: https://docs.cloudfoundry.org/loggregator/
+    type: Documentation
+  - url: https://github.com/cloudfoundry/loggregator-release
+    type: Source Code
+  - url: asyncapi/cloud-foundry-loggregator-asyncapi.yml
+    type: AsyncAPI
+  description: >-
+    Loggregator is Cloud Foundry's distributed log and metric pipeline that aggregates application logs,
+    platform component logs, and metrics for streaming consumption by users and external sinks. It exposes
+    a WebSocket Firehose, a v2 gRPC egress API, and the Reverse Log Proxy.
+- aid: cloud-foundry:open-service-broker-api
+  name: Open Service Broker API
+  tags:
+  - Marketplace
+  - Open Standard
+  - Service Broker
+  image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
+  humanURL: https://www.openservicebrokerapi.org/
+  properties:
+  - url: https://www.openservicebrokerapi.org/
+    type: Documentation
+  - url: https://github.com/openservicebrokerapi/servicebroker
+    type: Specification
+  description: >-
+    The Open Service Broker API is the open specification originally developed by Cloud Foundry and now
+    used by Kubernetes and other platforms to provision and manage backing services through a common HTTP
+    interface. Brokers expose a catalog and lifecycle operations for service instances and bindings.
+- aid: cloud-foundry:bosh
+  name: BOSH Director API
+  tags:
+  - Deployment
+  - Infrastructure
+  - Lifecycle
+  - Releases
+  image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
+  humanURL: https://bosh.io/docs/director-api-v1/
+  properties:
+  - url: https://bosh.io/docs/director-api-v1/
+    type: Documentation
+  - url: https://github.com/cloudfoundry/bosh
+    type: Source Code
+  description: >-
+    BOSH is Cloud Foundry's release engineering tool for packaging, deploying, and managing distributed
+    software. The BOSH Director API exposes deployment, stemcell, release, task, and VM lifecycle operations
+    used by operators and CI tooling to manage Cloud Foundry itself and the workloads it depends on.
+- aid: cloud-foundry:cloud-foundry-apps-api
+  name: Cloud Foundry Apps API
+  description: The Apps API from Cloud Foundry — 4 operation(s) for apps.
+  humanURL: https://v3-apidocs.cloudfoundry.org/
+  tags:
+  - Apps
+  properties:
+  - type: OpenAPI
+    url: openapi/cloud-foundry-apps-api-openapi.yml
+  - type: Documentation
+    url: https://v3-apidocs.cloudfoundry.org/
+  - type: Source Code
+    url: https://github.com/cloudfoundry/cloud_controller_ng
+- aid: cloud-foundry:cloud-foundry-builds-api
+  name: Cloud Foundry Builds API
+  description: The Builds API from Cloud Foundry — 1 operation(s) for builds.
+  humanURL: https://v3-apidocs.cloudfoundry.org/
+  tags:
+  - Builds
+  properties:
+  - type: OpenAPI
+    url: openapi/cloud-foundry-builds-api-openapi.yml
+  - type: Documentation
+    url: https://v3-apidocs.cloudfoundry.org/
+  - type: Source Code
+    url: https://github.com/cloudfoundry/cloud_controller_ng
+- aid: cloud-foundry:cloud-foundry-cloud-foundry-cloud-controller-api-v3-api
+  name: Cloud Foundry Cloud Foundry Cloud Controller API V3 API
+  description: >-
+    The Cloud Foundry Cloud Controller API V3 API from Cloud Foundry — 2 operation(s) for cloud foundry
+    cloud controller api v3.
+  humanURL: https://v3-apidocs.cloudfoundry.org/
+  tags:
+  - Cloud Foundry Cloud Controller API V3
+  properties:
+  - type: OpenAPI
+    url: openapi/cloud-foundry-cloud-foundry-cloud-controller-api-v3-api-openapi.yml
+  - type: Documentation
+    url: https://v3-apidocs.cloudfoundry.org/
+  - type: Source Code
+    url: https://github.com/cloudfoundry/cloud_controller_ng
+- aid: cloud-foundry:cloud-foundry-deployments-api
+  name: Cloud Foundry Deployments API
+  description: The Deployments API from Cloud Foundry — 1 operation(s) for deployments.
+  humanURL: https://v3-apidocs.cloudfoundry.org/
+  tags:
+  - Deployments
+  properties:
+  - type: OpenAPI
+    url: openapi/cloud-foundry-deployments-api-openapi.yml
+  - type: Documentation
+    url: https://v3-apidocs.cloudfoundry.org/
+  - type: Source Code
+    url: https://github.com/cloudfoundry/cloud_controller_ng
+- aid: cloud-foundry:cloud-foundry-jobs-api
+  name: Cloud Foundry Jobs API
+  description: The Jobs API from Cloud Foundry — 1 operation(s) for jobs.
+  humanURL: https://v3-apidocs.cloudfoundry.org/
+  tags:
+  - Jobs
+  properties:
+  - type: OpenAPI
+    url: openapi/cloud-foundry-jobs-api-openapi.yml
+  - type: Documentation
+    url: https://v3-apidocs.cloudfoundry.org/
+  - type: Source Code
+    url: https://github.com/cloudfoundry/cloud_controller_ng
+- aid: cloud-foundry:cloud-foundry-organizations-api
+  name: Cloud Foundry Organizations API
+  description: The Organizations API from Cloud Foundry — 2 operation(s) for organizations.
+  humanURL: https://v3-apidocs.cloudfoundry.org/
+  tags:
+  - Organizations
+  properties:
+  - type: OpenAPI
+    url: openapi/cloud-foundry-organizations-api-openapi.yml
+  - type: Documentation
+    url: https://v3-apidocs.cloudfoundry.org/
+  - type: Source Code
+    url: https://github.com/cloudfoundry/cloud_controller_ng
+- aid: cloud-foundry:cloud-foundry-service-instances-api
+  name: Cloud Foundry Service Instances API
+  description: The Service Instances API from Cloud Foundry — 2 operation(s) for service instances.
+  humanURL: https://v3-apidocs.cloudfoundry.org/
+  tags:
+  - Service Instances
+  properties:
+  - type: OpenAPI
+    url: openapi/cloud-foundry-service-instances-api-openapi.yml
+  - type: Documentation
+    url: https://v3-apidocs.cloudfoundry.org/
+  - type: Source Code
+    url: https://github.com/cloudfoundry/cloud_controller_ng
+- aid: cloud-foundry:cloud-foundry-spaces-api
+  name: Cloud Foundry Spaces API
+  description: The Spaces API from Cloud Foundry — 2 operation(s) for spaces.
+  humanURL: https://v3-apidocs.cloudfoundry.org/
+  tags:
+  - Spaces
+  properties:
+  - type: OpenAPI
+    url: openapi/cloud-foundry-spaces-api-openapi.yml
+  - type: Documentation
+    url: https://v3-apidocs.cloudfoundry.org/
+  - type: Source Code
+    url: https://github.com/cloudfoundry/cloud_controller_ng
 common:
   - type: AgenticAccess
     url: agentic-access/cloud-foundry-agentic-access.yml
