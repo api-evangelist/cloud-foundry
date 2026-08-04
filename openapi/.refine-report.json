@@ -1,0 +1,28 @@
+{
+  "provider": "cloud-foundry",
+  "sources": [
+    "cloud-foundry-apps-api-openapi.yml",
+    "cloud-foundry-builds-api-openapi.yml",
+    "cloud-foundry-cloud-foundry-cloud-controller-api-v3-api-openapi.yml",
+    "cloud-foundry-deployments-api-openapi.yml",
+    "cloud-foundry-jobs-api-openapi.yml",
+    "cloud-foundry-organizations-api-openapi.yml",
+    "cloud-foundry-service-instances-api-openapi.yml",
+    "cloud-foundry-spaces-api-openapi.yml"
+  ],
+  "outputs": [
+    "cloud-foundry-apps-api-openapi.yml",
+    "cloud-foundry-builds-api-openapi.yml",
+    "cloud-foundry-cloud-foundry-cloud-controller-api-v3-api-openapi.yml",
+    "cloud-foundry-deployments-api-openapi.yml",
+    "cloud-foundry-jobs-api-openapi.yml",
+    "cloud-foundry-organizations-api-openapi.yml",
+    "cloud-foundry-service-instances-api-openapi.yml",
+    "cloud-foundry-spaces-api-openapi.yml"
+  ],
+  "archived": [],
+  "errors": [],
+  "warnings": [],
+  "notes": [],
+  "skipped": []
+}

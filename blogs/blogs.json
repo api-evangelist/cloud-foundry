@@ -10,11 +10,9 @@
     },
     {
       "source": "https://slack.cloudfoundry.org/",
-      "feed_url": "https://slack.cloudfoundry.org/",
-      "saved": 0,
-      "error": "no_feed_no_posts"
+      "error": "HTTPError"
     }
   ],
   "post_count": 50,
-  "fetched": "2026-07-11T11:50:51Z"
+  "fetched": "2026-08-01T15:49:00Z"
 }
