@@ -68,8 +68,6 @@ apis:
     type: Documentation
   - url: https://github.com/cloudfoundry/loggregator-release
     type: Source Code
-  - url: asyncapi/cloud-foundry-loggregator-asyncapi.yml
-    type: AsyncAPI
   description: >-
     Loggregator is Cloud Foundry's distributed log and metric pipeline that aggregates application logs,
     platform component logs, and metrics for streaming consumption by users and external sinks. It exposes
