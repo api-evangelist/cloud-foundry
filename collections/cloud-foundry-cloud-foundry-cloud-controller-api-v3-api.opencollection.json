@@ -1,0 +1,46 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Apps Cloud Foundry Cloud Controller API V3 API",
+    "version": "3.220.0"
+  },
+  "request": {
+    "auth": {
+      "type": "bearer",
+      "token": "{{bearerToken}}"
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Cloud Foundry Cloud Controller API V3",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "API root",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.cloudfoundry.org/"
+          },
+          "docs": "Returns links to V2 and V3 endpoints and other metadata."
+        },
+        {
+          "info": {
+            "name": "V3 root",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.cloudfoundry.org/v3"
+          },
+          "docs": "V3 root"
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}
