@@ -30,6 +30,13 @@ tags:
   - Cloud Foundry Foundation
   - Containers
   - Multi-Cloud
+  - Open-Source
+  - Platform-as-a-Service
+  - Platform
+tags_raw:
+  - Cloud Foundry Foundation
+  - Containers
+  - Multi-Cloud
   - Open Source
   - PaaS
   - Platform
@@ -37,6 +44,10 @@ apis:
 - aid: cloud-foundry:uaa
   name: Cloud Foundry UAA
   tags:
+  - Authentication
+  - Identity
+  - Security
+  tags_raw:
   - Authentication
   - Identity
   - OAuth 2.0
@@ -112,6 +123,8 @@ apis:
   description: The Apps API from Cloud Foundry — 4 operation(s) for apps.
   humanURL: https://v3-apidocs.cloudfoundry.org/
   tags:
+  - Application
+  tags_raw:
   - Apps
   properties:
   - type: OpenAPI
@@ -153,6 +166,8 @@ apis:
   description: The Deployments API from Cloud Foundry — 1 operation(s) for deployments.
   humanURL: https://v3-apidocs.cloudfoundry.org/
   tags:
+  - Deployment
+  tags_raw:
   - Deployments
   properties:
   - type: OpenAPI
@@ -166,6 +181,8 @@ apis:
   description: The Jobs API from Cloud Foundry — 1 operation(s) for jobs.
   humanURL: https://v3-apidocs.cloudfoundry.org/
   tags:
+  - Job
+  tags_raw:
   - Jobs
   properties:
   - type: OpenAPI
@@ -179,6 +196,8 @@ apis:
   description: The Organizations API from Cloud Foundry — 2 operation(s) for organizations.
   humanURL: https://v3-apidocs.cloudfoundry.org/
   tags:
+  - Organization
+  tags_raw:
   - Organizations
   properties:
   - type: OpenAPI
