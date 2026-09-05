@@ -1,0 +1,683 @@
+generated: '2026-09-05'
+method: derived
+source: openapi/cloud-foundry-capi-v3-openapi.yaml (components.schemas — 97 schemas, 248 operations)
+note: Derived from the Cloud Foundry Foundation's own OpenAPI 3.1 description of the Cloud Controller API v3. CAPI
+  v3 expresses EVERY association through a `relationships` object rather than bare foreign keys — {"relationships":{"space":{"data":{"guid":"..."}}}}
+  — which is the defining structural change from the v2 API and is codified in cloudfoundry/cc-api-v3-style-guide.
+  Related objects can be side-loaded with the `include` query parameter into an `included` block, so a traversal
+  that would be N+1 in v2 is one call in v3. Every resource carries guid, created_at, updated_at and links; most
+  carry metadata.labels / metadata.annotations, which are queryable via label_selector.
+identity:
+  primary_key: guid
+  format: UUID
+  timestamps:
+  - created_at
+  - updated_at
+  note: GUIDs are opaque UUIDs with no type prefix — unlike prefix-encoded ids elsewhere, a bare Cloud Foundry GUID
+    does not tell you what it points at. Type comes from the path you fetched it from.
+containment_hierarchy:
+- Organization
+- Space
+- App
+- Process / Package / Droplet / Build / Deployment / Revision / Task / Sidecar
+containment_note: Organizations contain Spaces contain Apps. Deleting a parent cascades to every child, and there
+  is no restore — see the reversibility block in conventions/. Quotas attach at Organization (OrganizationQuota)
+  and Space (SpaceQuota) level.
+entity_count: 53
+entities:
+- name: App
+  fields:
+  - included
+  - lifecycle
+  - links
+  - metadata
+  - name
+  - relationships
+  - state
+  field_count: 7
+  has_metadata: true
+  relationships: []
+- name: AppCredentialBinding
+  fields:
+  - included
+  - last_operation
+  - links
+  - metadata
+  - name
+  - relationships
+  - type
+  field_count: 7
+  has_metadata: true
+  relationships:
+  - name: app
+    kind: belongs_to
+    via: relationships.app.data.guid
+  - name: service_instance
+    kind: belongs_to
+    via: relationships.service_instance.data.guid
+- name: AppEnvironment
+  fields:
+  - application_env_json
+  - environment_variables
+  - running_env_json
+  - staging_env_json
+  - system_env_json
+  field_count: 5
+  has_metadata: false
+  relationships: []
+- name: AppEnvironmentVariables
+  fields:
+  - links
+  - var
+  field_count: 2
+  has_metadata: false
+  relationships: []
+- name: AppPermissions
+  fields:
+  - read_basic_data
+  - read_sensitive_data
+  field_count: 2
+  has_metadata: false
+  relationships: []
+- name: AppSshEnabled
+  fields:
+  - enabled
+  - reason
+  field_count: 2
+  has_metadata: false
+  relationships: []
+- name: AppUsageEvent
+  fields:
+  - app
+  - buildpack
+  - instance_count
+  - memory_in_mb_per_instance
+  - organization
+  - process
+  - space
+  - state
+  - task
+  field_count: 9
+  has_metadata: false
+  relationships: []
+- name: AuditEvent
+  fields:
+  - actor
+  - data
+  - links
+  - organization
+  - space
+  - target
+  - type
+  field_count: 7
+  has_metadata: false
+  relationships: []
+- name: Build
+  fields:
+  - checksum
+  - created_by
+  - droplet
+  - error
+  - lifecycle
+  - links
+  - metadata
+  - package
+  - relationships
+  - staging_disk_in_mb
+  - staging_log_rate_limit_bytes_per_second
+  - staging_memory_in_mb
+  - state
+  field_count: 13
+  has_metadata: true
+  relationships: []
+- name: BuildUpdate
+  fields:
+  - error
+  - lifecycle
+  - metadata
+  - staging_disk_in_mb
+  - staging_log_rate_limit_bytes_per_second
+  - staging_memory_in_mb
+  - state
+  field_count: 7
+  has_metadata: true
+  relationships: []
+- name: Buildpack
+  fields:
+  - enabled
+  - filename
+  - lifecycle
+  - links
+  - locked
+  - metadata
+  - name
+  - position
+  - stack
+  - state
+  field_count: 10
+  has_metadata: true
+  relationships: []
+- name: Deployment
+  fields:
+  - droplet
+  - links
+  - metadata
+  - new_processes
+  - options
+  - previous_droplet
+  - relationships
+  - revision
+  - status
+  - strategy
+  field_count: 10
+  has_metadata: true
+  relationships: []
+- name: Domain
+  fields:
+  - internal
+  - links
+  - metadata
+  - name
+  - relationships
+  - router_group
+  - supported_protocols
+  field_count: 7
+  has_metadata: true
+  relationships: []
+- name: Droplet
+  fields:
+  - buildpacks
+  - checksum
+  - error
+  - execution_metadata
+  - image
+  - lifecycle
+  - links
+  - metadata
+  - process_types
+  - stack
+  - state
+  field_count: 11
+  has_metadata: true
+  relationships: []
+- name: EnvironmentVariableGroup
+  fields:
+  - links
+  - name
+  - updated_at
+  - var
+  field_count: 4
+  has_metadata: false
+  relationships: []
+- name: FeatureFlag
+  fields:
+  - custom_error_message
+  - enabled
+  - links
+  - name
+  - updated_at
+  field_count: 5
+  has_metadata: false
+  relationships: []
+- name: HealthCheck
+  fields:
+  - data
+  - type
+  field_count: 2
+  has_metadata: false
+  relationships: []
+- name: IndexLink
+  fields:
+  - meta
+  field_count: 1
+  has_metadata: false
+  relationships: []
+- name: IsolationSegment
+  fields:
+  - links
+  - metadata
+  - name
+  field_count: 3
+  has_metadata: true
+  relationships: []
+- name: Job
+  fields:
+  - errors
+  - links
+  - operation
+  - state
+  - warnings
+  field_count: 5
+  has_metadata: false
+  relationships: []
+- name: KeyCredentialBinding
+  fields:
+  - included
+  - last_operation
+  - links
+  - metadata
+  - name
+  - relationships
+  - type
+  field_count: 7
+  has_metadata: true
+  relationships:
+  - name: service_instance
+    kind: belongs_to
+    via: relationships.service_instance.data.guid
+- name: Lifecycle
+  fields:
+  - data
+  - type
+  field_count: 2
+  has_metadata: false
+  relationships: []
+- name: ManagedServiceInstance
+  fields:
+  - dashboard_url
+  - last_operation
+  - links
+  - maintenance_info
+  - metadata
+  - name
+  - relationships
+  - route_service_url
+  - syslog_drain_url
+  - tags
+  - type
+  - upgrade_available
+  field_count: 12
+  has_metadata: true
+  relationships:
+  - name: space
+    kind: belongs_to
+    via: relationships.space.data.guid
+  - name: service_plan
+    kind: belongs_to
+    via: relationships.service_plan.data.guid
+- name: Organization
+  fields:
+  - links
+  - metadata
+  - name
+  - relationships
+  - suspended
+  field_count: 5
+  has_metadata: true
+  relationships:
+  - name: quota
+    kind: belongs_to
+    via: relationships.quota.data.guid
+- name: OrganizationQuota
+  fields:
+  - apps
+  - domains
+  - links
+  - metadata
+  - name
+  - relationships
+  - routes
+  - services
+  field_count: 8
+  has_metadata: true
+  relationships:
+  - name: organizations
+    kind: has_many
+    via: relationships.organizations.data.guid
+- name: Package
+  fields:
+  - data
+  - links
+  - metadata
+  - relationships
+  - state
+  - type
+  field_count: 6
+  has_metadata: true
+  relationships: []
+- name: Process
+  fields:
+  - command
+  - disk_in_mb
+  - health_check
+  - instances
+  - links
+  - log_rate_limit_in_bytes_per_second
+  - memory_in_mb
+  - metadata
+  - readiness_health_check
+  - relationships
+  - type
+  - user
+  - version
+  field_count: 13
+  has_metadata: true
+  relationships:
+  - name: app
+    kind: belongs_to
+    via: relationships.app.data.guid
+  - name: revision
+    kind: belongs_to
+    via: relationships.revision.data.guid
+- name: ProcessStats
+  fields:
+  - resources
+  field_count: 1
+  has_metadata: false
+  relationships: []
+- name: ResourceMatch
+  fields:
+  - resources
+  field_count: 1
+  has_metadata: false
+  relationships: []
+- name: Revision
+  fields:
+  - description
+  - droplet
+  - enabled
+  - links
+  - metadata
+  - relationships
+  - version
+  field_count: 7
+  has_metadata: true
+  relationships:
+  - name: app
+    kind: belongs_to
+    via: relationships.app.data.guid
+- name: Role
+  fields:
+  - included
+  - links
+  - relationships
+  - type
+  field_count: 4
+  has_metadata: false
+  relationships:
+  - name: organization
+    kind: belongs_to
+    via: relationships.organization.data.guid
+  - name: space
+    kind: belongs_to
+    via: relationships.space.data.guid
+  - name: user
+    kind: belongs_to
+    via: relationships.user.data.guid
+- name: Route
+  fields:
+  - host
+  - included
+  - links
+  - metadata
+  - path
+  - port
+  - protocol
+  - relationships
+  - url
+  field_count: 9
+  has_metadata: true
+  relationships: []
+- name: RouteDestination
+  fields:
+  - app
+  - created_at
+  - guid
+  - links
+  - metadata
+  - port
+  - protocol
+  - updated_at
+  - weight
+  field_count: 9
+  has_metadata: true
+  relationships: []
+- name: SecurityGroup
+  fields:
+  - globally_enabled
+  - links
+  - metadata
+  - name
+  - rules
+  - running_spaces
+  - staging_spaces
+  field_count: 7
+  has_metadata: true
+  relationships: []
+- name: SecurityGroupCreate
+  fields:
+  - globally_enabled
+  - metadata
+  - name
+  - rules
+  field_count: 4
+  has_metadata: true
+  relationships: []
+- name: SecurityGroupUpdate
+  fields:
+  - globally_enabled
+  - metadata
+  - name
+  - rules
+  field_count: 4
+  has_metadata: true
+  relationships: []
+- name: ServiceBroker
+  fields:
+  - links
+  - metadata
+  - name
+  - relationships
+  - url
+  field_count: 5
+  has_metadata: true
+  relationships:
+  - name: space
+    kind: belongs_to
+    via: relationships.space.data.guid
+- name: ServiceCredentialBindingLastOperation
+  fields:
+  - created_at
+  - description
+  - state
+  - type
+  - updated_at
+  field_count: 5
+  has_metadata: false
+  relationships: []
+- name: ServiceInstanceLastOperation
+  fields:
+  - created_at
+  - description
+  - state
+  - type
+  - updated_at
+  field_count: 5
+  has_metadata: false
+  relationships: []
+- name: ServiceOffering
+  fields:
+  - links
+  - metadata
+  - service_broker_guid
+  - service_broker_name
+  field_count: 4
+  has_metadata: true
+  relationships:
+  - name: service_broker
+    kind: belongs_to
+    via: service_broker_guid
+- name: ServicePlan
+  fields:
+  - included
+  - links
+  - metadata
+  - service_offering_guid
+  - service_offering_name
+  field_count: 5
+  has_metadata: true
+  relationships:
+  - name: service_offering
+    kind: belongs_to
+    via: service_offering_guid
+- name: ServicePlanVisibility
+  fields:
+  - organizations
+  - type
+  field_count: 2
+  has_metadata: false
+  relationships: []
+- name: ServiceRouteBinding
+  fields:
+  - included
+  - last_operation
+  - links
+  - metadata
+  - relationships
+  - route_service_url
+  field_count: 6
+  has_metadata: true
+  relationships:
+  - name: route
+    kind: belongs_to
+    via: relationships.route.data.guid
+  - name: service_instance
+    kind: belongs_to
+    via: relationships.service_instance.data.guid
+- name: ServiceRouteBindingCreate
+  fields:
+  - metadata
+  - parameters
+  - relationships
+  field_count: 3
+  has_metadata: true
+  relationships:
+  - name: route
+    kind: belongs_to
+    via: relationships.route.data.guid
+  - name: service_instance
+    kind: belongs_to
+    via: relationships.service_instance.data.guid
+- name: ServiceUsageEvent
+  fields:
+  - links
+  field_count: 1
+  has_metadata: false
+  relationships: []
+- name: Sidecar
+  fields:
+  - command
+  - links
+  - memory_in_mb
+  - metadata
+  - name
+  - origin
+  - process_types
+  - relationships
+  field_count: 8
+  has_metadata: true
+  relationships:
+  - name: app
+    kind: belongs_to
+    via: relationships.app.data.guid
+- name: Space
+  fields:
+  - included
+  - links
+  - metadata
+  - name
+  - relationships
+  field_count: 5
+  has_metadata: true
+  relationships:
+  - name: organization
+    kind: belongs_to
+    via: relationships.organization.data.guid
+  - name: quota
+    kind: belongs_to
+    via: relationships.quota.data.guid
+- name: SpaceFeature
+  fields:
+  - description
+  - enabled
+  - name
+  field_count: 3
+  has_metadata: false
+  relationships: []
+- name: SpaceQuota
+  fields:
+  - apps
+  - links
+  - metadata
+  - name
+  - relationships
+  - routes
+  - services
+  field_count: 7
+  has_metadata: true
+  relationships:
+  - name: organization
+    kind: belongs_to
+    via: relationships.organization.data.guid
+  - name: spaces
+    kind: has_many
+    via: relationships.spaces.data.guid
+- name: Stack
+  fields:
+  - build_rootfs_image
+  - default
+  - description
+  - links
+  - metadata
+  - name
+  - run_rootfs_image
+  field_count: 7
+  has_metadata: true
+  relationships: []
+- name: Task
+  fields:
+  - command
+  - disk_in_mb
+  - droplet_guid
+  - links
+  - memory_in_mb
+  - metadata
+  - name
+  - result
+  - sequence_id
+  - state
+  field_count: 10
+  has_metadata: true
+  relationships:
+  - name: droplet
+    kind: belongs_to
+    via: droplet_guid
+- name: User
+  fields:
+  - created_at
+  - guid
+  - links
+  - metadata
+  - origin
+  - presentation_name
+  - updated_at
+  - username
+  field_count: 8
+  has_metadata: true
+  relationships: []
+- name: UserProvidedServiceInstance
+  fields:
+  - links
+  - metadata
+  - name
+  - relationships
+  - route_service_url
+  - syslog_drain_url
+  - tags
+  - type
+  field_count: 8
+  has_metadata: true
+  relationships:
+  - name: space
+    kind: belongs_to
+    via: relationships.space.data.guid

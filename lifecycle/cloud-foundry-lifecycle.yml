@@ -1,0 +1,77 @@
+generated: '2026-09-05'
+method: searched
+source: >-
+  https://github.com/cloudfoundry/cli/wiki/Versioning-and-Support-Policy,
+  https://github.com/cloudfoundry/capi-release/releases, https://v3-apidocs.cloudfoundry.org/,
+  https://v2-apidocs.cloudfoundry.org/, openapi/cloud-foundry-capi-v3-openapi.yaml
+versioning:
+  scheme: path-based major version (/v3), semver on the implementation releases
+  current_major: v3
+  header_versioning: false
+  date_versioning: false
+  note: >-
+    The API version lives in the URL path and has changed exactly once in the platform's life (v2 -> v3).
+    Implementation releases (capi-release 1.x, cf CLI 8.x) move weekly underneath a stable path. A separate
+    header, X-Broker-API-Version, versions the Open Service Broker contract between platform and broker.
+  reference_versions: >-
+    Each CAPI release publishes its own immutable reference site at
+    https://v3-apidocs.cloudfoundry.org/version/<capi-version>/ — a genuinely useful property, since a
+    consumer can pin documentation to the exact foundation version they are calling.
+deprecation:
+  policy_published: true
+  policy_url: https://github.com/cloudfoundry/cli/wiki/Versioning-and-Support-Policy
+  sunset_header: false
+  deprecation_header: false
+  rfc8594: false
+  practice: >-
+    Deprecations are announced in release notes and mailing-list announcements, then warned about in minor
+    and patch releases, and only REMOVED at a major version. The cf CLI states this explicitly. Cloud
+    Controller signals nothing machine-readable — no Deprecation or Sunset response header appears in the
+    248-operation v3 spec, so a client cannot detect a pending removal at runtime.
+  in_spec_deprecations:
+  - operationId: cancelTaskShort
+    path: PUT /v3/tasks/{guid}/cancel
+    marker: summary text "DEPRECATED - Cancel a task (short path)"
+    replacement: cancelTaskPut (PUT /v3/tasks/{guid}/actions/cancel)
+    note: >-
+      Flagged only in the SUMMARY STRING, not with OpenAPI's `deprecated: true` field. Zero of the 248
+      operations carry the machine-readable flag, so tooling that filters on it sees a fully current API.
+      This is the clearest actionable defect in an otherwise strong specification.
+  major_deprecations:
+  - what: Cloud Controller API v2
+    status: deprecated, end-of-life on most foundations
+    announced: 2021 (cf-dev announcement of the CC API v2 deprecation plan)
+    reference: https://v2-apidocs.cloudfoundry.org/
+    replacement: Cloud Controller API v3
+    enforcement: >-
+      A dedicated V2-API rate limiter (X-Ratelimit-*-V2-Api, CF-RateLimitV2APIExceeded) throttles v2 traffic
+      independently — deprecation backed by a runtime pressure mechanism rather than by documentation alone.
+support:
+  components:
+  - name: cf CLI v8
+    supported_from: '2021-09-21'
+    supported_until: open-ended
+    min_capi: 1.143.0
+    min_cf_deployment: v24.6.0
+  - name: cf CLI v7
+    supported_from: '2020-06-25'
+    supported_until: '2024-09-30'
+    min_capi: 1.143.0
+    min_cf_deployment: v24.6.0
+  policy: >-
+    A supported cf CLI release is maintained compatible with every cf-deployment version from v7.0.0 onward.
+    Each January, cf-deployment versions older than twelve months drop out of support.
+  url: https://github.com/cloudfoundry/cli/wiki/Versioning-and-Support-Policy
+status_page:
+  exists: false
+  url: null
+  note: >-
+    There is no Cloud Foundry status page, and there cannot be one: every Cloud Foundry is an independently
+    operated deployment. Availability is the operator's to publish — cloud.gov, SAP BTP, Swisscom and
+    Broadcom each run their own status page for their own foundation. A running foundation does expose
+    GET /v3/info (getPlatformInfo) and the root endpoint, which are the closest thing to a per-deployment
+    health signal. NO StatusPage pointer is emitted, because none exists to point at.
+sla:
+  published: false
+  note: Open-source software under Apache 2.0. No availability commitment from the Foundation; SLAs belong to commercial distributors.
+release_cadence: capi-release roughly weekly; cf CLI on semver as features land

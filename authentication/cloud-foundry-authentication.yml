@@ -1,13 +1,74 @@
-generated: '2026-07-11'
-method: derived
-source: openapi/cloud-foundry-openapi.yml
+generated: '2026-09-05'
+method: searched
+source: openapi/cloud-foundry-app-autoscaler-application-metric-api-openapi.yaml, openapi/cloud-foundry-app-autoscaler-custom-metrics-api-openapi.yaml,
+  openapi/cloud-foundry-app-autoscaler-policy-api-openapi.yaml, openapi/cloud-foundry-app-autoscaler-scaling-history-api-openapi.yaml,
+  openapi/cloud-foundry-apps-api-openapi.yml, openapi/cloud-foundry-builds-api-openapi.yml, openapi/cloud-foundry-capi-v3-openapi.yaml,
+  openapi/cloud-foundry-cloud-foundry-cloud-controller-api-v3-api-openapi.yml, openapi/cloud-foundry-deployments-api-openapi.yml,
+  openapi/cloud-foundry-jobs-api-openapi.yml, openapi/cloud-foundry-open-service-broker-api-openapi.yaml, openapi/cloud-foundry-organizations-api-openapi.yml
+  ...
 summary:
   types:
   - http
+  - mutualTLS
+  - oauth2
+  oauth2_flows:
+  - implicit
 schemes:
 - name: bearerAuth
   type: http
   scheme: bearer
   bearerFormat: JWT
   sources:
-  - openapi/cloud-foundry-openapi.yml
+  - openapi/cloud-foundry-app-autoscaler-application-metric-api-openapi.yaml
+  - openapi/cloud-foundry-app-autoscaler-policy-api-openapi.yaml
+  - openapi/cloud-foundry-app-autoscaler-scaling-history-api-openapi.yaml
+  - openapi/cloud-foundry-apps-api-openapi.yml
+  - openapi/cloud-foundry-builds-api-openapi.yml
+  - openapi/cloud-foundry-capi-v3-openapi.yaml
+  - openapi/cloud-foundry-cloud-foundry-cloud-controller-api-v3-api-openapi.yml
+  - openapi/cloud-foundry-deployments-api-openapi.yml
+  - openapi/cloud-foundry-jobs-api-openapi.yml
+  - openapi/cloud-foundry-organizations-api-openapi.yml
+  - openapi/cloud-foundry-service-instances-api-openapi.yml
+  - openapi/cloud-foundry-spaces-api-openapi.yml
+- name: mtls
+  type: mutualTLS
+  description: Use the Instance Identity Credentials provided by the Cloud Foundry runtime
+  sources:
+  - openapi/cloud-foundry-app-autoscaler-custom-metrics-api-openapi.yaml
+- name: basicAuthentication
+  type: http
+  scheme: basic
+  sources:
+  - openapi/cloud-foundry-app-autoscaler-custom-metrics-api-openapi.yaml
+  - openapi/cloud-foundry-open-service-broker-api-openapi.yaml
+- name: oauth
+  type: oauth2
+  flows:
+  - flow: implicit
+    authorizationUrl: https://uaa.cloudfoundry.local/api-oauth/dialog
+    scopes: 7
+  sources:
+  - openapi/cloud-foundry-capi-v3-openapi.yaml
+docs:
+- https://docs.cloudfoundry.org/uaa/
+- https://docs.cloudfoundry.org/api/uaa/
+- https://docs.cloudfoundry.org/concepts/architecture/uaa.html
+- https://github.com/cloudfoundry/uaa
+note: 'Cloud Foundry does not run an identity service — it ships one. Every foundation deploys its own User Account
+  and Authentication (UAA) server at uaa.<system-domain>, an OAuth 2.0 / OpenID Connect authorization server with
+  SCIM 2.0 user and group management, and SAML/LDAP/OIDC federation. There is no central Cloud Foundry account,
+  no API key to obtain, and no signup: credentials belong to whoever runs the deployment you are calling. `cf oauth-token`
+  prints the current bearer JWT from an authenticated cf CLI session and is the practical bridge from the CLI to
+  any HTTP client.
+
+  The four schemes below span the whole profile and are NOT interchangeable: the Cloud Controller takes UAA-issued
+  bearer JWTs; the App Autoscaler custom-metrics endpoint takes mutual TLS using the Instance Identity credentials
+  the runtime injects into the container (the only mTLS surface here, and a genuinely strong choice for an in-container
+  caller); the Open Service Broker contract takes HTTP Basic between platform and broker. Authorization then adds
+  a second axis — see scopes/cloud-foundry-scopes.yml.'
+discovery:
+  openid_configuration: https://uaa.<system-domain>/.well-known/openid-configuration
+  probed: false
+  note: 'Not probed: there is no public UAA instance. Every /.well-known/ path on every Foundation-controlled host
+    404s (well-known/cloud-foundry-well-known.yml).'

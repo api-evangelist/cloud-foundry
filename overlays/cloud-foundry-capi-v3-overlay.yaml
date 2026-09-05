@@ -1,0 +1,83 @@
+overlay: 1.0.0
+info:
+  title: API Evangelist enhancements for the Cloud Foundry Cloud Controller API v3
+  version: 1.0.0
+x-provenance:
+  generated: '2026-09-05'
+  method: generated
+  source: openapi/cloud-foundry-capi-v3-openapi.yaml
+  extends: openapi/cloud-foundry-capi-v3-openapi.yaml
+  note: >-
+    An OpenAPI Overlay 1.0.0 capturing API Evangelist's derived findings about the Cloud Foundry
+    Foundation's own CAPI v3 specification. It is applied ON TOP of the upstream document and never mutates
+    it. Every action below records something the upstream spec does not state but that a consumer needs:
+    that api.example.local is a placeholder for a self-hosted host, that the API has no idempotency
+    mechanism, that a single operation is deprecated in prose only, and where the derived conventions,
+    error, rate-limit and reversibility artifacts live.
+actions:
+- target: $.info
+  description: Record the derived artifact set and the absence of an idempotency mechanism.
+  update:
+    x-apievangelist-artifacts:
+      conventions: conventions/cloud-foundry-conventions.yml
+      errors: errors/cloud-foundry-problem-types.yml
+      rate_limits: rate-limits/cloud-foundry-rate-limits.yml
+      authentication: authentication/cloud-foundry-authentication.yml
+      scopes: scopes/cloud-foundry-scopes.yml
+      data_model: data-model/cloud-foundry-data-model.yml
+      lifecycle: lifecycle/cloud-foundry-lifecycle.yml
+      conformance: conformance/cloud-foundry-conformance.yml
+      skills: skills/_index.yml
+    x-idempotency:
+      supported: false
+      coverage: none
+      note: >-
+        No Idempotency-Key header appears on any of the 248 operations. Named-resource creates are protected
+        by uniqueness constraints (422 CF-UniquenessError); unnamed creates such as tasks and deployments
+        are not protected at all.
+    x-error-format:
+      media_type: application/json
+      rfc9457: false
+      envelope: '{"errors":[{"code":<int>,"title":"CF-<Name>","detail":"<text>"}]}'
+      discriminator: title
+- target: $.servers
+  description: >-
+    Flag that the upstream server URL is a placeholder. Cloud Foundry is self-hosted; api.cloudfoundry.org
+    answers HTTP 530 and api.example.local is not resolvable. The real base is api.<system-domain>, supplied
+    by the operator.
+  update:
+  - url: https://api.example.local
+    description: Cloud Foundry V3 API server
+    x-placeholder: true
+    x-real-form: https://api.{system-domain}
+    x-note: >-
+      Every Cloud Foundry is an independent deployment. There is no vendor-hosted endpoint, and no discovery
+      document that will tell a client where one is. The host must be configured.
+- target: $.paths['/v3/tasks/{guid}/cancel'].put
+  description: >-
+    Add the machine-readable deprecation flag the upstream spec omits. This operation announces DEPRECATED
+    in its summary string only, so tooling that filters on OpenAPI's `deprecated` field sees it as current.
+  update:
+    deprecated: true
+    x-replaced-by: cancelTaskPut
+    x-deprecation-source: summary text "DEPRECATED - Cancel a task (short path)"
+- target: $.components.responses.TooManyRequests
+  description: Document the rate-limit response headers, which the upstream spec does not declare.
+  update:
+    headers:
+      X-RateLimit-Limit:
+        description: Requests permitted in the current operator-configured window.
+        schema:
+          type: integer
+      X-RateLimit-Remaining:
+        description: >-
+          ESTIMATED requests remaining. Computed per Cloud Controller instance and rounded down to the
+          nearest 10% of the global maximum, so it can read 0 while requests still succeed.
+        schema:
+          type: integer
+      X-RateLimit-Reset:
+        description: >-
+          ABSOLUTE Unix timestamp at which the window resets. Not a delta in seconds. There is no
+          Retry-After header on this API.
+        schema:
+          type: integer

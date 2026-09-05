@@ -1,4 +1,4 @@
-openapi: 3.1.0
+openapi: 3.2.0
 info:
   title: Cloud Foundry Cloud Controller API v3 Apps Builds API
   description: 'Cloud Foundry Cloud Controller API v3 is the primary control plane of
@@ -51,18 +51,18 @@ paths:
       - Builds
 components:
   parameters:
-    Page:
-      name: page
-      in: query
-      schema:
-        type: integer
-        default: 1
     PerPage:
       name: per_page
       in: query
       schema:
         type: integer
         default: 50
+    Page:
+      name: page
+      in: query
+      schema:
+        type: integer
+        default: 1
   schemas:
     PaginatedResponse:
       type: object

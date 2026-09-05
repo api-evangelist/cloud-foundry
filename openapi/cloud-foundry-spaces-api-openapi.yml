@@ -1,4 +1,4 @@
-openapi: 3.1.0
+openapi: 3.2.0
 info:
   title: Cloud Foundry Cloud Controller API v3 Apps Spaces API
   description: 'Cloud Foundry Cloud Controller API v3 is the primary control plane of
@@ -92,35 +92,7 @@ paths:
       tags:
       - Spaces
 components:
-  parameters:
-    PerPage:
-      name: per_page
-      in: query
-      schema:
-        type: integer
-        default: 50
-    Page:
-      name: page
-      in: query
-      schema:
-        type: integer
-        default: 1
-    GuidParam:
-      name: guid
-      in: path
-      required: true
-      schema:
-        type: string
   schemas:
-    Space:
-      type: object
-      properties:
-        guid:
-          type: string
-        name:
-          type: string
-        relationships:
-          type: object
     PaginatedResponse:
       type: object
       properties:
@@ -143,6 +115,34 @@ components:
           type: array
           items:
             type: object
+    Space:
+      type: object
+      properties:
+        guid:
+          type: string
+        name:
+          type: string
+        relationships:
+          type: object
+  parameters:
+    PerPage:
+      name: per_page
+      in: query
+      schema:
+        type: integer
+        default: 50
+    GuidParam:
+      name: guid
+      in: path
+      required: true
+      schema:
+        type: string
+    Page:
+      name: page
+      in: query
+      schema:
+        type: integer
+        default: 1
   securitySchemes:
     bearerAuth:
       type: http

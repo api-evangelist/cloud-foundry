@@ -1,0 +1,181 @@
+generated: '2026-09-05'
+method: searched
+source: >-
+  openapi/cloud-foundry-capi-v3-openapi.yaml (248 operations),
+  https://github.com/cloudfoundry/cc-api-v3-style-guide,
+  https://docs.cloudfoundry.org/devguide/revisions.html,
+  https://docs.cloudfoundry.org/running/rate-limit-cloud-controller-api.html
+scope: Cloud Controller API v3 (the control plane). Loggregator/Log Cache are gRPC and follow their own conventions.
+authentication:
+  style: OAuth 2.0 bearer JWT issued by UAA
+  header: 'Authorization: Bearer <jwt>'
+  discovery: uaa.<system-domain>/.well-known/openid-configuration on a deployed foundation
+  scopes: scopes/cloud-foundry-scopes.yml
+  detail: authentication/cloud-foundry-authentication.yml
+  note: >-
+    Authorization is TWO-LAYERED and this trips up most integrations: a UAA scope (cloud_controller.read /
+    .write / .admin) gates the verb, and a Cloud Foundry ROLE on the target org or space gates the object.
+    Holding cloud_controller.write does not let you touch a space you have no role in.
+idempotency:
+  supported: false
+  coverage: none
+  mechanism: null
+  header: null
+  retention: null
+  scope: []
+  note: >-
+    No Idempotency-Key header exists anywhere in the 248-operation CAPI spec, and none is documented. Replay
+    protection is instead structural: creates are guarded by uniqueness constraints (a repeated create of an
+    app, org, space or domain by the same name returns 422 CF-UniquenessError rather than a duplicate), and
+    long-running mutations return 202 with a Job the client polls, so a retry during the window observes the
+    job rather than starting a second one. That is real protection for named resources and NO protection at
+    all for unnamed ones — a retried POST /v3/tasks or POST /v3/deployments after a network timeout can and
+    will run the work twice. An agent must GET before retrying any mutation.
+pagination:
+  style: page-number
+  params:
+  - name: page
+    in: query
+    default: 1
+  - name: per_page
+    in: query
+    default: 50
+  - name: order_by
+    in: query
+    note: Sort key; prefix with '-' for descending.
+  response_envelope: pagination
+  response_fields:
+  - pagination.total_results
+  - pagination.total_pages
+  - pagination.first.href
+  - pagination.last.href
+  - pagination.next.href
+  - pagination.previous.href
+  - resources[]
+  note: >-
+    Uniform across every list operation. next is `null` (not absent) on the last page, so a client tests for
+    null rather than for key presence. Links are absolute hrefs against the foundation's own host.
+filtering:
+  style: repeated comma-separated query filters
+  examples:
+  - names
+  - guids
+  - space_guids
+  - organization_guids
+  - label_selector
+  - created_ats
+  - updated_ats
+  note: >-
+    created_ats and updated_ats accept relational operators (e.g. created_ats[gt]=<timestamp>), and
+    label_selector implements Kubernetes-style label queries over the metadata.labels map.
+field_expansion:
+  supported: true
+  param: include
+  note: Named relationships can be side-loaded into an `included` object (components.schemas.IncludedResources), avoiding N+1 fetches.
+metadata:
+  supported: true
+  shape: metadata.labels (map) and metadata.annotations (map) on most resources
+  schema: components.schemas.Metadata
+  note: Kubernetes-shaped. labels are queryable via label_selector; annotations are not.
+relationships:
+  shape: components.schemas.Relationships with RelationshipToOne / RelationshipToMany members carrying {data:{guid}}
+  note: >-
+    Every association is expressed as a `relationships` object rather than a bare foreign-key field. This is
+    codified in the project's own cc-api-v3-style-guide and is the single biggest structural difference from
+    the v2 API. See data-model/cloud-foundry-data-model.yml.
+async_operations:
+  style: 202 + Job resource
+  note: >-
+    37 operations return 202. The response carries a Location header pointing at /v3/jobs/{guid}; the client
+    polls getJob until state is COMPLETE or FAILED, and a FAILED job carries the same CF-* error envelope.
+    This is the replacement for both idempotency keys and webhooks — there is no callback.
+request_id_tracing:
+  supported: true
+  headers:
+  - X-Vcap-Request-Id
+  note: >-
+    Cloud Foundry's Gorouter stamps X-Vcap-Request-Id on every request and it is threaded through component
+    logs, so it is the correlation key to quote when reporting a failure to an operator. It is a platform
+    convention rather than a field declared in the OpenAPI.
+warnings:
+  supported: true
+  header: X-Cf-Warnings
+  schema: components.schemas.Warning
+  note: Non-fatal advisories ride along on 2xx responses. An agent that only inspects the body will miss deprecation and quota warnings.
+versioning: see lifecycle/cloud-foundry-lifecycle.yml
+errors: see errors/cloud-foundry-problem-types.yml
+rate_limit_signaling: see rate-limits/cloud-foundry-rate-limits.yml
+dry_run_mode:
+  supported: false
+  note: >-
+    No dry-run, preview or validate-only parameter exists on any of the 248 operations. The closest
+    rehearsal available is creating a deployment against a specific revision, which still performs a real
+    rollout.
+reversibility:
+  grade: verified
+  applicable: true
+  note: >-
+    Cloud Foundry has an unusually strong reversibility story for a control plane, because rolling back a
+    deploy is a first-class product feature rather than an afterthought — but the windows are set by the
+    OPERATOR, not by the API, and the API publishes no header or field that states them. Every window below
+    is quoted from the documentation that defines it, with the operator-configurable ones marked as such.
+  surfaces:
+  - write_surface: Application deployment (createDeployment, POST /v3/deployments)
+    reversal: createDeployment with a `revision` relationship — deploy a prior revision
+    reversal_operation_id: createDeployment
+    window: >-
+      "By default, CAPI retains a maximum of 100 revisions per app." The BINDING limit is tighter: "By
+      default, Cloud Foundry retains the five most recent staged droplets in its droplets bucket", raisable
+      by the operator via system_blobstore_ccdroplet_max_staged_droplets_stored.
+    window_stated: true
+    docs: https://docs.cloudfoundry.org/devguide/revisions.html
+    note: >-
+      The spec says it plainly: "When you create a new deployment you can either provide a specific droplet
+      or revision to deploy." Rolling back is the same operation as rolling forward, which is why it is
+      reliable — `cf rollback APP-NAME --version VERSION` is the CLI form of exactly this call, and
+      listRevisionsForApp (GET /v3/apps/{guid}/revisions) enumerates what is listed. THE TRAP: the 100
+      retained revisions and the 5 retained droplets are different numbers. A revision can still be listed
+      while the droplet it points at has been pruned, so an agent must not treat "the revision is in the
+      list" as "the rollback will succeed" — only the five most recent staged droplets are guaranteed
+      deployable on a default foundation.
+  - write_surface: In-flight rolling deployment
+    reversal: cancelDeployment (POST /v3/deployments/{guid}/actions/cancel)
+    reversal_operation_id: cancelDeployment
+    window: While the deployment is in a DEPLOYING state. Once it reaches DEPLOYED the deployment can no longer be cancelled — roll back with a revision deployment instead.
+    window_stated: true
+    docs: https://v3-apidocs.cloudfoundry.org/
+    note: Reverts the app to the droplet and process state it had before the rollout began.
+  - write_surface: Task execution (createTask)
+    reversal: cancelTask (POST /v3/tasks/{guid}/actions/cancel)
+    reversal_operation_id: cancelTask
+    window: While the task is PENDING or RUNNING. A SUCCEEDED or FAILED task cannot be cancelled, and its side effects are not undone.
+    window_stated: true
+    docs: https://v3-apidocs.cloudfoundry.org/
+    note: >-
+      Cancels the PROCESS, not its effects. A task that has already written to a database is not reversed by
+      cancelling it — the most important caveat on this whole block for an agent.
+  - write_surface: Application state (startApp / stopApp / restartApp)
+    reversal: The inverse operation — stopApp reverses startApp and vice versa
+    reversal_operation_id: stopApp
+    window: unbounded
+    window_stated: true
+    note: Fully symmetric and instantaneous; the safest mutating pair on the API.
+  - write_surface: Resource deletion (deleteApp, deleteOrganization, deleteSpace, deleteServiceInstance, ...)
+    reversal: none
+    reversal_operation_id: null
+    window: null
+    window_stated: false
+    note: >-
+      IRREVERSIBLE AND UNDERSTATED. There is no trash, no soft delete, no restore operation and no retention
+      window anywhere in the CAPI surface. Deletes return 202 with a Job; once that job completes the
+      resource and its children are gone. Deleting an org cascades to every space, app, route and service
+      instance beneath it. An agent must treat every delete as terminal and escalate to a human.
+  - write_surface: Service instance / binding lifecycle
+    reversal: deleteServiceCredentialBinding reverses createServiceCredentialBinding
+    reversal_operation_id: deleteServiceCredentialBinding
+    window: unbounded for the binding itself
+    window_stated: true
+    note: >-
+      Unbinding is reversible; DELETING the service instance is not, and whether the backing data survives
+      is the BROKER's decision, not Cloud Foundry's. The platform cannot promise reversibility it does not
+      own.

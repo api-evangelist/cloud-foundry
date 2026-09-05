@@ -1,0 +1,162 @@
+generated: '2026-09-05'
+method: searched
+source: >-
+  https://docs.cloudfoundry.org/devguide/capi/client-libraries.html plus registry metadata endpoints
+  (proxy.golang.org, repo1.maven.org, rubygems.org, registry.npmjs.org, pypi.org) queried 2026-09-05.
+note: >-
+  Cloud Foundry is a Foundation-governed open-source platform, not a SaaS vendor. Its "SDK" surface is the
+  cf CLI plus a small set of Foundation-owned Go/Java/Ruby libraries. The CAPI client-libraries page names
+  exactly one SUPPORTED library (cf-java-client), one EXPERIMENTAL library (go-cfclient), and one
+  explicitly UNOFFICIAL library (cf-python-client, under the cloudfoundry-community org). Registry
+  versions and dates below were read from each registry's metadata endpoint.
+docs: https://docs.cloudfoundry.org/devguide/capi/client-libraries.html
+packages:
+- name: code.cloudfoundry.org/cli/v8
+  language: go
+  registry: go
+  registry_url: https://pkg.go.dev/code.cloudfoundry.org/cli/v8
+  repository: https://github.com/cloudfoundry/cli
+  official: true
+  kind: cli
+  version: v8.19.0
+  published: '2026-08-28'
+  source: https://proxy.golang.org/code.cloudfoundry.org/cli/v8/@latest
+  note: The official cf CLI. Binaries are also published as GitHub releases and via the cloudfoundry/tap Homebrew tap.
+- name: code.cloudfoundry.org/cli
+  language: go
+  registry: go
+  registry_url: https://pkg.go.dev/code.cloudfoundry.org/cli
+  repository: https://github.com/cloudfoundry/cli
+  official: true
+  kind: cli
+  version: v6.53.0+incompatible
+  published: '2020-10-01'
+  source: https://proxy.golang.org/code.cloudfoundry.org/cli/@latest
+  note: >-
+    The unversioned v6 module path. Frozen since 2020 — the maintained line is the /v8 module above.
+    Recorded because consumers importing the bare path still resolve to this 2020 release.
+- name: org.cloudfoundry:cloudfoundry-client
+  language: java
+  registry: maven
+  registry_url: https://repo1.maven.org/maven2/org/cloudfoundry/cloudfoundry-client/
+  repository: https://github.com/cloudfoundry/cf-java-client
+  official: true
+  kind: sdk
+  version: 5.17.0.RELEASE
+  published: '2026-05-19'
+  source: https://repo1.maven.org/maven2/org/cloudfoundry/cloudfoundry-client/maven-metadata.xml
+  note: The only client library the CAPI docs list as SUPPORTED.
+- name: org.cloudfoundry:cloudfoundry-operations
+  language: java
+  registry: maven
+  registry_url: https://repo1.maven.org/maven2/org/cloudfoundry/cloudfoundry-operations/
+  repository: https://github.com/cloudfoundry/cf-java-client
+  official: true
+  kind: sdk
+  version: 5.17.0.RELEASE
+  published: '2026-05-19'
+  source: https://repo1.maven.org/maven2/org/cloudfoundry/cloudfoundry-operations/maven-metadata.xml
+- name: org.cloudfoundry:cloudfoundry-client-reactor
+  language: java
+  registry: maven
+  registry_url: https://repo1.maven.org/maven2/org/cloudfoundry/cloudfoundry-client-reactor/
+  repository: https://github.com/cloudfoundry/cf-java-client
+  official: true
+  kind: sdk
+  version: 5.17.0.RELEASE
+  published: '2026-05-19'
+  source: https://repo1.maven.org/maven2/org/cloudfoundry/cloudfoundry-client-reactor/maven-metadata.xml
+- name: github.com/cloudfoundry/go-cfclient
+  language: go
+  registry: go
+  registry_url: https://pkg.go.dev/github.com/cloudfoundry/go-cfclient
+  repository: https://github.com/cloudfoundry/go-cfclient
+  official: true
+  kind: sdk
+  version: null
+  published: null
+  source: https://docs.cloudfoundry.org/devguide/capi/client-libraries.html
+  note: >-
+    Foundation-owned but labelled EXPERIMENTAL and "a work in progress" on the CAPI client-libraries page.
+    version/published left null — not resolved against a registry endpoint in this pass.
+- name: cf-uaa-lib
+  language: ruby
+  registry: rubygems
+  registry_url: https://rubygems.org/gems/cf-uaa-lib
+  repository: https://github.com/cloudfoundry/cf-uaa-lib
+  official: true
+  kind: sdk
+  version: 4.0.10
+  published: '2026-07-08'
+  source: https://rubygems.org/api/v1/gems/cf-uaa-lib.json
+  note: First-party client gem for the UAA OAuth 2.0 / SCIM server.
+- name: code.cloudfoundry.org/go-loggregator/v10
+  language: go
+  registry: go
+  registry_url: https://pkg.go.dev/code.cloudfoundry.org/go-loggregator/v10
+  repository: https://github.com/cloudfoundry/go-loggregator
+  official: true
+  kind: sdk
+  version: v10.3.1
+  published: '2026-03-05'
+  source: https://proxy.golang.org/code.cloudfoundry.org/go-loggregator/v10/@latest
+  note: Go client for the Loggregator v2 gRPC ingress/egress contracts saved in grpc/.
+- name: code.cloudfoundry.org/go-log-cache/v3
+  language: go
+  registry: go
+  registry_url: https://pkg.go.dev/code.cloudfoundry.org/go-log-cache/v3
+  repository: https://github.com/cloudfoundry/go-log-cache
+  official: true
+  kind: sdk
+  version: v3.1.2
+  published: '2026-05-05'
+  source: https://proxy.golang.org/code.cloudfoundry.org/go-log-cache/v3/@latest
+- name: github.com/cloudfoundry/bosh-cli/v7
+  language: go
+  registry: go
+  registry_url: https://pkg.go.dev/github.com/cloudfoundry/bosh-cli/v7
+  repository: https://github.com/cloudfoundry/bosh-cli
+  official: true
+  kind: cli
+  version: v7.10.10
+  published: '2026-08-19'
+  source: https://proxy.golang.org/github.com/cloudfoundry/bosh-cli/v7/@latest
+  note: The BOSH Director CLI — the client for the BOSH Director API listed in apis[].
+- name: cloudfoundry-client
+  language: python
+  registry: pypi
+  registry_url: https://pypi.org/project/cloudfoundry-client/
+  repository: https://github.com/cloudfoundry-community/cf-python-client
+  official: false
+  kind: sdk
+  version: 1.40.4
+  published: null
+  source: https://pypi.org/pypi/cloudfoundry-client/json
+  note: >-
+    The CAPI docs name this library and state explicitly that it is NOT supported by Cloud Foundry.
+    Maintained under the cloudfoundry-community org, so official:false. published left null — the PyPI
+    JSON info block does not carry a release date for the current version without walking releases[].
+- name: bosh_cli
+  language: ruby
+  registry: rubygems
+  registry_url: https://rubygems.org/gems/bosh_cli
+  repository: https://github.com/cloudfoundry/bosh
+  official: true
+  kind: cli
+  version: 1.3262.26.0
+  published: '2017-02-15'
+  source: https://rubygems.org/api/v1/gems/bosh_cli.json
+  note: >-
+    ABANDONMENT SIGNAL — the Ruby BOSH CLI gem has not shipped since 2017. It is superseded by the Go
+    bosh-cli/v7 above (v7.10.10, 2026-08-19). Recorded so a consumer resolving `gem install bosh_cli`
+    can see they are pulling a nine-year-old client.
+absent:
+- registry: npm
+  note: >-
+    No first-party Cloud Foundry client on npm. `cf-cli` (0.2.0, 2016-08-04) and `cloudfoundry`
+    (0.1.0, 2011-05-08) are third-party wrappers; `@cloudfoundry/cli` does not exist (404).
+  source: https://registry.npmjs.org/
+- registry: nuget
+  note: Not probed in this pass; no .NET client is named on the CAPI client-libraries page.
+- registry: crates.io
+  note: Not probed in this pass; no Rust client is named on the CAPI client-libraries page.

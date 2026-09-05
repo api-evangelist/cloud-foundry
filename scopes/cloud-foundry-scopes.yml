@@ -1,0 +1,79 @@
+generated: '2026-09-05'
+method: searched
+source: openapi/cloud-foundry-capi-v3-openapi.yaml components.securitySchemes.oauth, enriched from https://docs.cloudfoundry.org/concepts/architecture/uaa.html
+  and https://docs.cloudfoundry.org/uaa/
+schemes:
+- name: oauth
+  source: openapi/cloud-foundry-capi-v3-openapi.yaml
+  flows:
+  - flow: implicit
+    authorizationUrl: https://uaa.cloudfoundry.local/api-oauth/dialog
+scopes:
+- scope: cloud_controller.admin
+  description: This scope provides read and write access to all resources
+  flows:
+  - implicit
+  sources:
+  - openapi/cloud-foundry-capi-v3-openapi.yaml
+- scope: cloud_controller.admin_read_only
+  description: This scope provides read only access to all resources
+  flows:
+  - implicit
+  sources:
+  - openapi/cloud-foundry-capi-v3-openapi.yaml
+- scope: cloud_controller.global_auditor
+  description: This scope provides read access to all resources
+  flows:
+  - implicit
+  sources:
+  - openapi/cloud-foundry-capi-v3-openapi.yaml
+- scope: cloud_controller.read
+  description: Read access to the Cloud Controller
+  flows:
+  - implicit
+  sources:
+  - openapi/cloud-foundry-capi-v3-openapi.yaml
+- scope: cloud_controller.update_build_state
+  description: This scope allows its bearer to update the state of a build; currently only used when updating builds
+  flows:
+  - implicit
+  sources:
+  - openapi/cloud-foundry-capi-v3-openapi.yaml
+- scope: cloud_controller.write
+  description: Write access to the Cloud Controller
+  flows:
+  - implicit
+  sources:
+  - openapi/cloud-foundry-capi-v3-openapi.yaml
+- scope: cloud_controller_service_permissions.read
+  description: This scope provides read only access for service instance permissions
+  flows:
+  - implicit
+  sources:
+  - openapi/cloud-foundry-capi-v3-openapi.yaml
+docs:
+- https://docs.cloudfoundry.org/uaa/
+- https://docs.cloudfoundry.org/concepts/roles.html
+note: 'Scopes are issued by the target foundation''s UAA and are read verbatim from the Cloud Foundry Foundation''s
+  own CAPI OpenAPI. THE SCOPE IS ONLY HALF THE AUTHORIZATION. Cloud Foundry authorizes on two axes: a UAA scope
+  gates the VERB, and a Cloud Foundry ROLE on the target organization or space gates the OBJECT. A token carrying
+  cloud_controller.write still gets 403 on a space where the user has no role. The roles (org manager, org auditor,
+  org billing manager, space developer, space manager, space auditor, space supporter) are Cloud Controller data,
+  not UAA scopes, and appear nowhere in the securitySchemes block — which is why a client built purely from the
+  spec''s scope list will misdiagnose its own 403s. The authorizationUrl above (uaa.cloudfoundry.local) is a placeholder:
+  the real value is uaa.<system-domain> for the foundation you are calling.'
+authorization_model:
+  axes:
+  - UAA OAuth 2.0 scope (verb)
+  - Cloud Foundry role on org/space (object)
+  roles:
+  - organization_manager
+  - organization_auditor
+  - organization_billing_manager
+  - organization_user
+  - space_developer
+  - space_manager
+  - space_auditor
+  - space_supporter
+  roles_api: listRoles / createRole (GET,POST /v3/roles) in openapi/cloud-foundry-capi-v3-openapi.yaml
+  note: Role assignment is itself an API surface — the Roles tag carries 4 operations.

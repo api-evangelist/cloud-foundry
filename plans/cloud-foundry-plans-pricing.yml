@@ -1,0 +1,24 @@
+generated: '2026-09-05'
+method: searched
+source: https://www.cloudfoundry.org/
+plan_count: 0
+pricing_model: none
+note: >-
+  Cloud Foundry publishes no plans, tiers or prices because there is nothing to buy from the Cloud Foundry
+  Foundation. Cloud Foundry is Apache-2.0 licensed open-source software governed by a Linux Foundation
+  project; you obtain it by deploying it, and the API is reached at api.<your-system-domain> on
+  infrastructure you pay for yourself. Money enters the picture only through (a) Foundation membership,
+  which buys governance participation rather than API access, and (b) commercial distributions built on
+  Cloud Foundry and sold by third parties — Tanzu Platform for Cloud Foundry (Broadcom), SAP BTP Cloud
+  Foundry runtime, cloud.gov, Swisscom Application Cloud and others — each with its OWN pricing that is not
+  Cloud Foundry's to publish. plan_count: 0 here is a correct description of the Foundation's own commercial
+  surface, not a gap in this profile.
+plans: []
+membership:
+  url: https://www.cloudfoundry.org/foundation/
+  note: Foundation membership tiers exist but confer governance rights, not API entitlement. Not recorded as API plans.
+evidence:
+- url: https://www.cloudfoundry.org/
+  status: 200
+- url: https://www.cloudfoundry.org/foundation/
+  status: 200

@@ -1,0 +1,22 @@
+generated: '2026-09-05'
+method: generated
+source: openapi/cloud-foundry-capi-v3-openapi.yaml, conventions/cloud-foundry-conventions.yml, errors/cloud-foundry-problem-types.yml
+note: >-
+  Packaged Agent Skills for the Cloud Foundry Cloud Controller API v3. Every operationId referenced in these
+  skills was verified against the Foundation's own OpenAPI 3.1 description (248 operations) — none is
+  invented. The skills deliberately encode the three things the specification alone does not tell an agent:
+  that Cloud Foundry has no single API host, that there is no idempotency key on any mutation, and that
+  deletes have no restore path.
+skills:
+- name: cloud-foundry-deploy-application
+  file: skills/cloud-foundry-deploy-application.md
+  summary: App -> package -> build -> droplet -> deployment, with the async Job envelope and the feature-flag pre-check.
+  operations: 13
+- name: cloud-foundry-rollback-deployment
+  file: skills/cloud-foundry-rollback-deployment.md
+  summary: Cancel an in-flight rollout, or redeploy a prior revision — and check the droplet is still retained first.
+  operations: 9
+- name: cloud-foundry-run-task
+  file: skills/cloud-foundry-run-task.md
+  summary: Run a one-off command against a deployed app, poll it, and understand that cancel aborts rather than reverses.
+  operations: 8

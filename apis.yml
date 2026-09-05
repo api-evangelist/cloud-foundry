@@ -1,12 +1,12 @@
 aid: cloud-foundry
 name: Cloud Foundry
-description: >-
-  Cloud Foundry is an open-source, multi-cloud Platform as a Service (PaaS) governed by the Cloud Foundry Foundation. It
-  provides a developer-friendly application platform where operators push source code or container images and Cloud
-  Foundry handles staging, routing, scaling, and lifecycle management. The CF API (api.cloudfoundry.org) is the primary
-  control plane and is documented at v3.cloudfoundry.org/version/release-candidate. The ecosystem also includes the User
-  Account and Authentication (UAA) OAuth 2.0 server, the Loggregator log and metric pipeline, the Diego container
-  scheduler, the Open Service Broker API for marketplace services, and the Eirini Kubernetes-based scheduler.
+description: Cloud Foundry is an open-source, multi-cloud Platform as a Service (PaaS) governed by the Cloud Foundry
+  Foundation. It provides a developer-friendly application platform where operators push source code or container
+  images and Cloud Foundry handles staging, routing, scaling, and lifecycle management. The CF API (api.cloudfoundry.org)
+  is the primary control plane and is documented at v3.cloudfoundry.org/version/release-candidate. The ecosystem
+  also includes the User Account and Authentication (UAA) OAuth 2.0 server, the Loggregator log and metric pipeline,
+  the Diego container scheduler, the Open Service Broker API for marketplace services, and the Eirini Kubernetes-based
+  scheduler.
 type: Index
 deliveryModel:
   model: unknown
@@ -35,24 +35,63 @@ accessModel:
 image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/icons/cloud-foundry.png
 url: https://raw.githubusercontent.com/api-evangelist/cloud-foundry/refs/heads/main/apis.yml
 created: '2024-01-01'
-modified: '2026-04-23'
+modified: '2026-09-05'
 specificationVersion: '0.23'
 kind: opensource
 tags:
-  - Cloud Foundry Foundation
-  - Containers
-  - Multi-Cloud
-  - Open-Source
-  - Platform-as-a-Service
-  - Platform
+- Cloud Foundry Foundation
+- Containers
+- Multi-Cloud
+- Open-Source
+- Platform-as-a-Service
+- Platform
 tags_raw:
-  - Cloud Foundry Foundation
-  - Containers
-  - Multi-Cloud
-  - Open Source
-  - PaaS
-  - Platform
+- Cloud Foundry Foundation
+- Containers
+- Multi-Cloud
+- Open Source
+- PaaS
+- Platform
 apis:
+- aid: cloud-foundry:capi-v3
+  name: Cloud Foundry Cloud Controller API v3
+  description: The Cloud Controller API (CAPI) v3 is the primary control plane of Cloud Foundry. It manages apps,
+    packages, droplets, builds, deployments, processes, tasks, revisions, routes, domains, organizations, spaces,
+    roles, security groups, service brokers, offerings, plans, instances and credential bindings. The Cloud Foundry
+    Foundation publishes a machine-readable OpenAPI 3.1 description of the surface from the cf-openapi project (158
+    paths / 248 operations), rendered at cloudfoundry.github.io/cf-openapi. Requests authenticate with OAuth 2.0
+    bearer tokens issued by the UAA server; there is no single public host because every Cloud Foundry foundation
+    is self-hosted at its own api.<system-domain>.
+  humanURL: https://v3-apidocs.cloudfoundry.org/
+  tags:
+  - Cloud Foundry Cloud Controller API V3
+  - Application
+  - Deployment
+  - Organization
+  - Spaces
+  - Service Instances
+  tags_raw:
+  - CAPI
+  - Cloud Controller
+  - Apps
+  - Deployments
+  - Organizations
+  - Spaces
+  - Service Instances
+  image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
+  properties:
+  - type: OpenAPI
+    url: openapi/cloud-foundry-capi-v3-openapi.yaml
+  - type: APIReference
+    url: https://v3-apidocs.cloudfoundry.org/
+  - type: Documentation
+    url: https://docs.cloudfoundry.org/
+  - type: Source Code
+    url: https://github.com/cloudfoundry/cloud_controller_ng
+  - type: Specification
+    url: https://github.com/cloudfoundry/cf-openapi
+  - type: Reference
+    url: https://cloudfoundry.github.io/cf-openapi/
 - aid: cloud-foundry:uaa
   name: Cloud Foundry UAA
   tags:
@@ -73,10 +112,9 @@ apis:
     type: Source Code
   - url: https://docs.cloudfoundry.org/api/uaa/
     type: Reference
-  description: >-
-    The User Account and Authentication (UAA) server is Cloud Foundry's identity provider and OAuth 2.0
-    authorization server. It issues tokens consumed by the Cloud Controller, brokers, and operator tooling,
-    and supports SAML and LDAP federation, multifactor authentication, and SCIM-style user and group management.
+  description: The User Account and Authentication (UAA) server is Cloud Foundry's identity provider and OAuth 2.0
+    authorization server. It issues tokens consumed by the Cloud Controller, brokers, and operator tooling, and
+    supports SAML and LDAP federation, multifactor authentication, and SCIM-style user and group management.
 - aid: cloud-foundry:loggregator
   name: Cloud Foundry Loggregator
   tags:
@@ -85,16 +123,29 @@ apis:
   - Observability
   - Streaming
   image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
-  humanURL: https://docs.cloudfoundry.org/loggregator/
+  humanURL: https://docs.cloudfoundry.org/loggregator/architecture.html
   properties:
-  - url: https://docs.cloudfoundry.org/loggregator/
+  - url: https://docs.cloudfoundry.org/loggregator/architecture.html
     type: Documentation
   - url: https://github.com/cloudfoundry/loggregator-release
     type: Source Code
-  description: >-
-    Loggregator is Cloud Foundry's distributed log and metric pipeline that aggregates application logs,
-    platform component logs, and metrics for streaming consumption by users and external sinks. It exposes
-    a WebSocket Firehose, a v2 gRPC egress API, and the Reverse Log Proxy.
+  - type: Protobuf
+    url: grpc/cloud-foundry-loggregator-v2-egress.proto
+  - type: Protobuf
+    url: grpc/cloud-foundry-loggregator-v2-envelope.proto
+  - type: Protobuf
+    url: grpc/cloud-foundry-loggregator-v2-ingress.proto
+  - type: Protobuf
+    url: grpc/cloud-foundry-log-cache-v1-egress.proto
+  - type: Protobuf
+    url: grpc/cloud-foundry-log-cache-v1-ingress.proto
+  - type: Protobuf
+    url: grpc/cloud-foundry-log-cache-v1-orchestration.proto
+  - type: Protobuf
+    url: grpc/cloud-foundry-log-cache-v1-promql.proto
+  description: Loggregator is Cloud Foundry's distributed log and metric pipeline that aggregates application logs,
+    platform component logs, and metrics for streaming consumption by users and external sinks. It exposes a WebSocket
+    Firehose, a v2 gRPC egress API, and the Reverse Log Proxy.
 - aid: cloud-foundry:open-service-broker-api
   name: Open Service Broker API
   tags:
@@ -108,10 +159,11 @@ apis:
     type: Documentation
   - url: https://github.com/openservicebrokerapi/servicebroker
     type: Specification
-  description: >-
-    The Open Service Broker API is the open specification originally developed by Cloud Foundry and now
-    used by Kubernetes and other platforms to provision and manage backing services through a common HTTP
-    interface. Brokers expose a catalog and lifecycle operations for service instances and bindings.
+  - type: OpenAPI
+    url: openapi/cloud-foundry-open-service-broker-api-openapi.yaml
+  description: The Open Service Broker API is the open specification originally developed by Cloud Foundry and now
+    used by Kubernetes and other platforms to provision and manage backing services through a common HTTP interface.
+    Brokers expose a catalog and lifecycle operations for service instances and bindings.
 - aid: cloud-foundry:bosh
   name: BOSH Director API
   tags:
@@ -126,10 +178,9 @@ apis:
     type: Documentation
   - url: https://github.com/cloudfoundry/bosh
     type: Source Code
-  description: >-
-    BOSH is Cloud Foundry's release engineering tool for packaging, deploying, and managing distributed
-    software. The BOSH Director API exposes deployment, stemcell, release, task, and VM lifecycle operations
-    used by operators and CI tooling to manage Cloud Foundry itself and the workloads it depends on.
+  description: BOSH is Cloud Foundry's release engineering tool for packaging, deploying, and managing distributed
+    software. The BOSH Director API exposes deployment, stemcell, release, task, and VM lifecycle operations used
+    by operators and CI tooling to manage Cloud Foundry itself and the workloads it depends on.
 - aid: cloud-foundry:cloud-foundry-apps-api
   name: Cloud Foundry Apps API
   description: The Apps API from Cloud Foundry — 4 operation(s) for apps.
@@ -145,6 +196,7 @@ apis:
     url: https://v3-apidocs.cloudfoundry.org/
   - type: Source Code
     url: https://github.com/cloudfoundry/cloud_controller_ng
+  image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
 - aid: cloud-foundry:cloud-foundry-builds-api
   name: Cloud Foundry Builds API
   description: The Builds API from Cloud Foundry — 1 operation(s) for builds.
@@ -158,10 +210,10 @@ apis:
     url: https://v3-apidocs.cloudfoundry.org/
   - type: Source Code
     url: https://github.com/cloudfoundry/cloud_controller_ng
+  image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
 - aid: cloud-foundry:cloud-foundry-cloud-foundry-cloud-controller-api-v3-api
   name: Cloud Foundry Cloud Foundry Cloud Controller API V3 API
-  description: >-
-    The Cloud Foundry Cloud Controller API V3 API from Cloud Foundry — 2 operation(s) for cloud foundry
+  description: The Cloud Foundry Cloud Controller API V3 API from Cloud Foundry — 2 operation(s) for cloud foundry
     cloud controller api v3.
   humanURL: https://v3-apidocs.cloudfoundry.org/
   tags:
@@ -173,6 +225,7 @@ apis:
     url: https://v3-apidocs.cloudfoundry.org/
   - type: Source Code
     url: https://github.com/cloudfoundry/cloud_controller_ng
+  image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
 - aid: cloud-foundry:cloud-foundry-deployments-api
   name: Cloud Foundry Deployments API
   description: The Deployments API from Cloud Foundry — 1 operation(s) for deployments.
@@ -188,6 +241,7 @@ apis:
     url: https://v3-apidocs.cloudfoundry.org/
   - type: Source Code
     url: https://github.com/cloudfoundry/cloud_controller_ng
+  image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
 - aid: cloud-foundry:cloud-foundry-jobs-api
   name: Cloud Foundry Jobs API
   description: The Jobs API from Cloud Foundry — 1 operation(s) for jobs.
@@ -203,6 +257,7 @@ apis:
     url: https://v3-apidocs.cloudfoundry.org/
   - type: Source Code
     url: https://github.com/cloudfoundry/cloud_controller_ng
+  image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
 - aid: cloud-foundry:cloud-foundry-organizations-api
   name: Cloud Foundry Organizations API
   description: The Organizations API from Cloud Foundry — 2 operation(s) for organizations.
@@ -218,6 +273,7 @@ apis:
     url: https://v3-apidocs.cloudfoundry.org/
   - type: Source Code
     url: https://github.com/cloudfoundry/cloud_controller_ng
+  image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
 - aid: cloud-foundry:cloud-foundry-service-instances-api
   name: Cloud Foundry Service Instances API
   description: The Service Instances API from Cloud Foundry — 2 operation(s) for service instances.
@@ -231,6 +287,7 @@ apis:
     url: https://v3-apidocs.cloudfoundry.org/
   - type: Source Code
     url: https://github.com/cloudfoundry/cloud_controller_ng
+  image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
 - aid: cloud-foundry:cloud-foundry-spaces-api
   name: Cloud Foundry Spaces API
   description: The Spaces API from Cloud Foundry — 2 operation(s) for spaces.
@@ -244,39 +301,125 @@ apis:
     url: https://v3-apidocs.cloudfoundry.org/
   - type: Source Code
     url: https://github.com/cloudfoundry/cloud_controller_ng
-common:
-  - type: AgenticAccess
-    url: agentic-access/cloud-foundry-agentic-access.yml
-  - type: DomainSecurity
-    url: security/cloud-foundry-domain-security.yml
-  - type: Authentication
-    url: authentication/cloud-foundry-authentication.yml
-  - type: LinkedIn
-    url: https://www.linkedin.com/company/cloud-foundry
-  - type: Website
-    url: https://www.cloudfoundry.org/
+  image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
+- aid: cloud-foundry:app-autoscaler
+  name: Cloud Foundry App Autoscaler API
+  description: 'The App Autoscaler is a Cloud Foundry service that automatically scales application instances against
+    dynamic metric rules and scheduled windows. The project publishes OpenAPI descriptions for its public surface:
+    a Policy API for reading, writing and deleting a per-application scaling policy, a Custom Metrics API for submitting
+    application-defined metrics, a Scaling History API for the record of scaling events, and an Application Metric
+    API for aggregated metric series.'
+  humanURL: https://github.com/cloudfoundry/app-autoscaler
+  tags:
+  - Autoscaling
+  - Metrics
+  - Application
+  - Policy
+  tags_raw:
+  - Autoscaler
+  - Metrics
+  - Scaling
+  - Policy
+  image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
+  properties:
+  - type: OpenAPI
+    url: openapi/cloud-foundry-app-autoscaler-policy-api-openapi.yaml
+  - type: OpenAPI
+    url: openapi/cloud-foundry-app-autoscaler-custom-metrics-api-openapi.yaml
+  - type: OpenAPI
+    url: openapi/cloud-foundry-app-autoscaler-scaling-history-api-openapi.yaml
+  - type: OpenAPI
+    url: openapi/cloud-foundry-app-autoscaler-application-metric-api-openapi.yaml
   - type: Documentation
-    url: https://docs.cloudfoundry.org/
-  - type: GitHub
-    url: https://github.com/cloudfoundry
-  - type: Foundation
-    url: https://www.cloudfoundry.org/foundation/
-  - type: Community
-    url: https://www.cloudfoundry.org/community/
-  - type: Slack
-    url: https://slack.cloudfoundry.org/
-  - type: Blog
-    url: https://www.cloudfoundry.org/blog/
-  - type: Events
-    url: https://www.cloudfoundry.org/events/
-  - type: PrivacyPolicy
-    url: https://www.cloudfoundry.org/privacy-policy/
-  - type: Trademark
-    url: https://www.cloudfoundry.org/trademark-policy/
-  - type: JSONLD
-    url: json-ld/cloud-foundry-context.jsonld
-  - type: Spectral
-    url: rules/cloud-foundry-rules.yml
+    url: https://github.com/cloudfoundry/app-autoscaler/blob/main/docs/user_guide.md
+  - type: Source Code
+    url: https://github.com/cloudfoundry/app-autoscaler
+common:
+- type: OAuthScopes
+  url: scopes/cloud-foundry-scopes.yml
+- type: AgenticAccess
+  url: agentic-access/cloud-foundry-agentic-access.yml
+- type: DomainSecurity
+  url: security/cloud-foundry-domain-security.yml
+- type: Authentication
+  url: authentication/cloud-foundry-authentication.yml
+- type: LinkedIn
+  url: https://www.linkedin.com/company/cloud-foundry
+- type: Website
+  url: https://www.cloudfoundry.org/
+- type: Documentation
+  url: https://docs.cloudfoundry.org/
+- type: GitHub
+  url: https://github.com/cloudfoundry
+- type: Foundation
+  url: https://www.cloudfoundry.org/foundation/
+- type: Community
+  url: https://www.cloudfoundry.org/community/
+- type: Blog
+  url: https://www.cloudfoundry.org/blog/
+- type: Events
+  url: https://www.cloudfoundry.org/events/
+- type: PrivacyPolicy
+  url: https://www.linuxfoundation.org/privacy
+- type: Trademark
+  url: https://www.linuxfoundation.org/trademark-usage
+- type: JSONLD
+  url: json-ld/cloud-foundry-context.jsonld
+- type: Spectral
+  url: rules/cloud-foundry-rules.yml
+- type: Slack
+  url: https://cloudfoundry.slack.com/
+- type: TermsOfService
+  url: https://www.cloudfoundry.org/terms/
+- type: DeveloperPortal
+  url: https://docs.cloudfoundry.org/
+- type: APIReference
+  url: https://v3-apidocs.cloudfoundry.org/
+- type: GettingStarted
+  url: https://docs.cloudfoundry.org/cf-cli/getting-started.html
+- type: GitHubOrganization
+  url: https://github.com/cloudfoundry
+- type: Support
+  url: https://www.cloudfoundry.org/community/
+- type: Packages
+  url: packages/cloud-foundry-packages.yml
+- type: SDKs
+  url: packages/cloud-foundry-packages.yml
+- type: CLI
+  url: cli/cloud-foundry-cli.yml
+- type: LLMsTxt
+  url: llms/cloud-foundry-llms.txt
+- type: Overlay
+  url: overlays/cloud-foundry-capi-v3-overlay.yaml
+- type: Conformance
+  url: conformance/cloud-foundry-conformance.yml
+- type: ErrorCatalog
+  url: errors/cloud-foundry-problem-types.yml
+- type: Lifecycle
+  url: lifecycle/cloud-foundry-lifecycle.yml
+- type: Deprecation
+  url: lifecycle/cloud-foundry-lifecycle.yml
+- type: VulnerabilityDisclosure
+  url: security/cloud-foundry-vulnerability-disclosure.yml
+- type: Security
+  url: security/cloud-foundry-vulnerability-disclosure.yml
+- type: Conventions
+  url: conventions/cloud-foundry-conventions.yml
+- type: ChangeLog
+  url: changelog/cloud-foundry-changelog.yml
+- type: DataModel
+  url: data-model/cloud-foundry-data-model.yml
+- type: AgentSkill
+  url: skills/_index.yml
+- type: Plans
+  url: plans/cloud-foundry-plans-pricing.yml
+- type: RateLimits
+  url: rate-limits/cloud-foundry-rate-limits.yml
 maintainers:
-  - FN: Kin Lane
-    email: kinlane@gmail.com
+- FN: Kin Lane
+  email: kinlane@gmail.com
+x-enrichment:
+  date: '2026-09-05'
+  status: enriched
+  artifacts_added: 34
+  pass: local-v3

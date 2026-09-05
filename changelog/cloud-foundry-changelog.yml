@@ -1,0 +1,55 @@
+generated: '2026-09-05'
+method: searched
+source: https://github.com/cloudfoundry/capi-release/releases
+docs:
+- https://github.com/cloudfoundry/capi-release/releases
+- https://v3-apidocs.cloudfoundry.org/
+- https://github.com/cloudfoundry/cli/releases
+scheme: semver
+note: >-
+  Cloud Foundry has no single product changelog because it is not a single product. The Cloud Controller API
+  changes ship as dated capi-release versions (roughly weekly), the API reference is published as an
+  immutable per-version site at v3-apidocs.cloudfoundry.org/version/<capi-version>/, and the cf CLI has its
+  own semver line. The API surface itself is versioned by PATH (/v3) and never by header or date — the
+  release numbers below track the implementation, not a new API version.
+current:
+  capi_release: 1.245.0
+  capi_release_date: '2026-09-04'
+  cli: v8.19.0
+  cli_date: '2026-08-28'
+  api_reference_version_probed: 3.220.0
+  api_reference_url: https://v3-apidocs.cloudfoundry.org/version/3.220.0/index.html
+entries:
+- version: 1.245.0
+  date: '2026-09-04'
+  component: capi-release
+  url: https://github.com/cloudfoundry/capi-release/releases/tag/1.245.0
+- version: 1.244.0
+  date: '2026-09-03'
+  component: capi-release
+  url: https://github.com/cloudfoundry/capi-release/releases/tag/1.244.0
+- version: 1.243.0
+  date: '2026-08-27'
+  component: capi-release
+  url: https://github.com/cloudfoundry/capi-release/releases/tag/1.243.0
+- version: 1.242.0
+  date: '2026-08-20'
+  component: capi-release
+  url: https://github.com/cloudfoundry/capi-release/releases/tag/1.242.0
+- version: 1.241.0
+  date: '2026-07-31'
+  component: capi-release
+  url: https://github.com/cloudfoundry/capi-release/releases/tag/1.241.0
+- version: 1.240.0
+  date: '2026-07-16'
+  component: capi-release
+  url: https://github.com/cloudfoundry/capi-release/releases/tag/1.240.0
+- version: v8.19.0
+  date: '2026-08-28'
+  component: cf CLI
+  url: https://github.com/cloudfoundry/cli/releases/tag/v8.19.0
+cadence: >-
+  capi-release cut roughly weekly through 2026 (six releases between 2026-07-16 and 2026-09-04). Release
+  notes are per-tag on GitHub; there is no aggregated, human-readable "what changed in the API" feed, which
+  is the single biggest changelog gap for a consumer tracking the surface.
+breaking_change_policy: see lifecycle/cloud-foundry-lifecycle.yml

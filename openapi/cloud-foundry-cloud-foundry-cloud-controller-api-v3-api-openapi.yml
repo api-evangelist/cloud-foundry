@@ -1,4 +1,4 @@
-openapi: 3.1.0
+openapi: 3.2.0
 info:
   title: Apps Cloud Foundry Cloud Controller API V3 API
   description: 'Cloud Foundry Cloud Controller API v3 is the primary control plane of

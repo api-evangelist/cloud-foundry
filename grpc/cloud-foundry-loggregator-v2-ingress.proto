@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package loggregator.v2;
+
+option go_package = "code.cloudfoundry.org/go-loggregator/v10/rpc/loggregator_v2";
+
+option java_package = "org.cloudfoundry.loggregator.v2";
+option java_outer_classname = "LoggregatorIngress";
+
+import "loggregator-api/v2/envelope.proto";
+
+service Ingress {
+    rpc Sender(stream Envelope) returns (IngressResponse) {}
+    rpc BatchSender(stream EnvelopeBatch) returns (BatchSenderResponse) {}
+
+    rpc Send(EnvelopeBatch) returns (SendResponse) {}
+}
+
+message IngressResponse {}
+
+message BatchSenderResponse {}
+
+message SendResponse {}

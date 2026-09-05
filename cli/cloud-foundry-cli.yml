@@ -1,0 +1,83 @@
+generated: '2026-09-05'
+method: searched
+source: >-
+  https://docs.cloudfoundry.org/cf-cli/, https://github.com/cloudfoundry/cli,
+  https://github.com/cloudfoundry/cli/wiki/Versioning-and-Support-Policy
+name: cf
+full_name: Cloud Foundry Command Line Interface (cf CLI)
+official: true
+docs: https://docs.cloudfoundry.org/cf-cli/
+getting_started: https://docs.cloudfoundry.org/cf-cli/getting-started.html
+install_docs: https://docs.cloudfoundry.org/cf-cli/install-go-cli.html
+repository: https://github.com/cloudfoundry/cli
+language: go
+version: v8.19.0
+released: '2026-08-28'
+license: Apache-2.0
+note: >-
+  The cf CLI is the primary human interface to the Cloud Controller API and, in practice, the reference
+  implementation of it: nearly every documented workflow is expressed as a cf command first and an API call
+  second. `cf curl` makes it a general-purpose authenticated client for any CAPI endpoint, which is why it
+  matters to an agent even where no wrapper command exists — it carries the UAA token exchange for you.
+install:
+- method: homebrew
+  command: brew install cloudfoundry/tap/cf-cli@8
+- method: github-release
+  command: Download the platform binary or installer from https://github.com/cloudfoundry/cli/releases
+- method: apt
+  command: Add the Cloud Foundry apt repository and install cf8-cli (see install-go-cli.html)
+- method: yum
+  command: Add the Cloud Foundry yum repository and install cf8-cli (see install-go-cli.html)
+- method: go
+  command: go install code.cloudfoundry.org/cli/v8@latest
+command_groups:
+- group: getting started
+  commands: [help, version, login, logout, passwd, target, api, auth]
+- group: apps
+  commands: [apps, app, push, scale, delete, rename, start, stop, restart, restage, restart-app-instance, events, logs, env, set-env, unset-env, stacks, stack, copy-source, create-app-manifest, get-health-check, set-health-check, enable-ssh, disable-ssh, ssh-enabled, ssh]
+- group: revisions
+  commands: [revisions, revision, rollback]
+- group: services
+  commands: [marketplace, services, service, create-service, update-service, delete-service, rename-service, create-service-key, service-keys, service-key, delete-service-key, bind-service, unbind-service, bind-route-service, unbind-route-service, share-service, unshare-service]
+- group: orgs and spaces
+  commands: [orgs, org, create-org, delete-org, org-users, set-org-role, unset-org-role, spaces, space, create-space, delete-space, space-users, set-space-role, unset-space-role, allow-space-ssh, space-ssh-allowed]
+- group: routes and domains
+  commands: [routes, route, create-route, delete-route, delete-orphaned-routes, map-route, unmap-route, domains, create-shared-domain, delete-shared-domain, create-private-domain, delete-private-domain]
+- group: service brokers
+  commands: [service-brokers, create-service-broker, update-service-broker, delete-service-broker, rename-service-broker, service-access, enable-service-access, disable-service-access]
+- group: security groups
+  commands: [security-group, security-groups, create-security-group, update-security-group, delete-security-group, bind-security-group, unbind-security-group, bind-running-security-group, bind-staging-security-group]
+- group: buildpacks
+  commands: [buildpacks, create-buildpack, update-buildpack, rename-buildpack, delete-buildpack]
+- group: quotas
+  commands: [org-quotas, org-quota, create-org-quota, update-org-quota, delete-org-quota, set-org-quota, space-quotas, space-quota, create-space-quota, update-space-quota, delete-space-quota, set-space-quota, unset-space-quota]
+- group: tasks
+  commands: [run-task, tasks, terminate-task]
+- group: labels and metadata
+  commands: [labels, set-label, unset-label]
+- group: advanced / escape hatch
+  commands: [curl, config, oauth-token, ssh-code, feature-flags, feature-flag, enable-feature-flag, disable-feature-flag]
+- group: plugins
+  commands: [plugins, install-plugin, uninstall-plugin, add-plugin-repo, remove-plugin-repo, list-plugin-repos, repo-plugins]
+  note: The cf CLI has a first-party plugin system with a community plugin repository, so its command surface is extensible per foundation.
+key_flows:
+- name: Authenticate against a foundation
+  commands: ['cf api https://api.<system-domain>', cf login, cf oauth-token]
+  note: >-
+    `cf oauth-token` prints the current UAA bearer token — the practical bridge from the CLI to a raw HTTP
+    client or an agent, since there is no public UAA to authenticate against generically.
+- name: Deploy an application
+  commands: [cf push, cf apps, cf logs --recent]
+  api: createApp, createPackage, createBuild, createDeployment, getJob
+- name: Roll back a bad deploy
+  commands: [cf revisions APP, 'cf rollback APP --version N']
+  api: listRevisionsForApp, createDeployment
+  note: The CLI form of the reversibility path in conventions/cloud-foundry-conventions.yml.
+- name: Call any API endpoint directly
+  commands: ['cf curl /v3/apps?per_page=100', 'cf curl /v3/deployments -X POST -d ''{...}''']
+  note: The CAPI docs name `cf help curl` as a SUPPORTED way to consume the API, alongside the Java client.
+support_policy:
+  url: https://github.com/cloudfoundry/cli/wiki/Versioning-and-Support-Policy
+  current_line: v8 (supported from 2021-09-21, open-ended)
+  previous_line: v7 (2020-06-25 to 2024-09-30, now out of support)
+  minimum_capi: 1.143.0

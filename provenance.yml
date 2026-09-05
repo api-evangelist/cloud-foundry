@@ -7,7 +7,13 @@ artifacts:
     method: generated
     evidence: declared in the artifact
   authentication/cloud-foundry-authentication.yml:
-    method: derived
+    method: searched
+    evidence: declared in the artifact
+  changelog/cloud-foundry-changelog.yml:
+    method: searched
+    evidence: declared in the artifact
+  cli/cloud-foundry-cli.yml:
+    method: searched
     evidence: declared in the artifact
   collections/cloud-foundry-apps-api.opencollection.json:
     method: derived
@@ -63,73 +69,43 @@ artifacts:
   collections/cloud-foundry.postman_collection.json:
     method: derived
     evidence: openapi/cloud-foundry
+  conformance/cloud-foundry-conformance.yml:
+    method: searched
+    evidence: declared in the artifact
+  conventions/cloud-foundry-conventions.yml:
+    method: searched
+    evidence: declared in the artifact
+  data-model/cloud-foundry-data-model.yml:
+    method: derived
+    evidence: declared in the artifact
+  errors/cloud-foundry-problem-types.yml:
+    method: derived
+    evidence: declared in the artifact
+  grpc/cloud-foundry-log-cache-v1-egress.proto:
+    method: unknown
+    evidence: no authorship recorded
+  grpc/cloud-foundry-log-cache-v1-ingress.proto:
+    method: unknown
+    evidence: no authorship recorded
+  grpc/cloud-foundry-log-cache-v1-orchestration.proto:
+    method: unknown
+    evidence: no authorship recorded
+  grpc/cloud-foundry-log-cache-v1-promql.proto:
+    method: unknown
+    evidence: no authorship recorded
+  grpc/cloud-foundry-loggregator-v2-egress.proto:
+    method: unknown
+    evidence: no authorship recorded
+  grpc/cloud-foundry-loggregator-v2-envelope.proto:
+    method: unknown
+    evidence: no authorship recorded
+  grpc/cloud-foundry-loggregator-v2-ingress.proto:
+    method: unknown
+    evidence: no authorship recorded
   json-ld/cloud-foundry-context.jsonld:
     method: unknown
     evidence: no authorship recorded
-  kin/checks-2026-08-28T221322.yml:
-    method: generated
-    evidence: Kin Score snapshot written by score.rb
-  kin/score-2026-07-23T094130.yml:
-    method: generated
-    evidence: Kin Score snapshot written by score.rb
-  kin/score-2026-07-23T182523.yml:
-    method: generated
-    evidence: Kin Score snapshot written by score.rb
-  kin/score-2026-07-26T223651.yml:
-    method: generated
-    evidence: Kin Score snapshot written by score.rb
-  kin/score-2026-07-27T083119.yml:
-    method: generated
-    evidence: Kin Score snapshot written by score.rb
-  kin/score-2026-07-27T190208.yml:
-    method: generated
-    evidence: Kin Score snapshot written by score.rb
-  kin/score-2026-07-28T115055.yml:
-    method: generated
-    evidence: Kin Score snapshot written by score.rb
-  kin/score-2026-07-28T170848.yml:
-    method: generated
-    evidence: Kin Score snapshot written by score.rb
-  kin/score-2026-07-28T172558.yml:
-    method: generated
-    evidence: Kin Score snapshot written by score.rb
-  kin/score-2026-07-28T192327.yml:
-    method: generated
-    evidence: Kin Score snapshot written by score.rb
-  kin/score-2026-07-28T200725.yml:
-    method: generated
-    evidence: Kin Score snapshot written by score.rb
-  kin/score-2026-07-31T133250.yml:
-    method: generated
-    evidence: Kin Score snapshot written by score.rb
-  kin/score-2026-07-31T151044.yml:
-    method: generated
-    evidence: Kin Score snapshot written by score.rb
-  kin/score-2026-07-31T162206.yml:
-    method: generated
-    evidence: Kin Score snapshot written by score.rb
-  kin/score-2026-07-31T202106.yml:
-    method: generated
-    evidence: Kin Score snapshot written by score.rb
-  kin/score-2026-08-01T163141.yml:
-    method: generated
-    evidence: Kin Score snapshot written by score.rb
-  kin/score-2026-08-01T163302.yml:
-    method: generated
-    evidence: Kin Score snapshot written by score.rb
-  kin/score-2026-08-01T171935.yml:
-    method: generated
-    evidence: Kin Score snapshot written by score.rb
-  kin/score-2026-08-03T113057.yml:
-    method: generated
-    evidence: Kin Score snapshot written by score.rb
-  kin/score-2026-08-03T161012.yml:
-    method: generated
-    evidence: Kin Score snapshot written by score.rb
-  kin/score-2026-08-04T083143.yml:
-    method: generated
-    evidence: Kin Score snapshot written by score.rb
-  kin/score-2026-08-05T153418.yml:
+  kin/checks-2026-09-05T144739.yml:
     method: generated
     evidence: Kin Score snapshot written by score.rb
   kin/score-2026-08-06T210741.yml:
@@ -213,33 +189,153 @@ artifacts:
   kin/score-2026-08-28T221322.yml:
     method: generated
     evidence: Kin Score snapshot written by score.rb
-  openapi/cloud-foundry-apps-api-openapi.yml:
+  kin/score-2026-08-29T213958.yml:
+    method: generated
+    evidence: Kin Score snapshot written by score.rb
+  kin/score-2026-08-29T230545.yml:
+    method: generated
+    evidence: Kin Score snapshot written by score.rb
+  kin/score-2026-08-30T203505.yml:
+    method: generated
+    evidence: Kin Score snapshot written by score.rb
+  kin/score-2026-08-30T220315.yml:
+    method: generated
+    evidence: Kin Score snapshot written by score.rb
+  kin/score-2026-08-31T223420.yml:
+    method: generated
+    evidence: Kin Score snapshot written by score.rb
+  kin/score-2026-09-01T063623.yml:
+    method: generated
+    evidence: Kin Score snapshot written by score.rb
+  kin/score-2026-09-01T210448.yml:
+    method: generated
+    evidence: Kin Score snapshot written by score.rb
+  kin/score-2026-09-01T222808.yml:
+    method: generated
+    evidence: Kin Score snapshot written by score.rb
+  kin/score-2026-09-02T211804.yml:
+    method: generated
+    evidence: Kin Score snapshot written by score.rb
+  kin/score-2026-09-02T224043.yml:
+    method: generated
+    evidence: Kin Score snapshot written by score.rb
+  kin/score-2026-09-03T161828.yml:
+    method: generated
+    evidence: Kin Score snapshot written by score.rb
+  kin/score-2026-09-03T174231.yml:
+    method: generated
+    evidence: Kin Score snapshot written by score.rb
+  kin/score-2026-09-04T062714.yml:
+    method: generated
+    evidence: Kin Score snapshot written by score.rb
+  kin/score-2026-09-04T212454.yml:
+    method: generated
+    evidence: Kin Score snapshot written by score.rb
+  kin/score-2026-09-04T224856.yml:
+    method: generated
+    evidence: Kin Score snapshot written by score.rb
+  kin/score-2026-09-05T055819.yml:
+    method: generated
+    evidence: Kin Score snapshot written by score.rb
+  kin/score-2026-09-05T072335.yml:
+    method: generated
+    evidence: Kin Score snapshot written by score.rb
+  kin/score-2026-09-05T144739.yml:
+    method: generated
+    evidence: Kin Score snapshot written by score.rb
+  lifecycle/cloud-foundry-lifecycle.yml:
+    method: searched
+    evidence: declared in the artifact
+  llms/cloud-foundry-llms.txt:
     method: unknown
     evidence: no authorship recorded
+  mcp/cloud-foundry-mcp.yml:
+    method: derived
+    evidence: declared in the artifact
+  openapi/_original/cloud-foundry-openapi.yml:
+    method: harvested
+    evidence: fetched from the provider as-is; byte-identical to the source
+  openapi/cloud-foundry-app-autoscaler-application-metric-api-openapi.yaml:
+    method: unknown
+    evidence: no authorship recorded
+  openapi/cloud-foundry-app-autoscaler-custom-metrics-api-openapi.yaml:
+    method: unknown
+    evidence: no authorship recorded
+  openapi/cloud-foundry-app-autoscaler-policy-api-openapi.yaml:
+    method: unknown
+    evidence: no authorship recorded
+  openapi/cloud-foundry-app-autoscaler-scaling-history-api-openapi.yaml:
+    method: unknown
+    evidence: no authorship recorded
+  openapi/cloud-foundry-apps-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
   openapi/cloud-foundry-builds-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/cloud-foundry-capi-v3-openapi.yaml:
     method: unknown
     evidence: no authorship recorded
   openapi/cloud-foundry-cloud-foundry-cloud-controller-api-v3-api-openapi.yml:
-    method: unknown
-    evidence: no authorship recorded
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
   openapi/cloud-foundry-deployments-api-openapi.yml:
-    method: unknown
-    evidence: no authorship recorded
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
   openapi/cloud-foundry-jobs-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/cloud-foundry-open-service-broker-api-openapi.yaml:
     method: unknown
     evidence: no authorship recorded
   openapi/cloud-foundry-organizations-api-openapi.yml:
-    method: unknown
-    evidence: no authorship recorded
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
   openapi/cloud-foundry-service-instances-api-openapi.yml:
-    method: unknown
-    evidence: no authorship recorded
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
   openapi/cloud-foundry-spaces-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/shared_definitions.yaml:
     method: unknown
     evidence: no authorship recorded
+  overlays/cloud-foundry-capi-v3-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  packages/cloud-foundry-packages.yml:
+    method: searched
+    evidence: declared in the artifact
+  plans/cloud-foundry-plans-pricing.yml:
+    method: searched
+    evidence: declared in the artifact
+  rate-limits/cloud-foundry-rate-limits.yml:
+    method: searched
+    evidence: declared in the artifact
   rules/cloud-foundry-rules.yml:
     method: unknown
     evidence: no authorship recorded
+  scopes/cloud-foundry-scopes.yml:
+    method: searched
+    evidence: declared in the artifact
   security/cloud-foundry-domain-security.yml:
+    method: unknown
+    evidence: no authorship recorded
+  security/cloud-foundry-vulnerability-disclosure.yml:
+    method: searched
+    evidence: declared in the artifact
+  skills/_index.yml:
+    method: generated
+    evidence: declared in the artifact
+  skills/cloud-foundry-deploy-application.md:
+    method: generated
+    evidence: declared in the artifact
+  skills/cloud-foundry-rollback-deployment.md:
+    method: generated
+    evidence: declared in the artifact
+  skills/cloud-foundry-run-task.md:
+    method: generated
+    evidence: declared in the artifact
+  well-known/cloud-foundry-well-known.yml:
     method: unknown
     evidence: no authorship recorded

@@ -1,0 +1,98 @@
+# Cloud Foundry
+
+> Cloud Foundry is an open-source, multi-cloud application platform (PaaS) governed by the Cloud Foundry
+> Foundation under the Linux Foundation. Operators run their own foundation; developers push source code or
+> container images and the platform stages, routes, scales and manages them. There is no vendor-hosted
+> Cloud Foundry API: every deployment lives at api.<its-own-system-domain>, authenticated by that
+> deployment's own UAA OAuth 2.0 server.
+
+Generated 2026-09-05 by API Evangelist from the Cloud Foundry Foundation's own published artifacts.
+Cloud Foundry does not publish an llms.txt of its own (probed: 404 on cloudfoundry.org,
+www.cloudfoundry.org, docs.cloudfoundry.org, v3-apidocs.cloudfoundry.org, bosh.io). Method: generated.
+
+## Start here, because this API is not shaped like a SaaS API
+
+- There is NO public base URL. `api.cloudfoundry.org` does not serve (HTTP 530) — it is a placeholder, not
+  an endpoint. Ask the operator for the foundation's system domain.
+- Authentication is a bearer JWT from that foundation's UAA. `cf oauth-token` prints one.
+- Authorization is TWO layers: a UAA scope (cloud_controller.read/.write/.admin) gates the verb, a Cloud
+  Foundry role on the target org or space gates the object. Holding the scope is not enough.
+- Capabilities are per-deployment. Call GET /v3/feature_flags before assuming an operation exists.
+- Rate limits are set by the operator, not by Cloud Foundry. Read the headers, never hard-code a number.
+
+## Machine-readable contracts
+
+- Cloud Controller API v3 (OpenAPI 3.1, 158 paths / 248 operations, every operation has an operationId):
+  https://cloudfoundry.github.io/cf-openapi/latest/openapi.yaml
+  Source: https://github.com/cloudfoundry/cf-openapi
+- Open Service Broker API (OpenAPI 3.0 + Swagger 2.0) — the standard Cloud Foundry originated, now used by
+  Kubernetes and others: https://github.com/openservicebrokerapi/servicebroker
+- App Autoscaler (OpenAPI): policy, custom metrics, scaling history, application metrics —
+  https://github.com/cloudfoundry/app-autoscaler/tree/main/openapi
+- Loggregator v2 and Log Cache v1 (proto3 / gRPC): https://github.com/cloudfoundry/loggregator-api and
+  https://github.com/cloudfoundry/go-log-cache
+- UAA serves its own OpenAPI at runtime via springdoc; there is no checked-in spec and no public instance.
+
+## Documentation
+
+- Docs home: https://docs.cloudfoundry.org/
+- CAPI v3 reference (immutable per release): https://v3-apidocs.cloudfoundry.org/
+- Rendered CAPI OpenAPI: https://cloudfoundry.github.io/cf-openapi/
+- CAPI client libraries: https://docs.cloudfoundry.org/devguide/capi/client-libraries.html
+- Rate limits: https://docs.cloudfoundry.org/running/rate-limit-cloud-controller-api.html
+- App revisions and rollback: https://docs.cloudfoundry.org/devguide/revisions.html
+- cf CLI: https://docs.cloudfoundry.org/cf-cli/
+- BOSH Director API: https://bosh.io/docs/director-api-v1/
+- UAA: https://docs.cloudfoundry.org/uaa/ and https://docs.cloudfoundry.org/api/uaa/
+
+## Clients
+
+- cf CLI (Go, official): https://github.com/cloudfoundry/cli — v8.19.0 (2026-08-28)
+- cf-java-client (the ONLY library the CAPI docs call supported): org.cloudfoundry:cloudfoundry-client
+  5.17.0.RELEASE (2026-05-19), https://github.com/cloudfoundry/cf-java-client
+- go-cfclient (Foundation-owned, labelled EXPERIMENTAL): https://github.com/cloudfoundry/go-cfclient
+- cf-uaa-lib (Ruby, official): 4.0.10 (2026-07-08), https://github.com/cloudfoundry/cf-uaa-lib
+- bosh-cli (Go, official): v7.10.10 (2026-08-19), https://github.com/cloudfoundry/bosh-cli
+- cf-python-client — the docs state explicitly it is NOT supported by Cloud Foundry:
+  https://github.com/cloudfoundry-community/cf-python-client
+- No first-party npm package exists.
+
+## Conventions an agent needs
+
+- Pagination: ?page=&per_page= (default 50), with a `pagination` envelope carrying total_results,
+  total_pages and first/last/next/previous links. `next` is null on the last page, not absent.
+- Relationships: every association is `{"relationships":{"space":{"data":{"guid":"..."}}}}`, never a bare
+  foreign key. Side-load with `include`.
+- Async: 37 operations return 202 with a Location header pointing at /v3/jobs/{guid}. Poll getJob.
+- Errors: {"errors":[{"code":<int>,"title":"CF-...","detail":"..."}]} — application/json, NOT RFC 9457
+  problem+json. Branch on `title`; never parse `detail`.
+- Warnings: X-Cf-Warnings rides along on successful responses.
+- Tracing: X-Vcap-Request-Id is stamped by the router and threaded through component logs.
+- Rate limits: X-RateLimit-Limit / -Remaining / -Reset. Reset is an ABSOLUTE UNIX TIMESTAMP. There is no
+  Retry-After. Remaining is an estimate rounded to the nearest 10% and can be wrong in both directions.
+- IDEMPOTENCY: there is none. No Idempotency-Key header exists on any of the 248 operations. Named
+  resources are protected by uniqueness constraints (a duplicate create returns 422 CF-UniquenessError);
+  unnamed ones — tasks, deployments — are not. GET before retrying any mutation.
+- REVERSIBILITY: strong for deploys, absent for deletes. A rollout can be cancelled while DEPLOYING, and an
+  app can be redeployed from a prior revision (100 revisions retained, but only the FIVE most recent
+  droplets — a listed revision whose droplet was pruned will not deploy). Deletes have no trash, no restore
+  and no retention window, and cascade to children.
+
+## Governance and security
+
+- Foundation: https://www.cloudfoundry.org/foundation/
+- Security disclosure: security@cloudfoundry.org — https://www.cloudfoundry.org/security/
+  PGP fingerprint A576 4CD4 EE9A 002D 72F5 2A32 46B6 FF8F 8CF0 880C
+- Advisories: https://www.cloudfoundry.org/foundryblog/security-advisory/
+- No security.txt is served on any Cloud Foundry host.
+- Community: https://www.cloudfoundry.org/community/ · GitHub: https://github.com/cloudfoundry
+- License: Apache-2.0. There are no plans and no pricing — the Foundation sells nothing. Commercial
+  distributions (Broadcom Tanzu Platform, SAP BTP, cloud.gov, Swisscom) price separately.
+
+## Not published
+
+- No MCP server (hosted or stdio). The org contains research notes on MCP, not an implementation.
+- No A2A agent card at /.well-known/agent-card.json or /.well-known/agent.json on any host.
+- No AsyncAPI, no webhooks, no callbacks — the async pattern is 202 + Job polling.
+- No /.well-known/ documents of any kind on any Foundation-controlled host.
+- No status page, and there cannot be one: availability belongs to whoever runs the foundation.

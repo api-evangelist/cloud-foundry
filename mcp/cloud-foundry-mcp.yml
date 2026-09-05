@@ -1,0 +1,107 @@
+generated: '2026-09-05'
+method: derived
+status: candidate
+source: openapi/cloud-foundry-capi-v3-openapi.yaml
+name: Cloud Foundry Cloud Controller (candidate)
+deployment:
+  mode: none
+  endpoint: null
+  install: null
+  package: null
+  auth: unknown
+  verified: searched
+search_note: >-
+  NO Cloud Foundry MCP server exists — not hosted, not stdio, not first-party, not in the GitHub org. A
+  search of the cloudfoundry GitHub organization for MCP repositories returns nothing, and a code search for
+  "modelcontextprotocol" across the org returns two hits, both of them RESEARCH NOTES in
+  cloudfoundry/agentic-runtime-notes (research/mcp-protocol.md, research/toolhive.md) rather than an
+  implementation. The Foundation is reading about MCP; it has not shipped one. mode: none is therefore a
+  measurement, not a gap in this pass.
+architectural_note: >-
+  A hosted Cloud Foundry MCP server could not be a single URL even if one existed. Cloud Foundry is
+  self-hosted: there is no api.cloudfoundry.org origin (it answers 530), and every foundation lives at
+  api.<its-own-system-domain> behind its own UAA. Any real server would have to be operator-deployed
+  alongside a foundation, or local-stdio with the target host and UAA credentials passed in — which makes
+  local-stdio, not remote, the natural shape here. That is worth saying out loud, because the absence of a
+  remote endpoint for Cloud Foundry means something different than it does for a SaaS API.
+tools:
+  note: >-
+    Candidate tools ONLY, derived by grouping real operationIds from the Foundation's own OpenAPI. Each name
+    below maps to operations that exist and would inherit their parameters and requestBody as the tool's
+    inputSchema. Nothing here is published by Cloud Foundry and nothing here is callable today.
+  candidates:
+  - name: list_apps
+    rest: [listApps]
+    consequence: read
+  - name: get_app
+    rest: [getApp]
+    consequence: read
+  - name: list_app_revisions
+    rest: [listRevisionsForApp]
+    consequence: read
+  - name: get_app_env
+    rest: [getEnvForApp, getEnvironmentVariablesForApp]
+    consequence: read
+    caution: Returns environment variables, which routinely contain service credentials. Should be gated even in a read-only server.
+  - name: start_app
+    rest: [startApp]
+    consequence: write
+    reversible: stopApp
+  - name: stop_app
+    rest: [stopApp]
+    consequence: write
+    reversible: startApp
+  - name: restart_app
+    rest: [restartApp]
+    consequence: write
+  - name: scale_process
+    rest: [scaleProcess]
+    consequence: write
+  - name: create_deployment
+    rest: [createDeployment]
+    consequence: write
+    reversible: cancelDeployment (while DEPLOYING), or createDeployment against a prior revision
+  - name: cancel_deployment
+    rest: [cancelDeployment]
+    consequence: write
+  - name: run_task
+    rest: [createTask]
+    consequence: write
+    caution: Executes arbitrary commands in the app container. Cancelling a task stops the process but does not undo its effects.
+  - name: cancel_task
+    rest: [cancelTask]
+    consequence: write
+  - name: list_organizations
+    rest: [listOrganizations]
+    consequence: read
+  - name: list_spaces
+    rest: [listSpaces]
+    consequence: read
+  - name: list_service_instances
+    rest: [listServiceInstances]
+    consequence: read
+  - name: list_service_offerings
+    rest: [listServiceOfferings]
+    consequence: read
+  - name: get_job
+    rest: [getJob]
+    consequence: read
+    note: Required by every 202-returning tool above — the async completion path.
+  - name: list_feature_flags
+    rest: [listFeatureFlags]
+    consequence: read
+    note: >-
+      Should be called FIRST by any agent against an unknown foundation. Feature flags are per-deployment,
+      so capability discovery is a runtime question, not a spec question.
+  - name: get_platform_info
+    rest: [getPlatformInfo]
+    consequence: read
+  excluded:
+  - pattern: delete*
+    reason: >-
+      Deliberately excluded. Cloud Foundry deletes are irreversible with no restore window and cascade to
+      children (see conventions/cloud-foundry-conventions.yml reversibility). Any real server should put
+      these behind explicit human escalation rather than expose them as tools.
+authentication:
+  model: OAuth 2.0 bearer JWT issued by the target foundation's UAA
+  note: See authentication/cloud-foundry-authentication.yml and scopes/cloud-foundry-scopes.yml.

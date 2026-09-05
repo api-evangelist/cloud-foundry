@@ -1,0 +1,250 @@
+generated: '2026-09-05'
+method: probed
+source: live HTTPS probes of the named /.well-known/ paths on every host in apis.yml, every OpenAPI servers[] host,
+  and the docs/spec-rendering hosts
+note: 'Cloud Foundry publishes NO /.well-known/ documents on any host it controls. Every named path 404s on cloudfoundry.org,
+  www.cloudfoundry.org, docs.cloudfoundry.org, v3-apidocs.cloudfoundry.org, cloudfoundry.github.io, bosh.io and
+  www.openservicebrokerapi.org. api.cloudfoundry.org — the host carried in the servers[] block of the older derived
+  specs in openapi/ — answers 530 (Cloudflare origin unreachable) on every path, because Cloud Foundry is self-hosted:
+  there is no single public foundation and api.<system-domain> differs per deployment. A running foundation DOES
+  serve UAA discovery at https://uaa.<system-domain>/.well-known/openid-configuration, but that is an operator-deployed
+  endpoint, not a document the Foundation publishes, so it is not recorded as a hit. NO WellKnown or SecurityTxt
+  pointer is emitted from this file — every probe is an absence. The Foundation DOES run a coordinated vulnerability
+  disclosure programme, just not via security.txt; see security/cloud-foundry-vulnerability-disclosure.yml.'
+hosts:
+- host: cloudfoundry.org
+  documents:
+  - path: /.well-known/security.txt
+    status: 404
+    file: null
+  - path: /.well-known/openid-configuration
+    status: 404
+    file: null
+  - path: /.well-known/oauth-authorization-server
+    status: 404
+    file: null
+  - path: /.well-known/oauth-protected-resource
+    status: 404
+    file: null
+  - path: /.well-known/api-catalog
+    status: 404
+    file: null
+  - path: /.well-known/ai-plugin.json
+    status: 404
+    file: null
+  - path: /.well-known/agent-card.json
+    status: 404
+    file: null
+  - path: /.well-known/agent.json
+    status: 404
+    file: null
+  - path: /.well-known/aauth-resource.json
+    status: 404
+    file: null
+- host: www.cloudfoundry.org
+  documents:
+  - path: /.well-known/security.txt
+    status: 404
+    file: null
+  - path: /.well-known/openid-configuration
+    status: 404
+    file: null
+  - path: /.well-known/oauth-authorization-server
+    status: 404
+    file: null
+  - path: /.well-known/oauth-protected-resource
+    status: 404
+    file: null
+  - path: /.well-known/api-catalog
+    status: 404
+    file: null
+  - path: /.well-known/ai-plugin.json
+    status: 404
+    file: null
+  - path: /.well-known/agent-card.json
+    status: 404
+    file: null
+  - path: /.well-known/agent.json
+    status: 404
+    file: null
+  - path: /.well-known/aauth-resource.json
+    status: 404
+    file: null
+- host: api.cloudfoundry.org
+  documents:
+  - path: /.well-known/security.txt
+    status: 530
+    file: null
+  - path: /.well-known/openid-configuration
+    status: 530
+    file: null
+  - path: /.well-known/oauth-authorization-server
+    status: 530
+    file: null
+  - path: /.well-known/oauth-protected-resource
+    status: 530
+    file: null
+  - path: /.well-known/api-catalog
+    status: 530
+    file: null
+  - path: /.well-known/ai-plugin.json
+    status: 530
+    file: null
+  - path: /.well-known/agent-card.json
+    status: 530
+    file: null
+  - path: /.well-known/agent.json
+    status: 530
+    file: null
+  - path: /.well-known/aauth-resource.json
+    status: 530
+    file: null
+- host: docs.cloudfoundry.org
+  documents:
+  - path: /.well-known/security.txt
+    status: 404
+    file: null
+  - path: /.well-known/openid-configuration
+    status: 404
+    file: null
+  - path: /.well-known/oauth-authorization-server
+    status: 404
+    file: null
+  - path: /.well-known/oauth-protected-resource
+    status: 404
+    file: null
+  - path: /.well-known/api-catalog
+    status: 404
+    file: null
+  - path: /.well-known/ai-plugin.json
+    status: 404
+    file: null
+  - path: /.well-known/agent-card.json
+    status: 404
+    file: null
+  - path: /.well-known/agent.json
+    status: 404
+    file: null
+  - path: /.well-known/aauth-resource.json
+    status: 404
+    file: null
+- host: v3-apidocs.cloudfoundry.org
+  documents:
+  - path: /.well-known/security.txt
+    status: 404
+    file: null
+  - path: /.well-known/openid-configuration
+    status: 404
+    file: null
+  - path: /.well-known/oauth-authorization-server
+    status: 404
+    file: null
+  - path: /.well-known/oauth-protected-resource
+    status: 404
+    file: null
+  - path: /.well-known/api-catalog
+    status: 404
+    file: null
+  - path: /.well-known/ai-plugin.json
+    status: 404
+    file: null
+  - path: /.well-known/agent-card.json
+    status: 404
+    file: null
+  - path: /.well-known/agent.json
+    status: 404
+    file: null
+  - path: /.well-known/aauth-resource.json
+    status: 404
+    file: null
+- host: cloudfoundry.github.io
+  documents:
+  - path: /.well-known/security.txt
+    status: 404
+    file: null
+  - path: /.well-known/openid-configuration
+    status: 404
+    file: null
+  - path: /.well-known/oauth-authorization-server
+    status: 404
+    file: null
+  - path: /.well-known/oauth-protected-resource
+    status: 404
+    file: null
+  - path: /.well-known/api-catalog
+    status: 404
+    file: null
+  - path: /.well-known/ai-plugin.json
+    status: 404
+    file: null
+  - path: /.well-known/agent-card.json
+    status: 404
+    file: null
+  - path: /.well-known/agent.json
+    status: 404
+    file: null
+  - path: /.well-known/aauth-resource.json
+    status: 404
+    file: null
+- host: bosh.io
+  documents:
+  - path: /.well-known/security.txt
+    status: 404
+    file: null
+  - path: /.well-known/openid-configuration
+    status: 404
+    file: null
+  - path: /.well-known/oauth-authorization-server
+    status: 404
+    file: null
+  - path: /.well-known/oauth-protected-resource
+    status: 404
+    file: null
+  - path: /.well-known/api-catalog
+    status: 404
+    file: null
+  - path: /.well-known/ai-plugin.json
+    status: 404
+    file: null
+  - path: /.well-known/agent-card.json
+    status: 404
+    file: null
+  - path: /.well-known/agent.json
+    status: 404
+    file: null
+  - path: /.well-known/aauth-resource.json
+    status: 404
+    file: null
+- host: www.openservicebrokerapi.org
+  documents:
+  - path: /.well-known/security.txt
+    status: 404
+    file: null
+  - path: /.well-known/openid-configuration
+    status: 404
+    file: null
+  - path: /.well-known/oauth-authorization-server
+    status: 404
+    file: null
+  - path: /.well-known/oauth-protected-resource
+    status: 404
+    file: null
+  - path: /.well-known/api-catalog
+    status: 404
+    file: null
+  - path: /.well-known/ai-plugin.json
+    status: 404
+    file: null
+  - path: /.well-known/agent-card.json
+    status: 404
+    file: null
+  - path: /.well-known/agent.json
+    status: 404
+    file: null
+  - path: /.well-known/aauth-resource.json
+    status: 404
+    file: null
+summary:
+  hosts_probed: 8
+  paths_per_host: 9
+  documents_found: 0

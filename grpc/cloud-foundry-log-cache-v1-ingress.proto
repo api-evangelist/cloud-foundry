@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package logcache.v1;
+
+import "loggregator-api/v2/envelope.proto";
+
+option go_package = "code.cloudfoundry.org/go-log-cache/v3/rpc/logcache_v1";
+
+// The ingress service is used to write data into the LogCache system.
+service Ingress {
+    // Send is used to emit Envelopes batches into LogCache. The RPC function
+    // will not return until the data has been stored.
+    rpc Send(SendRequest) returns (SendResponse) {}
+}
+
+message SendRequest {
+    loggregator.v2.EnvelopeBatch envelopes = 1;
+    bool local_only = 2;
+}
+
+message SendResponse {}

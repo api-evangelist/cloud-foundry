@@ -23,6 +23,16 @@
   "archived": [],
   "errors": [],
   "warnings": [],
-  "notes": [],
+  "notes": [
+    "cloud-foundry-apps-api-openapi.yml: upgraded openapi 3.1.0 -> OpenAPI 3.2.0",
+    "cloud-foundry-builds-api-openapi.yml: upgraded openapi 3.1.0 -> OpenAPI 3.2.0",
+    "cloud-foundry-cloud-foundry-cloud-controller-api-v3-api-openapi.yml: upgraded openapi 3.1.0 -> OpenAPI 3.2.0",
+    "cloud-foundry-deployments-api-openapi.yml: upgraded openapi 3.1.0 -> OpenAPI 3.2.0",
+    "cloud-foundry-jobs-api-openapi.yml: upgraded openapi 3.1.0 -> OpenAPI 3.2.0",
+    "cloud-foundry-organizations-api-openapi.yml: upgraded openapi 3.1.0 -> OpenAPI 3.2.0",
+    "cloud-foundry-service-instances-api-openapi.yml: upgraded openapi 3.1.0 -> OpenAPI 3.2.0",
+    "cloud-foundry-spaces-api-openapi.yml: upgraded openapi 3.1.0 -> OpenAPI 3.2.0",
+    "apis.yml register: already-registered"
+  ],
   "skipped": []
 }

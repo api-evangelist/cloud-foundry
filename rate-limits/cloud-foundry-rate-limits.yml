@@ -1,0 +1,68 @@
+generated: '2026-09-05'
+method: searched
+source: https://docs.cloudfoundry.org/running/rate-limit-cloud-controller-api.html
+docs:
+- https://docs.cloudfoundry.org/running/rate-limit-cloud-controller-api.html
+- https://docs.cloudfoundry.org/running/setting-rate-limit-cloud-api.html
+limit_count: 3
+note: >-
+  Cloud Foundry's rate limits are OPERATOR-CONFIGURED, not vendor-fixed: every foundation sets its own
+  general_limit / unauthenticated_limit / reset_interval_in_minutes in the cc rate_limiter properties. The
+  numbers below are the documented example values, NOT a contract — the only trustworthy source of the live
+  budget is the response headers, which every foundation returns. That is why an agent must read the headers
+  rather than hard-code a number.
+rate_limits:
+- scope: per-user (authenticated)
+  applies_to: All Cloud Controller API v3 endpoints
+  window: operator-configured (rate_limiter.reset_interval_in_minutes)
+  limit: operator-configured (rate_limiter.general_limit)
+  documented_example: 60 requests per window
+  burst: null
+  headers:
+  - X-RateLimit-Limit
+  - X-RateLimit-Remaining
+  - X-RateLimit-Reset
+  exhaustion_status: 429
+  exhaustion_body: '{"errors":[{"code":10008,"title":"CF-RateLimitExceeded","detail":"Rate limit exceeded"}]}'
+  note: >-
+    X-RateLimit-Reset is a UNIX TIMESTAMP (documented example 1372700873), not a delta in seconds. An agent
+    that treats it as seconds-to-wait will sleep for decades.
+- scope: per-IP (unauthenticated)
+  applies_to: Requests with no valid bearer token, including /v3 and the root endpoint
+  window: operator-configured
+  limit: operator-configured (rate_limiter.unauthenticated_limit) — materially smaller than the authenticated limit
+  headers:
+  - X-RateLimit-Limit
+  - X-RateLimit-Remaining
+  - X-RateLimit-Reset
+  exhaustion_status: 429
+  note: >-
+    Counted per source IP, so clients sharing a NAT gateway share one budget
+    (cloudfoundry/cloud_controller_ng#2040). A token-refresh loop that fails auth will burn this bucket and
+    lock out every other client behind the same egress address — the failure mode reported in
+    cloudfoundry/cli#1582.
+- scope: per-user, V2 API only
+  applies_to: Deprecated Cloud Controller API v2 endpoints
+  window: operator-configured
+  limit: operator-configured
+  documented_example: 60 requests per window
+  headers:
+  - X-Ratelimit-Limit-V2-Api
+  - X-Ratelimit-Remaining-V2-Api
+  - X-Ratelimit-Reset-V2-Api
+  exhaustion_status: 429
+  exhaustion_body_title: CF-RateLimitV2APIExceeded
+  note: A deliberately separate, tighter bucket used to push consumers off the deprecated V2 surface.
+retry_after: false
+retry_guidance: >-
+  Cloud Controller does NOT send Retry-After. Compute the wait from X-RateLimit-Reset (absolute Unix time).
+caveats:
+- >-
+  Requests are counted independently by each Cloud Controller instance, and X-RateLimit-Remaining is an
+  ESTIMATE — the remaining fraction on the answering instance, rounded down to the nearest 10%, multiplied
+  by the global maximum. Consequence: a request can succeed when the header last read 0, and can fail when
+  it last read a positive number. Treat the header as advisory pressure, and the 429 as the truth.
+- >-
+  Because limits are per-foundation, the same client code can be well inside budget on one Cloud Foundry and
+  throttled on another. There is no discovery endpoint for the configured limit; the headers on the first
+  response are the only way to learn it.

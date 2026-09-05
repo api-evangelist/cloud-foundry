@@ -1,0 +1,96 @@
+generated: '2026-09-05'
+method: searched
+source: >-
+  openapi/cloud-foundry-capi-v3-openapi.yaml, openapi/cloud-foundry-open-service-broker-api-openapi.yaml,
+  https://docs.cloudfoundry.org/api/uaa/, https://github.com/cloudfoundry/uaa
+note: >-
+  Cloud Foundry is a Foundation-governed open-source platform, not a regulated service operator. There is no
+  SOC 2 / ISO 27001 / PCI posture to record here — the Foundation ships software that operators run under
+  their OWN compliance regimes. What IS assertable is protocol conformance, and Cloud Foundry's position is
+  unusual: it does not merely consume a domain standard, it AUTHORED one (the Open Service Broker API) that
+  Kubernetes and other platforms went on to adopt.
+conformance:
+- id: oauth2
+  conforms: true
+  evidence: >-
+    openapi/cloud-foundry-capi-v3-openapi.yaml components.securitySchemes.oauth — an OAuth 2.0 implicit flow
+    with authorizationUrl https://uaa.<system-domain>/api-oauth/dialog and seven named cloud_controller.*
+    scopes. Tokens are issued by the UAA server (github.com/cloudfoundry/uaa).
+- id: oauth2-bearer-jwt
+  conforms: true
+  evidence: >-
+    openapi/cloud-foundry-capi-v3-openapi.yaml components.securitySchemes.bearer — type http, scheme bearer,
+    bearerFormat JWT. Every CAPI operation is bearer-authenticated.
+- id: oidc
+  conforms: true
+  evidence: >-
+    UAA is described by its own maintainers as an "OAuth2/OpenID Connect server"
+    (uaa/src/main/java/org/cloudfoundry/identity/uaa/OpenApiConfiguration.java, cloudfoundry/uaa) and a
+    deployed foundation serves /.well-known/openid-configuration at uaa.<system-domain>. Not probed here —
+    there is no public UAA instance to probe, so this is a documentation-grounded claim, not a live one.
+- id: scim2
+  conforms: true
+  standard: SCIM 2.0 (RFC 7643 / RFC 7644)
+  evidence: >-
+    UAA's own OpenAPI configuration lists "SCIM 2.0 user and group management" as a key feature, and UAA
+    exposes /Users and /Groups SCIM endpoints (docs.cloudfoundry.org/api/uaa/). apis.yml already describes
+    UAA as supporting SCIM-style user and group management.
+  note: >-
+    DOMAIN-STANDARD SIGNATURE for the identity market. Recorded from UAA's own source and reference docs,
+    not from a marketing page. A schema-URN-level confirmation (urn:ietf:params:scim:schemas:*) would
+    require a live UAA instance, which is operator-deployed and not publicly reachable.
+- id: open-service-broker-api
+  conforms: true
+  standard: Open Service Broker API v2.x
+  version: '2.17'
+  evidence: >-
+    openapi/cloud-foundry-open-service-broker-api-openapi.yaml — the OSB API's OWN OpenAPI 3.0.0 description,
+    fetched verbatim from openservicebrokerapi/servicebroker. Five paths / ten operations over /v2/catalog,
+    /v2/service_instances/{instance_id}, its /last_operation, and /v2/service_instances/{instance_id}/
+    service_bindings/{binding_id}, with the X-Broker-API-Version header parameter as the version negotiator.
+    CAPI implements the platform side: openapi/cloud-foundry-capi-v3-openapi.yaml carries Service Brokers,
+    Service Offerings, Service Plans, Service Instances, Service Credential Bindings and Service Route
+    Bindings tags (42 operations) that drive OSB-conformant brokers.
+  note: >-
+    DOMAIN-STANDARD SIGNATURE for the platform / backing-services market, and the strongest single
+    conformance fact in this profile: Cloud Foundry originated the Open Service Broker API and it is now the
+    common broker interface across Cloud Foundry, Kubernetes and other platforms. A vendor already speaking
+    OSB integrates with Cloud Foundry's marketplace with no bespoke connector.
+- id: pagination
+  conforms: true
+  evidence: >-
+    openapi/cloud-foundry-capi-v3-openapi.yaml components.parameters.Page + components.parameters.PerPage,
+    with a components.schemas.Pagination envelope carrying total_results, total_pages and first/last/next/
+    previous Link objects. Applied consistently across every list operation.
+- id: rfc9457
+  conforms: false
+  evidence: >-
+    CAPI returns application/json, not application/problem+json. The error envelope is
+    {"errors":[{"code":<int>,"title":"CF-...","detail":"..."}]} (components.schemas.Error), which predates
+    and does not follow RFC 9457 Problem Details. See errors/cloud-foundry-problem-types.yml.
+- id: json:api
+  conforms: false
+  evidence: >-
+    CAPI uses its own relationship envelope (components.schemas.Relationships / RelationshipToOne /
+    RelationshipToMany) and an `include` query parameter. It resembles JSON:API in spirit and is codified in
+    the project's own cc-api-v3-style-guide (github.com/cloudfoundry/cc-api-v3-style-guide), but it does not
+    claim or implement the JSON:API media type.
+- id: idempotency
+  conforms: false
+  evidence: >-
+    No Idempotency-Key header appears anywhere in the 248-operation CAPI spec. Long-running mutations return
+    202 with a Job resource instead. See conventions/cloud-foundry-conventions.yml.
+- id: grpc
+  conforms: true
+  evidence: >-
+    grpc/cloud-foundry-loggregator-v2-*.proto and grpc/cloud-foundry-log-cache-v1-*.proto — proto3 service
+    definitions for the Loggregator Ingress/Egress pipeline and the Log Cache read API, fetched verbatim from
+    cloudfoundry/loggregator-api and cloudfoundry/go-log-cache.
+- id: promql
+  conforms: true
+  standard: Prometheus PromQL
+  evidence: >-
+    grpc/cloud-foundry-log-cache-v1-promql.proto — Log Cache exposes PromQL and PromQL_Range queries over its
+    metric store, so a Prometheus-literate consumer queries Cloud Foundry metrics with no new query language.
+certifications: []
+compliance_programs: []

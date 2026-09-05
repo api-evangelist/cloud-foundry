@@ -1,0 +1,136 @@
+generated: '2026-09-05'
+method: derived
+source: >-
+  openapi/cloud-foundry-capi-v3-openapi.yaml (components.responses, components.schemas.Error/Errors and the
+  4xx/5xx responses of 248 operations), enriched from
+  https://docs.cloudfoundry.org/running/rate-limit-cloud-controller-api.html
+format: cloud-foundry-errors
+media_type: application/json
+rfc9457: false
+envelope:
+  shape: '{"errors": [{"code": <integer>, "title": "CF-<ErrorName>", "detail": "<human readable>"}]}'
+  schema: components.schemas.Errors (array wrapper) / components.schemas.Error (member)
+  fields:
+  - name: code
+    type: integer
+    description: A numeric Cloud Foundry error code, stable across releases (e.g. 10008 for CF-RateLimitExceeded).
+  - name: title
+    type: string
+    description: The error name, always prefixed CF-. This is the machine-stable discriminator an agent should branch on.
+  - name: detail
+    type: string
+    description: Human-readable description. Not stable — never parse it.
+  note: >-
+    CAPI predates RFC 9457 and does NOT serve application/problem+json. An agent written against Problem
+    Details will not find `type`, `title` at the top level, or `status` — the CF envelope always nests an
+    array under `errors`, even for a single failure. Warnings (components.schemas.Warning) travel separately
+    in an X-Cf-Warnings header on otherwise-successful responses.
+status_coverage:
+  '400': 101
+  '401': 243
+  '403': 246
+  '404': 199
+  '409': 91
+  '422': 162
+  '429': 3
+  '500': 118
+  '502': 36
+  '503': 93
+  note: >-
+    Counts are operations declaring each status across the 248-operation CAPI spec. 401 and 403 are declared
+    on essentially the whole surface; 429 is declared on only 3 operations even though the rate limiter is
+    global (see rate-limits/cloud-foundry-rate-limits.yml) — a spec/runtime gap worth reporting upstream.
+problem_types:
+- name: CF-NotAuthenticated
+  status: 401
+  title: Unauthorized
+  reason: No bearer token, an expired token, or a token UAA will not validate.
+  remediation: >-
+    Re-authenticate against the foundation's UAA (uaa.<system-domain>) and retry once. Do not retry in a
+    loop — unauthenticated requests are counted against a SEPARATE, much smaller rate-limit bucket.
+  source: components.responses.Unauthorized
+- name: CF-NotAuthorized
+  status: 403
+  title: Forbidden
+  reason: >-
+    The token is valid but lacks the required scope or role. CAPI authorizes on both UAA scopes
+    (cloud_controller.read / .write / .admin) and CF roles (org manager, space developer, auditor).
+  remediation: >-
+    Check the required scope in scopes/cloud-foundry-scopes.yml and the caller's role on the target org or
+    space. Never retry — this is deterministic.
+  source: components.responses.Forbidden
+- name: CF-ResourceNotFound
+  status: 404
+  title: Not Found
+  reason: The GUID does not exist, or the caller cannot see it. CAPI returns 404 rather than 403 to avoid leaking existence.
+  remediation: Re-resolve the GUID from a list endpoint. A 404 after a successful create usually means eventual consistency — poll the Job.
+  source: components.responses.NotFound
+- name: CF-UnprocessableEntity
+  status: 422
+  title: CF-UnprocessableEntity
+  reason: >-
+    The request parsed but is semantically invalid — a relationship pointing at a missing resource, a quota
+    exceeded, an invalid lifecycle, a state transition that is not allowed.
+  remediation: Read `detail`; this is the richest error CAPI produces. Never retry unchanged.
+  source: components.responses.UnprocessableEntity, literal CF-UnprocessableEntity in the spec
+- name: CF-UniquenessError
+  status: 422
+  title: CF-UniquenessError
+  reason: A uniqueness constraint was violated — most often an app, org, space or domain name already taken in that scope.
+  remediation: Choose a different name, or GET the existing resource by name and reuse it.
+  source: literal CF-UniquenessError in openapi/cloud-foundry-capi-v3-openapi.yaml
+- name: CF-FeatureDisabled
+  status: 403
+  title: CF-FeatureDisabled
+  reason: >-
+    An operator has turned the relevant feature flag off for this foundation. Feature flags are
+    per-deployment, so the SAME call succeeds on one Cloud Foundry and fails on another.
+  remediation: >-
+    GET /v3/feature_flags (listFeatureFlags) before assuming a capability exists. This is the single most
+    important portability check for an agent talking to an unknown foundation.
+  source: literal CF-FeatureDisabled in openapi/cloud-foundry-capi-v3-openapi.yaml
+- name: CF-RateLimitExceeded
+  status: 429
+  code: 10008
+  title: CF-RateLimitExceeded
+  reason: The per-user (or per-IP, when unauthenticated) request budget for the current window is exhausted.
+  remediation: >-
+    Read X-RateLimit-Reset (a Unix timestamp) and sleep until it. Do not back off blindly — the reset time
+    is published. See rate-limits/cloud-foundry-rate-limits.yml.
+  source: components.responses.TooManyRequests (example code 10008, title CF-RateLimitExceeded)
+- name: CF-RateLimitV2APIExceeded
+  status: 429
+  title: CF-RateLimitV2APIExceeded
+  reason: The separate V2-API rate limiter, signalled by the X-Ratelimit-*-V2-Api header family, is exhausted.
+  remediation: Migrate the call to the V3 API. The V2 limiter exists to push consumers off the deprecated surface.
+  source: https://docs.cloudfoundry.org/running/rate-limit-cloud-controller-api.html
+- name: CF-BadRequest
+  status: 400
+  title: Bad Request
+  reason: Malformed JSON, an unknown query parameter, or an unparseable filter.
+  remediation: Validate against the spec before sending. Note this response can return text/html as well as JSON.
+  source: components.responses.BadRequest
+- name: CF-Conflict
+  status: 409
+  title: Conflict
+  reason: The resource is in a state that forbids the transition — e.g. deleting something with live dependents.
+  remediation: Resolve the dependency, or poll the in-flight Job to completion first.
+  source: components.responses.Conflict
+- name: CF-ServerError
+  status: 500
+  title: Internal Server Error
+  reason: Unhandled Cloud Controller failure.
+  remediation: Retry with backoff. Safe for GETs; for mutations check whether the change landed before retrying — there is no idempotency key.
+  source: components.responses['500']
+- name: CF-BadGateway
+  status: 502
+  title: Bad Gateway
+  reason: A downstream component (a service broker, UAA, the Diego API) failed or timed out.
+  remediation: Retry with backoff. Most often surfaces on service-instance and binding operations, where the broker is the downstream.
+  source: components.responses.BadGateway
+- name: CF-ServiceUnavailable
+  status: 503
+  title: Service Unavailable
+  reason: Cloud Controller is draining, restarting or in maintenance.
+  remediation: Retry with backoff.
+  source: components.responses.ServiceUnavailable
