@@ -63,6 +63,7 @@ apis:
     bearer tokens issued by the UAA server; there is no single public host because every Cloud Foundry foundation
     is self-hosted at its own api.<system-domain>.
   humanURL: https://v3-apidocs.cloudfoundry.org/
+  baseURL: https://api.{system-domain}
   tags:
   - Cloud Foundry Cloud Controller API V3
   - Application
@@ -105,6 +106,7 @@ apis:
   - Security
   image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
   humanURL: https://docs.cloudfoundry.org/uaa/
+  baseURL: https://uaa.{system-domain}
   properties:
   - url: https://docs.cloudfoundry.org/uaa/
     type: Documentation
@@ -124,6 +126,7 @@ apis:
   - Streaming
   image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
   humanURL: https://docs.cloudfoundry.org/loggregator/architecture.html
+  baseURL: https://log-cache.{system-domain}
   properties:
   - url: https://docs.cloudfoundry.org/loggregator/architecture.html
     type: Documentation
@@ -154,6 +157,7 @@ apis:
   - Service Broker
   image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
   humanURL: https://www.openservicebrokerapi.org/
+  baseURL: https://{broker-host}
   properties:
   - url: https://www.openservicebrokerapi.org/
     type: Documentation
@@ -173,6 +177,7 @@ apis:
   - Releases
   image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
   humanURL: https://bosh.io/docs/director-api-v1/
+  baseURL: https://{director-host}:25555
   properties:
   - url: https://bosh.io/docs/director-api-v1/
     type: Documentation
@@ -185,6 +190,7 @@ apis:
   name: Cloud Foundry Apps API
   description: The Apps API from Cloud Foundry — 4 operation(s) for apps.
   humanURL: https://v3-apidocs.cloudfoundry.org/
+  baseURL: https://api.{system-domain}
   tags:
   - Application
   tags_raw:
@@ -192,6 +198,10 @@ apis:
   properties:
   - type: OpenAPI
     url: openapi/cloud-foundry-apps-api-openapi.yml
+  - type: PostmanCollection
+    url: collections/cloud-foundry-apps-api.postman_collection.json
+  - type: OpenCollection
+    url: collections/cloud-foundry-apps-api.opencollection.json
   - type: Documentation
     url: https://v3-apidocs.cloudfoundry.org/
   - type: Source Code
@@ -201,11 +211,16 @@ apis:
   name: Cloud Foundry Builds API
   description: The Builds API from Cloud Foundry — 1 operation(s) for builds.
   humanURL: https://v3-apidocs.cloudfoundry.org/
+  baseURL: https://api.{system-domain}
   tags:
   - Builds
   properties:
   - type: OpenAPI
     url: openapi/cloud-foundry-builds-api-openapi.yml
+  - type: PostmanCollection
+    url: collections/cloud-foundry-builds-api.postman_collection.json
+  - type: OpenCollection
+    url: collections/cloud-foundry-builds-api.opencollection.json
   - type: Documentation
     url: https://v3-apidocs.cloudfoundry.org/
   - type: Source Code
@@ -216,11 +231,16 @@ apis:
   description: The Cloud Foundry Cloud Controller API V3 API from Cloud Foundry — 2 operation(s) for cloud foundry
     cloud controller api v3.
   humanURL: https://v3-apidocs.cloudfoundry.org/
+  baseURL: https://api.{system-domain}
   tags:
   - Cloud Foundry Cloud Controller API V3
   properties:
   - type: OpenAPI
     url: openapi/cloud-foundry-cloud-foundry-cloud-controller-api-v3-api-openapi.yml
+  - type: PostmanCollection
+    url: collections/cloud-foundry-cloud-foundry-cloud-controller-api-v3-api.postman_collection.json
+  - type: OpenCollection
+    url: collections/cloud-foundry-cloud-foundry-cloud-controller-api-v3-api.opencollection.json
   - type: Documentation
     url: https://v3-apidocs.cloudfoundry.org/
   - type: Source Code
@@ -230,6 +250,7 @@ apis:
   name: Cloud Foundry Deployments API
   description: The Deployments API from Cloud Foundry — 1 operation(s) for deployments.
   humanURL: https://v3-apidocs.cloudfoundry.org/
+  baseURL: https://api.{system-domain}
   tags:
   - Deployment
   tags_raw:
@@ -237,6 +258,10 @@ apis:
   properties:
   - type: OpenAPI
     url: openapi/cloud-foundry-deployments-api-openapi.yml
+  - type: PostmanCollection
+    url: collections/cloud-foundry-deployments-api.postman_collection.json
+  - type: OpenCollection
+    url: collections/cloud-foundry-deployments-api.opencollection.json
   - type: Documentation
     url: https://v3-apidocs.cloudfoundry.org/
   - type: Source Code
@@ -246,6 +271,7 @@ apis:
   name: Cloud Foundry Jobs API
   description: The Jobs API from Cloud Foundry — 1 operation(s) for jobs.
   humanURL: https://v3-apidocs.cloudfoundry.org/
+  baseURL: https://api.{system-domain}
   tags:
   - Job
   tags_raw:
@@ -253,6 +279,10 @@ apis:
   properties:
   - type: OpenAPI
     url: openapi/cloud-foundry-jobs-api-openapi.yml
+  - type: PostmanCollection
+    url: collections/cloud-foundry-jobs-api.postman_collection.json
+  - type: OpenCollection
+    url: collections/cloud-foundry-jobs-api.opencollection.json
   - type: Documentation
     url: https://v3-apidocs.cloudfoundry.org/
   - type: Source Code
@@ -262,6 +292,7 @@ apis:
   name: Cloud Foundry Organizations API
   description: The Organizations API from Cloud Foundry — 2 operation(s) for organizations.
   humanURL: https://v3-apidocs.cloudfoundry.org/
+  baseURL: https://api.{system-domain}
   tags:
   - Organization
   tags_raw:
@@ -269,6 +300,10 @@ apis:
   properties:
   - type: OpenAPI
     url: openapi/cloud-foundry-organizations-api-openapi.yml
+  - type: PostmanCollection
+    url: collections/cloud-foundry-organizations-api.postman_collection.json
+  - type: OpenCollection
+    url: collections/cloud-foundry-organizations-api.opencollection.json
   - type: Documentation
     url: https://v3-apidocs.cloudfoundry.org/
   - type: Source Code
@@ -278,11 +313,16 @@ apis:
   name: Cloud Foundry Service Instances API
   description: The Service Instances API from Cloud Foundry — 2 operation(s) for service instances.
   humanURL: https://v3-apidocs.cloudfoundry.org/
+  baseURL: https://api.{system-domain}
   tags:
   - Service Instances
   properties:
   - type: OpenAPI
     url: openapi/cloud-foundry-service-instances-api-openapi.yml
+  - type: PostmanCollection
+    url: collections/cloud-foundry-service-instances-api.postman_collection.json
+  - type: OpenCollection
+    url: collections/cloud-foundry-service-instances-api.opencollection.json
   - type: Documentation
     url: https://v3-apidocs.cloudfoundry.org/
   - type: Source Code
@@ -292,11 +332,16 @@ apis:
   name: Cloud Foundry Spaces API
   description: The Spaces API from Cloud Foundry — 2 operation(s) for spaces.
   humanURL: https://v3-apidocs.cloudfoundry.org/
+  baseURL: https://api.{system-domain}
   tags:
   - Spaces
   properties:
   - type: OpenAPI
     url: openapi/cloud-foundry-spaces-api-openapi.yml
+  - type: PostmanCollection
+    url: collections/cloud-foundry-spaces-api.postman_collection.json
+  - type: OpenCollection
+    url: collections/cloud-foundry-spaces-api.opencollection.json
   - type: Documentation
     url: https://v3-apidocs.cloudfoundry.org/
   - type: Source Code
@@ -310,6 +355,7 @@ apis:
     application-defined metrics, a Scaling History API for the record of scaling events, and an Application Metric
     API for aggregated metric series.'
   humanURL: https://github.com/cloudfoundry/app-autoscaler
+  baseURL: https://{autoscaler-api-server-url}
   tags:
   - Autoscaling
   - Metrics
@@ -415,11 +461,17 @@ common:
   url: plans/cloud-foundry-plans-pricing.yml
 - type: RateLimits
   url: rate-limits/cloud-foundry-rate-limits.yml
+- type: PostmanCollection
+  url: collections/cloud-foundry.postman_collection.json
+- type: OpenCollection
+  url: collections/cloud-foundry.opencollection.json
+- type: EventSurface
+  url: asyncapi/cloud-foundry-event-surface.yml
 maintainers:
 - FN: Kin Lane
   email: kinlane@gmail.com
 x-enrichment:
   date: '2026-09-05'
   status: enriched
-  artifacts_added: 34
+  artifacts_added: 35
   pass: local-v3
