@@ -53,46 +53,6 @@ tags_raw:
 - PaaS
 - Platform
 apis:
-- aid: cloud-foundry:capi-v3
-  name: Cloud Foundry Cloud Controller API v3
-  description: The Cloud Controller API (CAPI) v3 is the primary control plane of Cloud Foundry. It manages apps,
-    packages, droplets, builds, deployments, processes, tasks, revisions, routes, domains, organizations, spaces,
-    roles, security groups, service brokers, offerings, plans, instances and credential bindings. The Cloud Foundry
-    Foundation publishes a machine-readable OpenAPI 3.1 description of the surface from the cf-openapi project (158
-    paths / 248 operations), rendered at cloudfoundry.github.io/cf-openapi. Requests authenticate with OAuth 2.0
-    bearer tokens issued by the UAA server; there is no single public host because every Cloud Foundry foundation
-    is self-hosted at its own api.<system-domain>.
-  humanURL: https://v3-apidocs.cloudfoundry.org/
-  baseURL: https://api.{system-domain}
-  tags:
-  - Cloud Foundry Cloud Controller API V3
-  - Application
-  - Deployment
-  - Organization
-  - Spaces
-  - Service Instances
-  tags_raw:
-  - CAPI
-  - Cloud Controller
-  - Apps
-  - Deployments
-  - Organizations
-  - Spaces
-  - Service Instances
-  image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
-  properties:
-  - type: OpenAPI
-    url: openapi/cloud-foundry-capi-v3-openapi.yaml
-  - type: APIReference
-    url: https://v3-apidocs.cloudfoundry.org/
-  - type: Documentation
-    url: https://docs.cloudfoundry.org/
-  - type: Source Code
-    url: https://github.com/cloudfoundry/cloud_controller_ng
-  - type: Specification
-    url: https://github.com/cloudfoundry/cf-openapi
-  - type: Reference
-    url: https://cloudfoundry.github.io/cf-openapi/
 - aid: cloud-foundry:uaa
   name: Cloud Foundry UAA
   tags:
@@ -114,9 +74,10 @@ apis:
     type: Source Code
   - url: https://docs.cloudfoundry.org/api/uaa/
     type: Reference
-  description: The User Account and Authentication (UAA) server is Cloud Foundry's identity provider and OAuth 2.0
-    authorization server. It issues tokens consumed by the Cloud Controller, brokers, and operator tooling, and
-    supports SAML and LDAP federation, multifactor authentication, and SCIM-style user and group management.
+  description: >-
+    The User Account and Authentication (UAA) server is Cloud Foundry's identity provider and OAuth 2.0
+    authorization server. It issues tokens consumed by the Cloud Controller, brokers, and operator tooling,
+    and supports SAML and LDAP federation, multifactor authentication, and SCIM-style user and group management.
 - aid: cloud-foundry:loggregator
   name: Cloud Foundry Loggregator
   tags:
@@ -146,28 +107,10 @@ apis:
     url: grpc/cloud-foundry-log-cache-v1-orchestration.proto
   - type: Protobuf
     url: grpc/cloud-foundry-log-cache-v1-promql.proto
-  description: Loggregator is Cloud Foundry's distributed log and metric pipeline that aggregates application logs,
-    platform component logs, and metrics for streaming consumption by users and external sinks. It exposes a WebSocket
-    Firehose, a v2 gRPC egress API, and the Reverse Log Proxy.
-- aid: cloud-foundry:open-service-broker-api
-  name: Open Service Broker API
-  tags:
-  - Marketplace
-  - Open Standard
-  - Service Broker
-  image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
-  humanURL: https://www.openservicebrokerapi.org/
-  baseURL: https://{broker-host}
-  properties:
-  - url: https://www.openservicebrokerapi.org/
-    type: Documentation
-  - url: https://github.com/openservicebrokerapi/servicebroker
-    type: Specification
-  - type: OpenAPI
-    url: openapi/cloud-foundry-open-service-broker-api-openapi.yaml
-  description: The Open Service Broker API is the open specification originally developed by Cloud Foundry and now
-    used by Kubernetes and other platforms to provision and manage backing services through a common HTTP interface.
-    Brokers expose a catalog and lifecycle operations for service instances and bindings.
+  description: >-
+    Loggregator is Cloud Foundry's distributed log and metric pipeline that aggregates application logs,
+    platform component logs, and metrics for streaming consumption by users and external sinks. It exposes
+    a WebSocket Firehose, a v2 gRPC egress API, and the Reverse Log Proxy.
 - aid: cloud-foundry:bosh
   name: BOSH Director API
   tags:
@@ -183,9 +126,10 @@ apis:
     type: Documentation
   - url: https://github.com/cloudfoundry/bosh
     type: Source Code
-  description: BOSH is Cloud Foundry's release engineering tool for packaging, deploying, and managing distributed
-    software. The BOSH Director API exposes deployment, stemcell, release, task, and VM lifecycle operations used
-    by operators and CI tooling to manage Cloud Foundry itself and the workloads it depends on.
+  description: >-
+    BOSH is Cloud Foundry's release engineering tool for packaging, deploying, and managing distributed
+    software. The BOSH Director API exposes deployment, stemcell, release, task, and VM lifecycle operations
+    used by operators and CI tooling to manage Cloud Foundry itself and the workloads it depends on.
 - aid: cloud-foundry:cloud-foundry-apps-api
   name: Cloud Foundry Apps API
   description: The Apps API from Cloud Foundry — 4 operation(s) for apps.
@@ -221,26 +165,6 @@ apis:
     url: collections/cloud-foundry-builds-api.postman_collection.json
   - type: OpenCollection
     url: collections/cloud-foundry-builds-api.opencollection.json
-  - type: Documentation
-    url: https://v3-apidocs.cloudfoundry.org/
-  - type: Source Code
-    url: https://github.com/cloudfoundry/cloud_controller_ng
-  image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
-- aid: cloud-foundry:cloud-foundry-cloud-foundry-cloud-controller-api-v3-api
-  name: Cloud Foundry Cloud Foundry Cloud Controller API V3 API
-  description: The Cloud Foundry Cloud Controller API V3 API from Cloud Foundry — 2 operation(s) for cloud foundry
-    cloud controller api v3.
-  humanURL: https://v3-apidocs.cloudfoundry.org/
-  baseURL: https://api.{system-domain}
-  tags:
-  - Cloud Foundry Cloud Controller API V3
-  properties:
-  - type: OpenAPI
-    url: openapi/cloud-foundry-cloud-foundry-cloud-controller-api-v3-api-openapi.yml
-  - type: PostmanCollection
-    url: collections/cloud-foundry-cloud-foundry-cloud-controller-api-v3-api.postman_collection.json
-  - type: OpenCollection
-    url: collections/cloud-foundry-cloud-foundry-cloud-controller-api-v3-api.opencollection.json
   - type: Documentation
     url: https://v3-apidocs.cloudfoundry.org/
   - type: Source Code
@@ -347,35 +271,1134 @@ apis:
   - type: Source Code
     url: https://github.com/cloudfoundry/cloud_controller_ng
   image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
-- aid: cloud-foundry:app-autoscaler
-  name: Cloud Foundry App Autoscaler API
-  description: 'The App Autoscaler is a Cloud Foundry service that automatically scales application instances against
-    dynamic metric rules and scheduled windows. The project publishes OpenAPI descriptions for its public surface:
-    a Policy API for reading, writing and deleting a per-application scaling policy, a Custom Metrics API for submitting
-    application-defined metrics, a Scaling History API for the record of scaling events, and an Application Metric
-    API for aggregated metric series.'
-  humanURL: https://github.com/cloudfoundry/app-autoscaler
-  baseURL: https://{autoscaler-api-server-url}
+- aid: cloud-foundry:cloud-foundry-admin-api
+  name: Cloud Foundry Admin API
+  description: Administrative operations for Cloud Foundry platform management.
+  humanURL: https://v3-apidocs.cloudfoundry.org/
+  baseURL: https://api.{system-domain}
   tags:
-  - Autoscaling
-  - Metrics
-  - Application
-  - Policy
-  tags_raw:
-  - Autoscaler
-  - Metrics
-  - Scaling
-  - Policy
-  image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
+  - Admin
   properties:
   - type: OpenAPI
-    url: openapi/cloud-foundry-app-autoscaler-policy-api-openapi.yaml
+    url: openapi/cloud-foundry-admin-api-openapi.yml
+  - type: APIReference
+    url: https://v3-apidocs.cloudfoundry.org/
+  - type: Documentation
+    url: https://docs.cloudfoundry.org/
+  - type: Source Code
+    url: https://github.com/cloudfoundry/cloud_controller_ng
+  - type: Specification
+    url: https://github.com/cloudfoundry/cf-openapi
+  - type: Reference
+    url: https://cloudfoundry.github.io/cf-openapi/
+  - type: Documentation
+    url: https://www.openservicebrokerapi.org/
+  - type: Specification
+    url: https://github.com/openservicebrokerapi/servicebroker
+  - type: Documentation
+    url: https://github.com/cloudfoundry/app-autoscaler/blob/main/docs/user_guide.md
+  - type: Source Code
+    url: https://github.com/cloudfoundry/app-autoscaler
+- aid: cloud-foundry:cloud-foundry-app-usage-events-api
+  name: Cloud Foundry App Usage Events API
+  description: App usage events are a record of changes in the usage of apps and tasks.
+  humanURL: https://v3-apidocs.cloudfoundry.org/
+  baseURL: https://api.{system-domain}
+  tags:
+  - App Usage Events
+  properties:
   - type: OpenAPI
-    url: openapi/cloud-foundry-app-autoscaler-custom-metrics-api-openapi.yaml
+    url: openapi/cloud-foundry-app-usage-events-api-openapi.yml
+  - type: APIReference
+    url: https://v3-apidocs.cloudfoundry.org/
+  - type: Documentation
+    url: https://docs.cloudfoundry.org/
+  - type: Source Code
+    url: https://github.com/cloudfoundry/cloud_controller_ng
+  - type: Specification
+    url: https://github.com/cloudfoundry/cf-openapi
+  - type: Reference
+    url: https://cloudfoundry.github.io/cf-openapi/
+  - type: Documentation
+    url: https://www.openservicebrokerapi.org/
+  - type: Specification
+    url: https://github.com/openservicebrokerapi/servicebroker
+  - type: Documentation
+    url: https://github.com/cloudfoundry/app-autoscaler/blob/main/docs/user_guide.md
+  - type: Source Code
+    url: https://github.com/cloudfoundry/app-autoscaler
+- aid: cloud-foundry:cloud-foundry-application-metric-api-v1-api
+  name: Cloud Foundry Application Metric API V1 API
+  description: List aggregated metrics of an application.
+  humanURL: https://v3-apidocs.cloudfoundry.org/
+  baseURL: https://api.{system-domain}
+  tags:
+  - Application Metric API V1
+  properties:
   - type: OpenAPI
-    url: openapi/cloud-foundry-app-autoscaler-scaling-history-api-openapi.yaml
+    url: openapi/cloud-foundry-application-metric-api-v1-api-openapi.yml
+  - type: APIReference
+    url: https://v3-apidocs.cloudfoundry.org/
+  - type: Documentation
+    url: https://docs.cloudfoundry.org/
+  - type: Source Code
+    url: https://github.com/cloudfoundry/cloud_controller_ng
+  - type: Specification
+    url: https://github.com/cloudfoundry/cf-openapi
+  - type: Reference
+    url: https://cloudfoundry.github.io/cf-openapi/
+  - type: Documentation
+    url: https://www.openservicebrokerapi.org/
+  - type: Specification
+    url: https://github.com/openservicebrokerapi/servicebroker
+  - type: Documentation
+    url: https://github.com/cloudfoundry/app-autoscaler/blob/main/docs/user_guide.md
+  - type: Source Code
+    url: https://github.com/cloudfoundry/app-autoscaler
+- aid: cloud-foundry:cloud-foundry-audit-events-api
+  name: Cloud Foundry Audit Events API
+  description: >-
+    Audit events help Cloud Foundry operators monitor actions taken against resources (such as apps) via
+    user or system actions.
+  humanURL: https://v3-apidocs.cloudfoundry.org/
+  baseURL: https://api.{system-domain}
+  tags:
+  - Audit Events
+  properties:
   - type: OpenAPI
-    url: openapi/cloud-foundry-app-autoscaler-application-metric-api-openapi.yaml
+    url: openapi/cloud-foundry-audit-events-api-openapi.yml
+  - type: APIReference
+    url: https://v3-apidocs.cloudfoundry.org/
+  - type: Documentation
+    url: https://docs.cloudfoundry.org/
+  - type: Source Code
+    url: https://github.com/cloudfoundry/cloud_controller_ng
+  - type: Specification
+    url: https://github.com/cloudfoundry/cf-openapi
+  - type: Reference
+    url: https://cloudfoundry.github.io/cf-openapi/
+  - type: Documentation
+    url: https://www.openservicebrokerapi.org/
+  - type: Specification
+    url: https://github.com/openservicebrokerapi/servicebroker
+  - type: Documentation
+    url: https://github.com/cloudfoundry/app-autoscaler/blob/main/docs/user_guide.md
+  - type: Source Code
+    url: https://github.com/cloudfoundry/app-autoscaler
+- aid: cloud-foundry:cloud-foundry-buildpacks-api
+  name: Cloud Foundry Buildpacks API
+  description: >-
+    Buildpacks are used during a build to download external dependencies and transform a package into
+    an executable droplet.
+  humanURL: https://v3-apidocs.cloudfoundry.org/
+  baseURL: https://api.{system-domain}
+  tags:
+  - Buildpacks
+  properties:
+  - type: OpenAPI
+    url: openapi/cloud-foundry-buildpacks-api-openapi.yml
+  - type: APIReference
+    url: https://v3-apidocs.cloudfoundry.org/
+  - type: Documentation
+    url: https://docs.cloudfoundry.org/
+  - type: Source Code
+    url: https://github.com/cloudfoundry/cloud_controller_ng
+  - type: Specification
+    url: https://github.com/cloudfoundry/cf-openapi
+  - type: Reference
+    url: https://cloudfoundry.github.io/cf-openapi/
+  - type: Documentation
+    url: https://www.openservicebrokerapi.org/
+  - type: Specification
+    url: https://github.com/openservicebrokerapi/servicebroker
+  - type: Documentation
+    url: https://github.com/cloudfoundry/app-autoscaler/blob/main/docs/user_guide.md
+  - type: Source Code
+    url: https://github.com/cloudfoundry/app-autoscaler
+- aid: cloud-foundry:cloud-foundry-catalog-api
+  name: Cloud Foundry Catalog API
+  description: The Catalog API from Cloud Foundry — 1 operation(s) for catalog.
+  humanURL: https://v3-apidocs.cloudfoundry.org/
+  baseURL: https://api.{system-domain}
+  tags:
+  - Catalog
+  properties:
+  - type: OpenAPI
+    url: openapi/cloud-foundry-catalog-api-openapi.yml
+  - type: APIReference
+    url: https://v3-apidocs.cloudfoundry.org/
+  - type: Documentation
+    url: https://docs.cloudfoundry.org/
+  - type: Source Code
+    url: https://github.com/cloudfoundry/cloud_controller_ng
+  - type: Specification
+    url: https://github.com/cloudfoundry/cf-openapi
+  - type: Reference
+    url: https://cloudfoundry.github.io/cf-openapi/
+  - type: Documentation
+    url: https://www.openservicebrokerapi.org/
+  - type: Specification
+    url: https://github.com/openservicebrokerapi/servicebroker
+  - type: Documentation
+    url: https://github.com/cloudfoundry/app-autoscaler/blob/main/docs/user_guide.md
+  - type: Source Code
+    url: https://github.com/cloudfoundry/app-autoscaler
+- aid: cloud-foundry:cloud-foundry-create-policy-api-v1-api
+  name: Cloud Foundry Create Policy API V1 API
+  description: >-
+    The Create Policy API V1 API from Cloud Foundry — 1 operation(s) for create policy api v1.
+  humanURL: https://v3-apidocs.cloudfoundry.org/
+  baseURL: https://api.{system-domain}
+  tags:
+  - Create Policy API V1
+  properties:
+  - type: OpenAPI
+    url: openapi/cloud-foundry-create-policy-api-v1-api-openapi.yml
+  - type: APIReference
+    url: https://v3-apidocs.cloudfoundry.org/
+  - type: Documentation
+    url: https://docs.cloudfoundry.org/
+  - type: Source Code
+    url: https://github.com/cloudfoundry/cloud_controller_ng
+  - type: Specification
+    url: https://github.com/cloudfoundry/cf-openapi
+  - type: Reference
+    url: https://cloudfoundry.github.io/cf-openapi/
+  - type: Documentation
+    url: https://www.openservicebrokerapi.org/
+  - type: Specification
+    url: https://github.com/openservicebrokerapi/servicebroker
+  - type: Documentation
+    url: https://github.com/cloudfoundry/app-autoscaler/blob/main/docs/user_guide.md
+  - type: Source Code
+    url: https://github.com/cloudfoundry/app-autoscaler
+- aid: cloud-foundry:cloud-foundry-custom-metrics-api-v1-api
+  name: Cloud Foundry Custom Metrics API V1 API
+  description: Work with application-specific custom metrics to scale your application.
+  humanURL: https://v3-apidocs.cloudfoundry.org/
+  baseURL: https://api.{system-domain}
+  tags:
+  - Custom Metrics API V1
+  properties:
+  - type: OpenAPI
+    url: openapi/cloud-foundry-custom-metrics-api-v1-api-openapi.yml
+  - type: APIReference
+    url: https://v3-apidocs.cloudfoundry.org/
+  - type: Documentation
+    url: https://docs.cloudfoundry.org/
+  - type: Source Code
+    url: https://github.com/cloudfoundry/cloud_controller_ng
+  - type: Specification
+    url: https://github.com/cloudfoundry/cf-openapi
+  - type: Reference
+    url: https://cloudfoundry.github.io/cf-openapi/
+  - type: Documentation
+    url: https://www.openservicebrokerapi.org/
+  - type: Specification
+    url: https://github.com/openservicebrokerapi/servicebroker
+  - type: Documentation
+    url: https://github.com/cloudfoundry/app-autoscaler/blob/main/docs/user_guide.md
+  - type: Source Code
+    url: https://github.com/cloudfoundry/app-autoscaler
+- aid: cloud-foundry:cloud-foundry-delete-policy-api-v1-api
+  name: Cloud Foundry Delete Policy API V1 API
+  description: >-
+    The Delete Policy API V1 API from Cloud Foundry — 1 operation(s) for delete policy api v1.
+  humanURL: https://v3-apidocs.cloudfoundry.org/
+  baseURL: https://api.{system-domain}
+  tags:
+  - Delete Policy API V1
+  properties:
+  - type: OpenAPI
+    url: openapi/cloud-foundry-delete-policy-api-v1-api-openapi.yml
+  - type: APIReference
+    url: https://v3-apidocs.cloudfoundry.org/
+  - type: Documentation
+    url: https://docs.cloudfoundry.org/
+  - type: Source Code
+    url: https://github.com/cloudfoundry/cloud_controller_ng
+  - type: Specification
+    url: https://github.com/cloudfoundry/cf-openapi
+  - type: Reference
+    url: https://cloudfoundry.github.io/cf-openapi/
+  - type: Documentation
+    url: https://www.openservicebrokerapi.org/
+  - type: Specification
+    url: https://github.com/openservicebrokerapi/servicebroker
+  - type: Documentation
+    url: https://github.com/cloudfoundry/app-autoscaler/blob/main/docs/user_guide.md
+  - type: Source Code
+    url: https://github.com/cloudfoundry/app-autoscaler
+- aid: cloud-foundry:cloud-foundry-domains-api
+  name: Cloud Foundry Domains API
+  description: Domains represent a fully qualified domain name that is used for application routes.
+  humanURL: https://v3-apidocs.cloudfoundry.org/
+  baseURL: https://api.{system-domain}
+  tags:
+  - Domains
+  properties:
+  - type: OpenAPI
+    url: openapi/cloud-foundry-domains-api-openapi.yml
+  - type: APIReference
+    url: https://v3-apidocs.cloudfoundry.org/
+  - type: Documentation
+    url: https://docs.cloudfoundry.org/
+  - type: Source Code
+    url: https://github.com/cloudfoundry/cloud_controller_ng
+  - type: Specification
+    url: https://github.com/cloudfoundry/cf-openapi
+  - type: Reference
+    url: https://cloudfoundry.github.io/cf-openapi/
+  - type: Documentation
+    url: https://www.openservicebrokerapi.org/
+  - type: Specification
+    url: https://github.com/openservicebrokerapi/servicebroker
+  - type: Documentation
+    url: https://github.com/cloudfoundry/app-autoscaler/blob/main/docs/user_guide.md
+  - type: Source Code
+    url: https://github.com/cloudfoundry/app-autoscaler
+- aid: cloud-foundry:cloud-foundry-droplets-api
+  name: Cloud Foundry Droplets API
+  description: Droplets are the result of staging an application package.
+  humanURL: https://v3-apidocs.cloudfoundry.org/
+  baseURL: https://api.{system-domain}
+  tags:
+  - Droplets
+  properties:
+  - type: OpenAPI
+    url: openapi/cloud-foundry-droplets-api-openapi.yml
+  - type: APIReference
+    url: https://v3-apidocs.cloudfoundry.org/
+  - type: Documentation
+    url: https://docs.cloudfoundry.org/
+  - type: Source Code
+    url: https://github.com/cloudfoundry/cloud_controller_ng
+  - type: Specification
+    url: https://github.com/cloudfoundry/cf-openapi
+  - type: Reference
+    url: https://cloudfoundry.github.io/cf-openapi/
+  - type: Documentation
+    url: https://www.openservicebrokerapi.org/
+  - type: Specification
+    url: https://github.com/openservicebrokerapi/servicebroker
+  - type: Documentation
+    url: https://github.com/cloudfoundry/app-autoscaler/blob/main/docs/user_guide.md
+  - type: Source Code
+    url: https://github.com/cloudfoundry/app-autoscaler
+- aid: cloud-foundry:cloud-foundry-environment-variable-groups-api
+  name: Cloud Foundry Environment Variable Groups API
+  description: 'There are two types of environment variable groups: running and staging.'
+  humanURL: https://v3-apidocs.cloudfoundry.org/
+  baseURL: https://api.{system-domain}
+  tags:
+  - Environment Variable Groups
+  properties:
+  - type: OpenAPI
+    url: openapi/cloud-foundry-environment-variable-groups-api-openapi.yml
+  - type: APIReference
+    url: https://v3-apidocs.cloudfoundry.org/
+  - type: Documentation
+    url: https://docs.cloudfoundry.org/
+  - type: Source Code
+    url: https://github.com/cloudfoundry/cloud_controller_ng
+  - type: Specification
+    url: https://github.com/cloudfoundry/cf-openapi
+  - type: Reference
+    url: https://cloudfoundry.github.io/cf-openapi/
+  - type: Documentation
+    url: https://www.openservicebrokerapi.org/
+  - type: Specification
+    url: https://github.com/openservicebrokerapi/servicebroker
+  - type: Documentation
+    url: https://github.com/cloudfoundry/app-autoscaler/blob/main/docs/user_guide.md
+  - type: Source Code
+    url: https://github.com/cloudfoundry/app-autoscaler
+- aid: cloud-foundry:cloud-foundry-feature-flags-api
+  name: Cloud Foundry Feature Flags API
+  description: Feature flags are runtime flags that enable or disable functionality on the API.
+  humanURL: https://v3-apidocs.cloudfoundry.org/
+  baseURL: https://api.{system-domain}
+  tags:
+  - Feature Flags
+  properties:
+  - type: OpenAPI
+    url: openapi/cloud-foundry-feature-flags-api-openapi.yml
+  - type: APIReference
+    url: https://v3-apidocs.cloudfoundry.org/
+  - type: Documentation
+    url: https://docs.cloudfoundry.org/
+  - type: Source Code
+    url: https://github.com/cloudfoundry/cloud_controller_ng
+  - type: Specification
+    url: https://github.com/cloudfoundry/cf-openapi
+  - type: Reference
+    url: https://cloudfoundry.github.io/cf-openapi/
+  - type: Documentation
+    url: https://www.openservicebrokerapi.org/
+  - type: Specification
+    url: https://github.com/openservicebrokerapi/servicebroker
+  - type: Documentation
+    url: https://github.com/cloudfoundry/app-autoscaler/blob/main/docs/user_guide.md
+  - type: Source Code
+    url: https://github.com/cloudfoundry/app-autoscaler
+- aid: cloud-foundry:cloud-foundry-get-policy-api-v1-api
+  name: Cloud Foundry Get Policy API V1 API
+  description: The Get Policy API V1 API from Cloud Foundry — 1 operation(s) for get policy api v1.
+  humanURL: https://v3-apidocs.cloudfoundry.org/
+  baseURL: https://api.{system-domain}
+  tags:
+  - Get Policy API V1
+  properties:
+  - type: OpenAPI
+    url: openapi/cloud-foundry-get-policy-api-v1-api-openapi.yml
+  - type: APIReference
+    url: https://v3-apidocs.cloudfoundry.org/
+  - type: Documentation
+    url: https://docs.cloudfoundry.org/
+  - type: Source Code
+    url: https://github.com/cloudfoundry/cloud_controller_ng
+  - type: Specification
+    url: https://github.com/cloudfoundry/cf-openapi
+  - type: Reference
+    url: https://cloudfoundry.github.io/cf-openapi/
+  - type: Documentation
+    url: https://www.openservicebrokerapi.org/
+  - type: Specification
+    url: https://github.com/openservicebrokerapi/servicebroker
+  - type: Documentation
+    url: https://github.com/cloudfoundry/app-autoscaler/blob/main/docs/user_guide.md
+  - type: Source Code
+    url: https://github.com/cloudfoundry/app-autoscaler
+- aid: cloud-foundry:cloud-foundry-info-api
+  name: Cloud Foundry Info API
+  description: Info endpoints expose Cloud Controller configuration information.
+  humanURL: https://v3-apidocs.cloudfoundry.org/
+  baseURL: https://api.{system-domain}
+  tags:
+  - Info
+  properties:
+  - type: OpenAPI
+    url: openapi/cloud-foundry-info-api-openapi.yml
+  - type: APIReference
+    url: https://v3-apidocs.cloudfoundry.org/
+  - type: Documentation
+    url: https://docs.cloudfoundry.org/
+  - type: Source Code
+    url: https://github.com/cloudfoundry/cloud_controller_ng
+  - type: Specification
+    url: https://github.com/cloudfoundry/cf-openapi
+  - type: Reference
+    url: https://cloudfoundry.github.io/cf-openapi/
+  - type: Documentation
+    url: https://www.openservicebrokerapi.org/
+  - type: Specification
+    url: https://github.com/openservicebrokerapi/servicebroker
+  - type: Documentation
+    url: https://github.com/cloudfoundry/app-autoscaler/blob/main/docs/user_guide.md
+  - type: Source Code
+    url: https://github.com/cloudfoundry/app-autoscaler
+- aid: cloud-foundry:cloud-foundry-isolation-segments-api
+  name: Cloud Foundry Isolation Segments API
+  description: >-
+    Isolation Segments provide dedicated pools of resources to which apps can be deployed to isolate workloads.
+  humanURL: https://v3-apidocs.cloudfoundry.org/
+  baseURL: https://api.{system-domain}
+  tags:
+  - Isolation Segments
+  properties:
+  - type: OpenAPI
+    url: openapi/cloud-foundry-isolation-segments-api-openapi.yml
+  - type: APIReference
+    url: https://v3-apidocs.cloudfoundry.org/
+  - type: Documentation
+    url: https://docs.cloudfoundry.org/
+  - type: Source Code
+    url: https://github.com/cloudfoundry/cloud_controller_ng
+  - type: Specification
+    url: https://github.com/cloudfoundry/cf-openapi
+  - type: Reference
+    url: https://cloudfoundry.github.io/cf-openapi/
+  - type: Documentation
+    url: https://www.openservicebrokerapi.org/
+  - type: Specification
+    url: https://github.com/openservicebrokerapi/servicebroker
+  - type: Documentation
+    url: https://github.com/cloudfoundry/app-autoscaler/blob/main/docs/user_guide.md
+  - type: Source Code
+    url: https://github.com/cloudfoundry/app-autoscaler
+- aid: cloud-foundry:cloud-foundry-manifests-api
+  name: Cloud Foundry Manifests API
+  description: >-
+    A manifest is a method for applying bulk configurations to apps and their underlying processes.
+  humanURL: https://v3-apidocs.cloudfoundry.org/
+  baseURL: https://api.{system-domain}
+  tags:
+  - Manifests
+  properties:
+  - type: OpenAPI
+    url: openapi/cloud-foundry-manifests-api-openapi.yml
+  - type: APIReference
+    url: https://v3-apidocs.cloudfoundry.org/
+  - type: Documentation
+    url: https://docs.cloudfoundry.org/
+  - type: Source Code
+    url: https://github.com/cloudfoundry/cloud_controller_ng
+  - type: Specification
+    url: https://github.com/cloudfoundry/cf-openapi
+  - type: Reference
+    url: https://cloudfoundry.github.io/cf-openapi/
+  - type: Documentation
+    url: https://www.openservicebrokerapi.org/
+  - type: Specification
+    url: https://github.com/openservicebrokerapi/servicebroker
+  - type: Documentation
+    url: https://github.com/cloudfoundry/app-autoscaler/blob/main/docs/user_guide.md
+  - type: Source Code
+    url: https://github.com/cloudfoundry/app-autoscaler
+- aid: cloud-foundry:cloud-foundry-organization-quotas-api
+  name: Cloud Foundry Organization Quotas API
+  description: >-
+    Organization quotas are named sets of memory, log rate, service, and instance usage quotas.
+  humanURL: https://v3-apidocs.cloudfoundry.org/
+  baseURL: https://api.{system-domain}
+  tags:
+  - Organization Quotas
+  properties:
+  - type: OpenAPI
+    url: openapi/cloud-foundry-organization-quotas-api-openapi.yml
+  - type: APIReference
+    url: https://v3-apidocs.cloudfoundry.org/
+  - type: Documentation
+    url: https://docs.cloudfoundry.org/
+  - type: Source Code
+    url: https://github.com/cloudfoundry/cloud_controller_ng
+  - type: Specification
+    url: https://github.com/cloudfoundry/cf-openapi
+  - type: Reference
+    url: https://cloudfoundry.github.io/cf-openapi/
+  - type: Documentation
+    url: https://www.openservicebrokerapi.org/
+  - type: Specification
+    url: https://github.com/openservicebrokerapi/servicebroker
+  - type: Documentation
+    url: https://github.com/cloudfoundry/app-autoscaler/blob/main/docs/user_guide.md
+  - type: Source Code
+    url: https://github.com/cloudfoundry/app-autoscaler
+- aid: cloud-foundry:cloud-foundry-packages-api
+  name: Cloud Foundry Packages API
+  description: >-
+    A package is an application’s ‘source code’; either raw bits for your application or a pointer to
+    these bits.
+  humanURL: https://v3-apidocs.cloudfoundry.org/
+  baseURL: https://api.{system-domain}
+  tags:
+  - Packages
+  properties:
+  - type: OpenAPI
+    url: openapi/cloud-foundry-packages-api-openapi.yml
+  - type: APIReference
+    url: https://v3-apidocs.cloudfoundry.org/
+  - type: Documentation
+    url: https://docs.cloudfoundry.org/
+  - type: Source Code
+    url: https://github.com/cloudfoundry/cloud_controller_ng
+  - type: Specification
+    url: https://github.com/cloudfoundry/cf-openapi
+  - type: Reference
+    url: https://cloudfoundry.github.io/cf-openapi/
+  - type: Documentation
+    url: https://www.openservicebrokerapi.org/
+  - type: Specification
+    url: https://github.com/openservicebrokerapi/servicebroker
+  - type: Documentation
+    url: https://github.com/cloudfoundry/app-autoscaler/blob/main/docs/user_guide.md
+  - type: Source Code
+    url: https://github.com/cloudfoundry/app-autoscaler
+- aid: cloud-foundry:cloud-foundry-processes-api
+  name: Cloud Foundry Processes API
+  description: Processes define the runnable units of an app.
+  humanURL: https://v3-apidocs.cloudfoundry.org/
+  baseURL: https://api.{system-domain}
+  tags:
+  - Processes
+  properties:
+  - type: OpenAPI
+    url: openapi/cloud-foundry-processes-api-openapi.yml
+  - type: APIReference
+    url: https://v3-apidocs.cloudfoundry.org/
+  - type: Documentation
+    url: https://docs.cloudfoundry.org/
+  - type: Source Code
+    url: https://github.com/cloudfoundry/cloud_controller_ng
+  - type: Specification
+    url: https://github.com/cloudfoundry/cf-openapi
+  - type: Reference
+    url: https://cloudfoundry.github.io/cf-openapi/
+  - type: Documentation
+    url: https://www.openservicebrokerapi.org/
+  - type: Specification
+    url: https://github.com/openservicebrokerapi/servicebroker
+  - type: Documentation
+    url: https://github.com/cloudfoundry/app-autoscaler/blob/main/docs/user_guide.md
+  - type: Source Code
+    url: https://github.com/cloudfoundry/app-autoscaler
+- aid: cloud-foundry:cloud-foundry-resource-matches-api
+  name: Cloud Foundry Resource Matches API
+  description: >-
+    Resource Matches are used to determine if a resource has been previously uploaded to the Cloud Controller.
+  humanURL: https://v3-apidocs.cloudfoundry.org/
+  baseURL: https://api.{system-domain}
+  tags:
+  - Resource Matches
+  properties:
+  - type: OpenAPI
+    url: openapi/cloud-foundry-resource-matches-api-openapi.yml
+  - type: APIReference
+    url: https://v3-apidocs.cloudfoundry.org/
+  - type: Documentation
+    url: https://docs.cloudfoundry.org/
+  - type: Source Code
+    url: https://github.com/cloudfoundry/cloud_controller_ng
+  - type: Specification
+    url: https://github.com/cloudfoundry/cf-openapi
+  - type: Reference
+    url: https://cloudfoundry.github.io/cf-openapi/
+  - type: Documentation
+    url: https://www.openservicebrokerapi.org/
+  - type: Specification
+    url: https://github.com/openservicebrokerapi/servicebroker
+  - type: Documentation
+    url: https://github.com/cloudfoundry/app-autoscaler/blob/main/docs/user_guide.md
+  - type: Source Code
+    url: https://github.com/cloudfoundry/app-autoscaler
+- aid: cloud-foundry:cloud-foundry-revisions-api
+  name: Cloud Foundry Revisions API
+  description: Revisions represent code used by an application at a specific time.
+  humanURL: https://v3-apidocs.cloudfoundry.org/
+  baseURL: https://api.{system-domain}
+  tags:
+  - Revisions
+  properties:
+  - type: OpenAPI
+    url: openapi/cloud-foundry-revisions-api-openapi.yml
+  - type: APIReference
+    url: https://v3-apidocs.cloudfoundry.org/
+  - type: Documentation
+    url: https://docs.cloudfoundry.org/
+  - type: Source Code
+    url: https://github.com/cloudfoundry/cloud_controller_ng
+  - type: Specification
+    url: https://github.com/cloudfoundry/cf-openapi
+  - type: Reference
+    url: https://cloudfoundry.github.io/cf-openapi/
+  - type: Documentation
+    url: https://www.openservicebrokerapi.org/
+  - type: Specification
+    url: https://github.com/openservicebrokerapi/servicebroker
+  - type: Documentation
+    url: https://github.com/cloudfoundry/app-autoscaler/blob/main/docs/user_guide.md
+  - type: Source Code
+    url: https://github.com/cloudfoundry/app-autoscaler
+- aid: cloud-foundry:cloud-foundry-roles-api
+  name: Cloud Foundry Roles API
+  description: Roles are used to control access to resources.
+  humanURL: https://v3-apidocs.cloudfoundry.org/
+  baseURL: https://api.{system-domain}
+  tags:
+  - Roles
+  properties:
+  - type: OpenAPI
+    url: openapi/cloud-foundry-roles-api-openapi.yml
+  - type: APIReference
+    url: https://v3-apidocs.cloudfoundry.org/
+  - type: Documentation
+    url: https://docs.cloudfoundry.org/
+  - type: Source Code
+    url: https://github.com/cloudfoundry/cloud_controller_ng
+  - type: Specification
+    url: https://github.com/cloudfoundry/cf-openapi
+  - type: Reference
+    url: https://cloudfoundry.github.io/cf-openapi/
+  - type: Documentation
+    url: https://www.openservicebrokerapi.org/
+  - type: Specification
+    url: https://github.com/openservicebrokerapi/servicebroker
+  - type: Documentation
+    url: https://github.com/cloudfoundry/app-autoscaler/blob/main/docs/user_guide.md
+  - type: Source Code
+    url: https://github.com/cloudfoundry/app-autoscaler
+- aid: cloud-foundry:cloud-foundry-root-api
+  name: Cloud Foundry Root API
+  description: Root API endpoints that provide entry points and API information.
+  humanURL: https://v3-apidocs.cloudfoundry.org/
+  baseURL: https://api.{system-domain}
+  tags:
+  - Root
+  properties:
+  - type: OpenAPI
+    url: openapi/cloud-foundry-root-api-openapi.yml
+  - type: APIReference
+    url: https://v3-apidocs.cloudfoundry.org/
+  - type: Documentation
+    url: https://docs.cloudfoundry.org/
+  - type: Source Code
+    url: https://github.com/cloudfoundry/cloud_controller_ng
+  - type: Specification
+    url: https://github.com/cloudfoundry/cf-openapi
+  - type: Reference
+    url: https://cloudfoundry.github.io/cf-openapi/
+  - type: Documentation
+    url: https://www.openservicebrokerapi.org/
+  - type: Specification
+    url: https://github.com/openservicebrokerapi/servicebroker
+  - type: Documentation
+    url: https://github.com/cloudfoundry/app-autoscaler/blob/main/docs/user_guide.md
+  - type: Source Code
+    url: https://github.com/cloudfoundry/app-autoscaler
+- aid: cloud-foundry:cloud-foundry-routes-api
+  name: Cloud Foundry Routes API
+  description: Routes are used to map a URL to an app.
+  humanURL: https://v3-apidocs.cloudfoundry.org/
+  baseURL: https://api.{system-domain}
+  tags:
+  - Routes
+  properties:
+  - type: OpenAPI
+    url: openapi/cloud-foundry-routes-api-openapi.yml
+  - type: APIReference
+    url: https://v3-apidocs.cloudfoundry.org/
+  - type: Documentation
+    url: https://docs.cloudfoundry.org/
+  - type: Source Code
+    url: https://github.com/cloudfoundry/cloud_controller_ng
+  - type: Specification
+    url: https://github.com/cloudfoundry/cf-openapi
+  - type: Reference
+    url: https://cloudfoundry.github.io/cf-openapi/
+  - type: Documentation
+    url: https://www.openservicebrokerapi.org/
+  - type: Specification
+    url: https://github.com/openservicebrokerapi/servicebroker
+  - type: Documentation
+    url: https://github.com/cloudfoundry/app-autoscaler/blob/main/docs/user_guide.md
+  - type: Source Code
+    url: https://github.com/cloudfoundry/app-autoscaler
+- aid: cloud-foundry:cloud-foundry-scaling-history-api-v1-api
+  name: Cloud Foundry Scaling History API V1 API
+  description: List the scaling history of an Application
+  humanURL: https://v3-apidocs.cloudfoundry.org/
+  baseURL: https://api.{system-domain}
+  tags:
+  - Scaling History API V1
+  properties:
+  - type: OpenAPI
+    url: openapi/cloud-foundry-scaling-history-api-v1-api-openapi.yml
+  - type: APIReference
+    url: https://v3-apidocs.cloudfoundry.org/
+  - type: Documentation
+    url: https://docs.cloudfoundry.org/
+  - type: Source Code
+    url: https://github.com/cloudfoundry/cloud_controller_ng
+  - type: Specification
+    url: https://github.com/cloudfoundry/cf-openapi
+  - type: Reference
+    url: https://cloudfoundry.github.io/cf-openapi/
+  - type: Documentation
+    url: https://www.openservicebrokerapi.org/
+  - type: Specification
+    url: https://github.com/openservicebrokerapi/servicebroker
+  - type: Documentation
+    url: https://github.com/cloudfoundry/app-autoscaler/blob/main/docs/user_guide.md
+  - type: Source Code
+    url: https://github.com/cloudfoundry/app-autoscaler
+- aid: cloud-foundry:cloud-foundry-security-groups-api
+  name: Cloud Foundry Security Groups API
+  description: Security groups are used to control access to apps.
+  humanURL: https://v3-apidocs.cloudfoundry.org/
+  baseURL: https://api.{system-domain}
+  tags:
+  - Security Groups
+  properties:
+  - type: OpenAPI
+    url: openapi/cloud-foundry-security-groups-api-openapi.yml
+  - type: APIReference
+    url: https://v3-apidocs.cloudfoundry.org/
+  - type: Documentation
+    url: https://docs.cloudfoundry.org/
+  - type: Source Code
+    url: https://github.com/cloudfoundry/cloud_controller_ng
+  - type: Specification
+    url: https://github.com/cloudfoundry/cf-openapi
+  - type: Reference
+    url: https://cloudfoundry.github.io/cf-openapi/
+  - type: Documentation
+    url: https://www.openservicebrokerapi.org/
+  - type: Specification
+    url: https://github.com/openservicebrokerapi/servicebroker
+  - type: Documentation
+    url: https://github.com/cloudfoundry/app-autoscaler/blob/main/docs/user_guide.md
+  - type: Source Code
+    url: https://github.com/cloudfoundry/app-autoscaler
+- aid: cloud-foundry:cloud-foundry-service-brokers-api
+  name: Cloud Foundry Service Brokers API
+  description: Service brokers are used to manage services.
+  humanURL: https://v3-apidocs.cloudfoundry.org/
+  baseURL: https://api.{system-domain}
+  tags:
+  - Service Brokers
+  properties:
+  - type: OpenAPI
+    url: openapi/cloud-foundry-service-brokers-api-openapi.yml
+  - type: APIReference
+    url: https://v3-apidocs.cloudfoundry.org/
+  - type: Documentation
+    url: https://docs.cloudfoundry.org/
+  - type: Source Code
+    url: https://github.com/cloudfoundry/cloud_controller_ng
+  - type: Specification
+    url: https://github.com/cloudfoundry/cf-openapi
+  - type: Reference
+    url: https://cloudfoundry.github.io/cf-openapi/
+  - type: Documentation
+    url: https://www.openservicebrokerapi.org/
+  - type: Specification
+    url: https://github.com/openservicebrokerapi/servicebroker
+  - type: Documentation
+    url: https://github.com/cloudfoundry/app-autoscaler/blob/main/docs/user_guide.md
+  - type: Source Code
+    url: https://github.com/cloudfoundry/app-autoscaler
+- aid: cloud-foundry:cloud-foundry-service-credential-bindings-api
+  name: Cloud Foundry Service Credential Bindings API
+  description: Service credential bindings are used to bind a service instance to an app.
+  humanURL: https://v3-apidocs.cloudfoundry.org/
+  baseURL: https://api.{system-domain}
+  tags:
+  - Service Credential Bindings
+  properties:
+  - type: OpenAPI
+    url: openapi/cloud-foundry-service-credential-bindings-api-openapi.yml
+  - type: APIReference
+    url: https://v3-apidocs.cloudfoundry.org/
+  - type: Documentation
+    url: https://docs.cloudfoundry.org/
+  - type: Source Code
+    url: https://github.com/cloudfoundry/cloud_controller_ng
+  - type: Specification
+    url: https://github.com/cloudfoundry/cf-openapi
+  - type: Reference
+    url: https://cloudfoundry.github.io/cf-openapi/
+  - type: Documentation
+    url: https://www.openservicebrokerapi.org/
+  - type: Specification
+    url: https://github.com/openservicebrokerapi/servicebroker
+  - type: Documentation
+    url: https://github.com/cloudfoundry/app-autoscaler/blob/main/docs/user_guide.md
+  - type: Source Code
+    url: https://github.com/cloudfoundry/app-autoscaler
+- aid: cloud-foundry:cloud-foundry-service-offerings-api
+  name: Cloud Foundry Service Offerings API
+  description: Service offerings are services that are available to be used.
+  humanURL: https://v3-apidocs.cloudfoundry.org/
+  baseURL: https://api.{system-domain}
+  tags:
+  - Service Offerings
+  properties:
+  - type: OpenAPI
+    url: openapi/cloud-foundry-service-offerings-api-openapi.yml
+  - type: APIReference
+    url: https://v3-apidocs.cloudfoundry.org/
+  - type: Documentation
+    url: https://docs.cloudfoundry.org/
+  - type: Source Code
+    url: https://github.com/cloudfoundry/cloud_controller_ng
+  - type: Specification
+    url: https://github.com/cloudfoundry/cf-openapi
+  - type: Reference
+    url: https://cloudfoundry.github.io/cf-openapi/
+  - type: Documentation
+    url: https://www.openservicebrokerapi.org/
+  - type: Specification
+    url: https://github.com/openservicebrokerapi/servicebroker
+  - type: Documentation
+    url: https://github.com/cloudfoundry/app-autoscaler/blob/main/docs/user_guide.md
+  - type: Source Code
+    url: https://github.com/cloudfoundry/app-autoscaler
+- aid: cloud-foundry:cloud-foundry-service-plans-api
+  name: Cloud Foundry Service Plans API
+  description: Service plans are plans for a service.
+  humanURL: https://v3-apidocs.cloudfoundry.org/
+  baseURL: https://api.{system-domain}
+  tags:
+  - Service Plans
+  properties:
+  - type: OpenAPI
+    url: openapi/cloud-foundry-service-plans-api-openapi.yml
+  - type: APIReference
+    url: https://v3-apidocs.cloudfoundry.org/
+  - type: Documentation
+    url: https://docs.cloudfoundry.org/
+  - type: Source Code
+    url: https://github.com/cloudfoundry/cloud_controller_ng
+  - type: Specification
+    url: https://github.com/cloudfoundry/cf-openapi
+  - type: Reference
+    url: https://cloudfoundry.github.io/cf-openapi/
+  - type: Documentation
+    url: https://www.openservicebrokerapi.org/
+  - type: Specification
+    url: https://github.com/openservicebrokerapi/servicebroker
+  - type: Documentation
+    url: https://github.com/cloudfoundry/app-autoscaler/blob/main/docs/user_guide.md
+  - type: Source Code
+    url: https://github.com/cloudfoundry/app-autoscaler
+- aid: cloud-foundry:cloud-foundry-service-route-bindings-api
+  name: Cloud Foundry Service Route Bindings API
+  description: Service route bindings are used to bind a route to a service instance.
+  humanURL: https://v3-apidocs.cloudfoundry.org/
+  baseURL: https://api.{system-domain}
+  tags:
+  - Service Route Bindings
+  properties:
+  - type: OpenAPI
+    url: openapi/cloud-foundry-service-route-bindings-api-openapi.yml
+  - type: APIReference
+    url: https://v3-apidocs.cloudfoundry.org/
+  - type: Documentation
+    url: https://docs.cloudfoundry.org/
+  - type: Source Code
+    url: https://github.com/cloudfoundry/cloud_controller_ng
+  - type: Specification
+    url: https://github.com/cloudfoundry/cf-openapi
+  - type: Reference
+    url: https://cloudfoundry.github.io/cf-openapi/
+  - type: Documentation
+    url: https://www.openservicebrokerapi.org/
+  - type: Specification
+    url: https://github.com/openservicebrokerapi/servicebroker
+  - type: Documentation
+    url: https://github.com/cloudfoundry/app-autoscaler/blob/main/docs/user_guide.md
+  - type: Source Code
+    url: https://github.com/cloudfoundry/app-autoscaler
+- aid: cloud-foundry:cloud-foundry-service-usage-events-api
+  name: Cloud Foundry Service Usage Events API
+  description: Service usage events are a record of changes in the usage of services.
+  humanURL: https://v3-apidocs.cloudfoundry.org/
+  baseURL: https://api.{system-domain}
+  tags:
+  - Service Usage Events
+  properties:
+  - type: OpenAPI
+    url: openapi/cloud-foundry-service-usage-events-api-openapi.yml
+  - type: APIReference
+    url: https://v3-apidocs.cloudfoundry.org/
+  - type: Documentation
+    url: https://docs.cloudfoundry.org/
+  - type: Source Code
+    url: https://github.com/cloudfoundry/cloud_controller_ng
+  - type: Specification
+    url: https://github.com/cloudfoundry/cf-openapi
+  - type: Reference
+    url: https://cloudfoundry.github.io/cf-openapi/
+  - type: Documentation
+    url: https://www.openservicebrokerapi.org/
+  - type: Specification
+    url: https://github.com/openservicebrokerapi/servicebroker
+  - type: Documentation
+    url: https://github.com/cloudfoundry/app-autoscaler/blob/main/docs/user_guide.md
+  - type: Source Code
+    url: https://github.com/cloudfoundry/app-autoscaler
+- aid: cloud-foundry:cloud-foundry-servicebindings-api
+  name: Cloud Foundry Service Bindings API
+  description: The ServiceBindings API from Cloud Foundry — 2 operation(s) for servicebindings.
+  humanURL: https://v3-apidocs.cloudfoundry.org/
+  baseURL: https://api.{system-domain}
+  tags:
+  - ServiceBindings
+  properties:
+  - type: OpenAPI
+    url: openapi/cloud-foundry-servicebindings-api-openapi.yml
+  - type: APIReference
+    url: https://v3-apidocs.cloudfoundry.org/
+  - type: Documentation
+    url: https://docs.cloudfoundry.org/
+  - type: Source Code
+    url: https://github.com/cloudfoundry/cloud_controller_ng
+  - type: Specification
+    url: https://github.com/cloudfoundry/cf-openapi
+  - type: Reference
+    url: https://cloudfoundry.github.io/cf-openapi/
+  - type: Documentation
+    url: https://www.openservicebrokerapi.org/
+  - type: Specification
+    url: https://github.com/openservicebrokerapi/servicebroker
+  - type: Documentation
+    url: https://github.com/cloudfoundry/app-autoscaler/blob/main/docs/user_guide.md
+  - type: Source Code
+    url: https://github.com/cloudfoundry/app-autoscaler
+- aid: cloud-foundry:cloud-foundry-serviceinstances-api
+  name: Cloud Foundry Service Instances API
+  description: The ServiceInstances API from Cloud Foundry — 2 operation(s) for serviceinstances.
+  humanURL: https://v3-apidocs.cloudfoundry.org/
+  baseURL: https://api.{system-domain}
+  tags:
+  - ServiceInstances
+  properties:
+  - type: OpenAPI
+    url: openapi/cloud-foundry-serviceinstances-api-openapi.yml
+  - type: APIReference
+    url: https://v3-apidocs.cloudfoundry.org/
+  - type: Documentation
+    url: https://docs.cloudfoundry.org/
+  - type: Source Code
+    url: https://github.com/cloudfoundry/cloud_controller_ng
+  - type: Specification
+    url: https://github.com/cloudfoundry/cf-openapi
+  - type: Reference
+    url: https://cloudfoundry.github.io/cf-openapi/
+  - type: Documentation
+    url: https://www.openservicebrokerapi.org/
+  - type: Specification
+    url: https://github.com/openservicebrokerapi/servicebroker
+  - type: Documentation
+    url: https://github.com/cloudfoundry/app-autoscaler/blob/main/docs/user_guide.md
+  - type: Source Code
+    url: https://github.com/cloudfoundry/app-autoscaler
+- aid: cloud-foundry:cloud-foundry-sidecars-api
+  name: Cloud Foundry Sidecars API
+  description: Sidecars are used to run a process alongside an app.
+  humanURL: https://v3-apidocs.cloudfoundry.org/
+  baseURL: https://api.{system-domain}
+  tags:
+  - Sidecars
+  properties:
+  - type: OpenAPI
+    url: openapi/cloud-foundry-sidecars-api-openapi.yml
+  - type: APIReference
+    url: https://v3-apidocs.cloudfoundry.org/
+  - type: Documentation
+    url: https://docs.cloudfoundry.org/
+  - type: Source Code
+    url: https://github.com/cloudfoundry/cloud_controller_ng
+  - type: Specification
+    url: https://github.com/cloudfoundry/cf-openapi
+  - type: Reference
+    url: https://cloudfoundry.github.io/cf-openapi/
+  - type: Documentation
+    url: https://www.openservicebrokerapi.org/
+  - type: Specification
+    url: https://github.com/openservicebrokerapi/servicebroker
+  - type: Documentation
+    url: https://github.com/cloudfoundry/app-autoscaler/blob/main/docs/user_guide.md
+  - type: Source Code
+    url: https://github.com/cloudfoundry/app-autoscaler
+- aid: cloud-foundry:cloud-foundry-space-quotas-api
+  name: Cloud Foundry Space Quotas API
+  description: Space quotas are named sets of memory, log rate, service, and instance usage quotas.
+  humanURL: https://v3-apidocs.cloudfoundry.org/
+  baseURL: https://api.{system-domain}
+  tags:
+  - Space Quotas
+  properties:
+  - type: OpenAPI
+    url: openapi/cloud-foundry-space-quotas-api-openapi.yml
+  - type: APIReference
+    url: https://v3-apidocs.cloudfoundry.org/
+  - type: Documentation
+    url: https://docs.cloudfoundry.org/
+  - type: Source Code
+    url: https://github.com/cloudfoundry/cloud_controller_ng
+  - type: Specification
+    url: https://github.com/cloudfoundry/cf-openapi
+  - type: Reference
+    url: https://cloudfoundry.github.io/cf-openapi/
+  - type: Documentation
+    url: https://www.openservicebrokerapi.org/
+  - type: Specification
+    url: https://github.com/openservicebrokerapi/servicebroker
+  - type: Documentation
+    url: https://github.com/cloudfoundry/app-autoscaler/blob/main/docs/user_guide.md
+  - type: Source Code
+    url: https://github.com/cloudfoundry/app-autoscaler
+- aid: cloud-foundry:cloud-foundry-stacks-api
+  name: Cloud Foundry Stacks API
+  description: Stacks are used to specify the operating system and runtime environment for an app.
+  humanURL: https://v3-apidocs.cloudfoundry.org/
+  baseURL: https://api.{system-domain}
+  tags:
+  - Stacks
+  properties:
+  - type: OpenAPI
+    url: openapi/cloud-foundry-stacks-api-openapi.yml
+  - type: APIReference
+    url: https://v3-apidocs.cloudfoundry.org/
+  - type: Documentation
+    url: https://docs.cloudfoundry.org/
+  - type: Source Code
+    url: https://github.com/cloudfoundry/cloud_controller_ng
+  - type: Specification
+    url: https://github.com/cloudfoundry/cf-openapi
+  - type: Reference
+    url: https://cloudfoundry.github.io/cf-openapi/
+  - type: Documentation
+    url: https://www.openservicebrokerapi.org/
+  - type: Specification
+    url: https://github.com/openservicebrokerapi/servicebroker
+  - type: Documentation
+    url: https://github.com/cloudfoundry/app-autoscaler/blob/main/docs/user_guide.md
+  - type: Source Code
+    url: https://github.com/cloudfoundry/app-autoscaler
+- aid: cloud-foundry:cloud-foundry-tasks-api
+  name: Cloud Foundry Tasks API
+  description: Tasks are one-off commands that can be run against an app.
+  humanURL: https://v3-apidocs.cloudfoundry.org/
+  baseURL: https://api.{system-domain}
+  tags:
+  - Tasks
+  properties:
+  - type: OpenAPI
+    url: openapi/cloud-foundry-tasks-api-openapi.yml
+  - type: APIReference
+    url: https://v3-apidocs.cloudfoundry.org/
+  - type: Documentation
+    url: https://docs.cloudfoundry.org/
+  - type: Source Code
+    url: https://github.com/cloudfoundry/cloud_controller_ng
+  - type: Specification
+    url: https://github.com/cloudfoundry/cf-openapi
+  - type: Reference
+    url: https://cloudfoundry.github.io/cf-openapi/
+  - type: Documentation
+    url: https://www.openservicebrokerapi.org/
+  - type: Specification
+    url: https://github.com/openservicebrokerapi/servicebroker
+  - type: Documentation
+    url: https://github.com/cloudfoundry/app-autoscaler/blob/main/docs/user_guide.md
+  - type: Source Code
+    url: https://github.com/cloudfoundry/app-autoscaler
+- aid: cloud-foundry:cloud-foundry-users-api
+  name: Cloud Foundry Users API
+  description: Users are the users of the Cloud Foundry platform.
+  humanURL: https://v3-apidocs.cloudfoundry.org/
+  baseURL: https://api.{system-domain}
+  tags:
+  - Users
+  properties:
+  - type: OpenAPI
+    url: openapi/cloud-foundry-users-api-openapi.yml
+  - type: APIReference
+    url: https://v3-apidocs.cloudfoundry.org/
+  - type: Documentation
+    url: https://docs.cloudfoundry.org/
+  - type: Source Code
+    url: https://github.com/cloudfoundry/cloud_controller_ng
+  - type: Specification
+    url: https://github.com/cloudfoundry/cf-openapi
+  - type: Reference
+    url: https://cloudfoundry.github.io/cf-openapi/
+  - type: Documentation
+    url: https://www.openservicebrokerapi.org/
+  - type: Specification
+    url: https://github.com/openservicebrokerapi/servicebroker
   - type: Documentation
     url: https://github.com/cloudfoundry/app-autoscaler/blob/main/docs/user_guide.md
   - type: Source Code
