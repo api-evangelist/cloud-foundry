@@ -1235,34 +1235,6 @@ apis:
     url: https://github.com/cloudfoundry/app-autoscaler/blob/main/docs/user_guide.md
   - type: Source Code
     url: https://github.com/cloudfoundry/app-autoscaler
-- aid: cloud-foundry:cloud-foundry-serviceinstances-api
-  name: Cloud Foundry Service Instances API
-  description: The ServiceInstances API from Cloud Foundry — 2 operation(s) for serviceinstances.
-  humanURL: https://v3-apidocs.cloudfoundry.org/
-  baseURL: https://api.{system-domain}
-  tags:
-  - ServiceInstances
-  properties:
-  - type: OpenAPI
-    url: openapi/cloud-foundry-serviceinstances-api-openapi.yml
-  - type: APIReference
-    url: https://v3-apidocs.cloudfoundry.org/
-  - type: Documentation
-    url: https://docs.cloudfoundry.org/
-  - type: Source Code
-    url: https://github.com/cloudfoundry/cloud_controller_ng
-  - type: Specification
-    url: https://github.com/cloudfoundry/cf-openapi
-  - type: Reference
-    url: https://cloudfoundry.github.io/cf-openapi/
-  - type: Documentation
-    url: https://www.openservicebrokerapi.org/
-  - type: Specification
-    url: https://github.com/openservicebrokerapi/servicebroker
-  - type: Documentation
-    url: https://github.com/cloudfoundry/app-autoscaler/blob/main/docs/user_guide.md
-  - type: Source Code
-    url: https://github.com/cloudfoundry/app-autoscaler
 - aid: cloud-foundry:cloud-foundry-sidecars-api
   name: Cloud Foundry Sidecars API
   description: Sidecars are used to run a process alongside an app.
