@@ -258,6 +258,8 @@ apis:
   humanURL: https://v3-apidocs.cloudfoundry.org/
   baseURL: https://api.{system-domain}
   tags:
+  - Space
+  tags_raw:
   - Spaces
   properties:
   - type: OpenAPI
@@ -1213,6 +1215,8 @@ apis:
   humanURL: https://v3-apidocs.cloudfoundry.org/
   baseURL: https://api.{system-domain}
   tags:
+  - Service Bindings
+  tags_raw:
   - ServiceBindings
   properties:
   - type: OpenAPI
@@ -1325,6 +1329,8 @@ apis:
   humanURL: https://v3-apidocs.cloudfoundry.org/
   baseURL: https://api.{system-domain}
   tags:
+  - Task
+  tags_raw:
   - Tasks
   properties:
   - type: OpenAPI
@@ -1353,6 +1359,8 @@ apis:
   humanURL: https://v3-apidocs.cloudfoundry.org/
   baseURL: https://api.{system-domain}
   tags:
+  - User
+  tags_raw:
   - Users
   properties:
   - type: OpenAPI
