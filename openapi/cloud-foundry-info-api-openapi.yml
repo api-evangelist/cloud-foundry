@@ -1,0 +1,306 @@
+openapi: 3.2.0
+info:
+  title: Cloud Foundry V3 Info API
+  description: '# Welcome to the Experimental Cloud Foundry V3 API Docs!'
+  version: latest
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+  contact:
+    name: Cloud Foundry
+    url: https://www.cloudfoundry.org/
+servers:
+- url: https://api.example.local
+  description: Cloud Foundry V3 API server
+security:
+- oauth:
+  - cloud_controller.read
+  - cloud_controller.write
+tags:
+- name: Info
+  description: Info endpoints expose Cloud Controller configuration information.
+paths:
+  /v3/info:
+    get:
+      summary: Get platform info
+      description: Get information about the platform.
+      operationId: getPlatformInfo
+      tags:
+      - Info
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  name:
+                    type: string
+                    description: Name of the platform
+                  build:
+                    type: string
+                    description: Build number of the platform
+                  version:
+                    type: integer
+                    description: Version number of the platform
+                  description:
+                    type: string
+                    description: Description of the platform
+                  cli_version:
+                    type: object
+                    description: Minimum and recommended CLI versions
+                    properties:
+                      minimum:
+                        type: string
+                        description: Minimum CLI version
+                      recommended:
+                        type: string
+                        description: Recommended CLI version
+                  custom:
+                    type: object
+                    description: Custom information about the platform
+                    additionalProperties:
+                      type: string
+                  links:
+                    type: object
+                    description: Links to related resources
+                    properties:
+                      self:
+                        allOf:
+                        - $ref: '#/components/schemas/Link'
+                        - description: Link to the current endpoint
+                      support:
+                        allOf:
+                        - $ref: '#/components/schemas/Link'
+                        - description: Link to the support website for the platform
+              examples:
+                default:
+                  summary: default
+                  value:
+                    build: ''
+                    cli_version:
+                      minimum: ''
+                      recommended: ''
+                    custom: {}
+                    description: ''
+                    name: ''
+                    version: 0
+                    osbapi_version: ''
+                    rate_limits:
+                      enabled: false
+                      general_limit: 2000
+                      reset_interval_in_minutes: 30
+                    links:
+                      self:
+                        href: http://api.example.com/v3/info
+                      support:
+                        href: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/500'
+        '502':
+          $ref: '#/components/responses/BadGateway'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+  /v3/info/usage_summary:
+    get:
+      summary: Get platform usage summary
+      description: This endpoint retrieves a high-level summary of usage across the entire Cloud Foundry installation.
+      operationId: getPlatformUsageSummary
+      tags:
+      - Info
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  usage_summary:
+                    type: object
+                    description: Usage summary
+                    properties:
+                      started_instances:
+                        type: integer
+                        description: Total number of process instances in the STARTED state
+                      memory_in_mb:
+                        type: integer
+                        description: Sum of memory usage of all tasks in the RUNNING state and all process instances in the STARTED state
+                      routes:
+                        type: integer
+                        description: Total number of routes
+                      service_instances:
+                        type: integer
+                        description: Total number of managed service instances
+                      reserved_ports:
+                        type: integer
+                        description: Total number of reserved ports
+                      domains:
+                        type: integer
+                        description: Total number of private domains
+                      per_app_tasks:
+                        type: integer
+                        description: Total number of running tasks
+                      service_keys:
+                        type: integer
+                        description: Total number of service keys
+                  links:
+                    type: object
+                    description: Links to related resources
+                    properties:
+                      self:
+                        allOf:
+                        - $ref: '#/components/schemas/Link'
+                        - description: Link to the current endpoint
+              examples:
+                default:
+                  summary: default
+                  value:
+                    usage_summary:
+                      started_instances: 294
+                      memory_in_mb: 123945
+                      routes: 300
+                      service_instances: 50
+                      reserved_ports: 10
+                      domains: 5
+                      per_app_tasks: 0
+                      service_keys: 20
+                    links:
+                      self:
+                        href: http://api.example.com/v3/info/usage_summary
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/500'
+components:
+  responses:
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    ServiceUnavailable:
+      description: Service Unavailable
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    BadRequest:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+        text/html:
+          schema:
+            type: string
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    UnprocessableEntity:
+      description: Unprocessable Entity
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    '500':
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    BadGateway:
+      description: Bad Gateway
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Conflict:
+      description: Conflict
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    NotFound:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+  schemas:
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: A numeric code for this error
+        detail:
+          type: string
+          description: Detailed description of the error
+        title:
+          type: string
+          description: Name of the error
+    Errors:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/Error'
+      description: 'An error response will always return a list of error objects. Errors appear on the job resource for asynchronous operations.
+
+        Clients should use the code and title fields for programmatically handling specific errors. The message in the detail field is subject to change over time.
+
+        '
+    Link:
+      type: object
+      properties:
+        href:
+          type: string
+          description: The URL of the link
+        method:
+          type: string
+          description: An optional field containing the HTTP method to be used when following the URL
+      required:
+      - href
+      description: 'Each link is keyed by its type and will include a href for the URL and an optional method for links that cannot be followed using GET.
+
+        '
+  securitySchemes:
+    oauth:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: https://uaa.cloudfoundry.local/api-oauth/dialog
+          scopes:
+            cloud_controller.admin: This scope provides read and write access to all resources
+            cloud_controller.admin_read_only: This scope provides read only access to all resources
+            cloud_controller.global_auditor: This scope provides read access to all resources
+            cloud_controller.read: Read access to the Cloud Controller
+            cloud_controller.write: Write access to the Cloud Controller
+            cloud_controller.update_build_state: This scope allows its bearer to update the state of a build; currently only used when updating builds
+            cloud_controller_service_permissions.read: This scope provides read only access for service instance permissions
+    bearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Bearer JWT token authentication

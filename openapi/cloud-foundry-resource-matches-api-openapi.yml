@@ -1,0 +1,220 @@
+openapi: 3.2.0
+info:
+  title: Cloud Foundry V3 Resource Matches API
+  description: '# Welcome to the Experimental Cloud Foundry V3 API Docs!'
+  version: latest
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+  contact:
+    name: Cloud Foundry
+    url: https://www.cloudfoundry.org/
+servers:
+- url: https://api.example.local
+  description: Cloud Foundry V3 API server
+security:
+- oauth:
+  - cloud_controller.read
+  - cloud_controller.write
+tags:
+- name: Resource Matches
+  description: Resource Matches are used to determine if a resource has been previously uploaded to the Cloud Controller.
+paths:
+  /v3/resource_matches:
+    post:
+      summary: Create a resource match
+      description: 'This endpoint returns a list of **cached** resources from the input list.
+
+
+        This endpoint matches given resource SHA-1/file size pairs against the Cloud Controller cache and reports the subset that describes already cached files. This is usually used to avoid uploading duplicate files when pushing an app which has only been partially changed. The `path` and `mode` fields are not used when matching.
+
+
+        When uploading package bits, the response from this endpoint should be used as the `resources` form field. As such, it is useful to include the `path` and `mode` fields for each resource even though they are not used when determining a resource match.
+
+
+        Cloud Foundry operators may set minimum/maximum file sizes to match against. If the file size provided is outside this range, it will not be matched against.
+
+
+        If the `resource_matching` feature flag is disabled, resource matching will always return an empty array.'
+      operationId: postResourceMatches
+      tags:
+      - Resource Matches
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                resources:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      checksum:
+                        type: object
+                        properties:
+                          value:
+                            type: string
+                      size_in_bytes:
+                        type: integer
+                      path:
+                        type: string
+                  description: List of resources to check for in the resource cache
+              required:
+              - resources
+            examples:
+              default:
+                summary: default
+                value:
+                  resources:
+                  - checksum:
+                      value: 002d760bea1be268e27077412e11a320d0f164d3
+                    size_in_bytes: 36
+                    path: C:\path\to\file
+                    mode: '645'
+                  - checksum:
+                      value: a9993e364706816aba3e25717850c26c9cd0d89d
+                    size_in_bytes: 1
+                    path: path/to/file
+                    mode: '644'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceMatch'
+              examples:
+                default:
+                  summary: default
+                  value:
+                    resources:
+                    - checksum:
+                        value: a9993e364706816aba3e25717850c26c9cd0d89d
+                      size_in_bytes: 1
+                      path: path/to/file
+                      mode: '644'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/500'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+components:
+  responses:
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    ServiceUnavailable:
+      description: Service Unavailable
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    BadRequest:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+        text/html:
+          schema:
+            type: string
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    UnprocessableEntity:
+      description: Unprocessable Entity
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    '500':
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    Conflict:
+      description: Conflict
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+  schemas:
+    Errors:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/Error'
+      description: 'An error response will always return a list of error objects. Errors appear on the job resource for asynchronous operations.
+
+        Clients should use the code and title fields for programmatically handling specific errors. The message in the detail field is subject to change over time.
+
+        '
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: A numeric code for this error
+        detail:
+          type: string
+          description: Detailed description of the error
+        title:
+          type: string
+          description: Name of the error
+    ResourceMatch:
+      type: object
+      properties:
+        resources:
+          type: array
+          items:
+            type: object
+            properties:
+              checksum:
+                type: object
+                properties:
+                  value:
+                    type: string
+              size_in_bytes:
+                type: integer
+              path:
+                type: string
+              mode:
+                type: string
+  securitySchemes:
+    oauth:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: https://uaa.cloudfoundry.local/api-oauth/dialog
+          scopes:
+            cloud_controller.admin: This scope provides read and write access to all resources
+            cloud_controller.admin_read_only: This scope provides read only access to all resources
+            cloud_controller.global_auditor: This scope provides read access to all resources
+            cloud_controller.read: Read access to the Cloud Controller
+            cloud_controller.write: Write access to the Cloud Controller
+            cloud_controller.update_build_state: This scope allows its bearer to update the state of a build; currently only used when updating builds
+            cloud_controller_service_permissions.read: This scope provides read only access for service instance permissions
+    bearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Bearer JWT token authentication

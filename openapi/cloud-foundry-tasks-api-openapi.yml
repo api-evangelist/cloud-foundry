@@ -1,6 +1,6 @@
 openapi: 3.2.0
 info:
-  title: Cloud Foundry V3 Builds API
+  title: Cloud Foundry V3 Tasks API
   description: '# Welcome to the Experimental Cloud Foundry V3 API Docs!'
   version: latest
   license:
@@ -17,16 +17,16 @@ security:
   - cloud_controller.read
   - cloud_controller.write
 tags:
-- name: Builds
-  description: Builds represent the process of staging an application package.
+- name: Tasks
+  description: Tasks are one-off commands that can be run against an app.
 paths:
-  /v3/builds:
+  /v3/tasks:
     get:
-      summary: List builds
-      description: Retrieve all builds.
-      operationId: listBuilds
+      summary: List tasks
+      description: Retrieve all tasks the user has access to. The `command` field is excluded in the response.
+      operationId: listTasks
       tags:
-      - Builds
+      - Tasks
       parameters:
       - $ref: '#/components/parameters/Page'
       - $ref: '#/components/parameters/PerPage'
@@ -34,6 +34,20 @@ paths:
       - $ref: '#/components/parameters/CreatedAts'
       - $ref: '#/components/parameters/UpdatedAts'
       - $ref: '#/components/parameters/LabelSelector'
+      - name: guids
+        in: query
+        schema:
+          type: array
+          items:
+            type: string
+        description: Comma-delimited list of task guids to filter by
+      - name: names
+        in: query
+        schema:
+          type: array
+          items:
+            type: string
+        description: Comma-delimited list of task names to filter by
       - name: states
         in: query
         schema:
@@ -41,78 +55,47 @@ paths:
           items:
             type: string
             enum:
-            - STAGING
-            - STAGED
+            - PENDING
+            - RUNNING
+            - SUCCEEDED
+            - CANCELING
             - FAILED
-        description: Comma-delimited list of build states to filter by
+        description: Comma-delimited list of task states to filter by
       - name: app_guids
         in: query
         schema:
           type: array
           items:
             type: string
-        description: Comma-delimited list of app GUIDs to filter by
-      - name: package_guids
+        description: Comma-delimited list of app guids to filter by
+      - name: space_guids
         in: query
         schema:
           type: array
           items:
             type: string
-        description: Comma-delimited list of package GUIDs to filter by
+        description: Comma-delimited list of space guids to filter by
+      - name: organization_guids
+        in: query
+        schema:
+          type: array
+          items:
+            type: string
+        description: Comma-delimited list of organization guids to filter by
+      - name: sequence_ids
+        in: query
+        schema:
+          type: array
+          items:
+            type: integer
+        description: Comma-delimited list of sequence ids to filter by
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BuildList'
-              examples:
-                default:
-                  summary: default
-                  value:
-                    pagination:
-                      total_results: 1
-                      total_pages: 1
-                      first:
-                        href: https://api.example.org?states=STAGING&page=1&per_page=2
-                      last:
-                        href: https://api.example.org?states=STAGING&page=1&per_page=2
-                      next: null
-                      previous: null
-                    resources:
-                    - guid: 123e4567-e89b-12d3-a456-426614174000
-                      created_at: '2016-03-28T23:39:34Z'
-                      updated_at: '2016-06-08T16:41:26Z'
-                      created_by:
-                        guid: 123e4567-e89b-12d3-a456-426614174000
-                        name: bill
-                        email: bill@example.com
-                      state: STAGING
-                      staging_memory_in_mb: 1024
-                      staging_disk_in_mb: 1024
-                      staging_log_rate_limit_bytes_per_second: 1024
-                      error: null
-                      lifecycle:
-                        type: buildpack
-                        data:
-                          buildpacks:
-                          - ruby_buildpack
-                          stack: cflinuxfs4
-                      package:
-                        guid: 123e4567-e89b-12d3-a456-426614174000
-                      droplet: null
-                      relationships:
-                        app:
-                          data:
-                            guid: 123e4567-e89b-12d3-a456-426614174000
-                      metadata:
-                        labels: {}
-                        annotations: {}
-                      links:
-                        self:
-                          href: https://api.example.org/v3/builds/585bc3c1-3743-497d-88b0-403ad6b56d16
-                        app:
-                          href: https://api.example.org/v3/apps/7b34f1cf-7e73-428a-bb5a-8a17a8058396
+                $ref: '#/components/schemas/TaskList'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -129,98 +112,33 @@ paths:
           $ref: '#/components/responses/BadGateway'
         '503':
           $ref: '#/components/responses/ServiceUnavailable'
-    post:
-      summary: Create a build
-      description: Create a build.
-      operationId: createBuild
-      tags:
-      - Builds
-      requestBody:
-        description: Build object that needs to be created
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                package:
-                  $ref: '#/components/schemas/Relationship'
-                lifecycle:
-                  $ref: '#/components/schemas/Lifecycle'
-                staging_memory_in_mb:
-                  type: integer
-                  description: Memory in MB allocated for staging of the build
-                staging_disk_in_mb:
-                  type: integer
-                  description: Disk space in MB allocated for staging of the build
-                staging_log_rate_limit_bytes_per_second:
-                  type: integer
-                  description: Log rate limit in bytes per second allocated for staging of the build
-                metadata:
-                  $ref: '#/components/schemas/Metadata'
-              required:
-              - package
-              description: Request schema for creating a build
-            examples:
-              default:
-                summary: default
-                value:
-                  package:
-                    guid: 123e4567-e89b-12d3-a456-426614174000
-      responses:
-        '201':
-          description: Successfully created build
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Build'
-          links:
-            app:
-              operationId: getApp
-              parameters:
-                guid: $response.body#/relationships/app/data/guid
-              description: Retrieve the app for this build
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '409':
-          $ref: '#/components/responses/Conflict'
-        '422':
-          $ref: '#/components/responses/UnprocessableEntity'
-        '500':
-          $ref: '#/components/responses/500'
-        '503':
-          $ref: '#/components/responses/ServiceUnavailable'
-  /v3/builds/{guid}:
+  /v3/tasks/{guid}:
     get:
-      summary: Get a build
-      description: Retrieve a build.
-      operationId: getBuild
+      summary: Get a task
+      description: Retrieve a task. The `command` field may be excluded in the response based on the user’s role.
+      operationId: getTask
       tags:
-      - Builds
+      - Tasks
       parameters:
       - $ref: '#/components/parameters/Guid'
       responses:
         '200':
-          description: Successfully retrieved build
+          description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Build'
+                $ref: '#/components/schemas/Task'
           links:
             app:
               operationId: getApp
               parameters:
                 guid: $response.body#/relationships/app/data/guid
-              description: Retrieve the app for this build
+              description: Retrieve the app for this task
             droplet:
               operationId: getDroplet
               parameters:
-                guid: $response.body#/droplet/guid
-              description: Retrieve the droplet for this build
+                guid: $response.body#/droplet_guid
+              description: Retrieve the droplet for this task
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -228,18 +146,20 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
     patch:
-      summary: Update a build
-      description: Update a build.
-      operationId: updateBuild
+      summary: Update a task
+      description: Update a task.
+      operationId: updateTask
       tags:
-      - Builds
+      - Tasks
       parameters:
       - $ref: '#/components/parameters/Guid'
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/BuildUpdate'
+              properties:
+                metadata:
+                  $ref: '#/components/schemas/Metadata'
             examples:
               default:
                 summary: default
@@ -255,7 +175,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Build'
+                $ref: '#/components/schemas/Task'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -272,118 +192,22 @@ paths:
           $ref: '#/components/responses/500'
         '503':
           $ref: '#/components/responses/ServiceUnavailable'
-  /v3/apps/{guid}/builds:
-    get:
-      summary: List builds for an app
-      description: Retrieve all builds for an app.
-      operationId: listAppBuilds
+  /v3/tasks/{guid}/actions/cancel:
+    post:
+      summary: Cancel a task
+      description: Cancels a running task. Canceled tasks will initially be in state `CANCELING` and will move to state `FAILED` once the cancel request has been processed. Cancel requests are idempotent and will be processed according to the state of the task when the request is executed. Canceling a task that is in `SUCCEEDED` or `FAILED` state will return an error.
+      operationId: cancelTask
       tags:
-      - Builds
+      - Tasks
       parameters:
       - $ref: '#/components/parameters/Guid'
-      - $ref: '#/components/parameters/Page'
-      - $ref: '#/components/parameters/PerPage'
-      - $ref: '#/components/parameters/OrderBy'
-      - name: states
-        in: query
-        schema:
-          type: array
-          items:
-            type: string
-            enum:
-            - STAGING
-            - STAGED
-            - FAILED
-        description: Comma-delimited list of build states to filter by
-      - $ref: '#/components/parameters/LabelSelector'
-      - $ref: '#/components/parameters/CreatedAts'
-      - $ref: '#/components/parameters/UpdatedAts'
       responses:
-        '200':
+        '202':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BuildList'
-              examples:
-                default:
-                  summary: default
-                  value:
-                    pagination:
-                      total_results: 1
-                      total_pages: 1
-                      first:
-                        href: https://api.example.org?states=STAGING&page=1&per_page=2
-                      last:
-                        href: https://api.example.org?states=STAGING&page=1&per_page=2
-                      next: null
-                      previous: null
-                    resources:
-                    - guid: 123e4567-e89b-12d3-a456-426614174000
-                      created_at: '2016-03-28T23:39:34Z'
-                      updated_at: '2016-06-08T16:41:26Z'
-                      created_by:
-                        guid: 123e4567-e89b-12d3-a456-426614174000
-                        name: bill
-                        email: bill@example.com
-                      state: STAGING
-                      staging_memory_in_mb: 1024
-                      staging_disk_in_mb: 1024
-                      staging_log_rate_limit_bytes_per_second: 1024
-                      error: null
-                      lifecycle:
-                        type: buildpack
-                        data:
-                          buildpacks:
-                          - ruby_buildpack
-                          stack: cflinuxfs4
-                      package:
-                        guid: 123e4567-e89b-12d3-a456-426614174000
-                      droplet: null
-                      relationships:
-                        app:
-                          data:
-                            guid: 123e4567-e89b-12d3-a456-426614174000
-                      metadata:
-                        labels: {}
-                        annotations: {}
-                      links:
-                        self:
-                          href: https://api.example.org/v3/builds/585bc3c1-3743-497d-88b0-403ad6b56d16
-                        app:
-                          href: https://api.example.org/v3/apps/7b34f1cf-7e73-428a-bb5a-8a17a8058396
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-    patch:
-      summary: Update a build
-      description: Update a build.
-      operationId: updateBuildViaApp
-      tags:
-      - Builds
-      parameters:
-      - $ref: '#/components/parameters/Guid'
-      requestBody:
-        description: Build object that needs to be updated
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                metadata:
-                  $ref: '#/components/schemas/Metadata'
-              description: Request schema for updating a build
-      responses:
-        '200':
-          description: Successfully updated build
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Build'
+                $ref: '#/components/schemas/Task'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -392,41 +216,165 @@ paths:
           $ref: '#/components/responses/NotFound'
         '422':
           $ref: '#/components/responses/UnprocessableEntity'
+    put:
+      summary: Cancel a task (PUT)
+      description: Cancels a running task using PUT method. Canceled tasks will initially be in state `CANCELING` and will move to state `FAILED` once the cancel request has been processed. Cancel requests are idempotent and will be processed according to the state of the task when the request is executed. Canceling a task that is in `SUCCEEDED` or `FAILED` state will return an error.
+      operationId: cancelTaskPut
+      tags:
+      - Tasks
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      responses:
+        '202':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/500'
+  /v3/tasks/{guid}/cancel:
+    put:
+      summary: DEPRECATED - Cancel a task (short path)
+      description: DEPRECATED - Use /v3/tasks/{guid}/actions/cancel instead.
+      operationId: cancelTaskShort
+      tags:
+      - Tasks
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      responses:
+        '202':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /v3/apps/{guid}/tasks:
+    get:
+      summary: List tasks for an app
+      description: Retrieve tasks for an app.
+      operationId: listAppTasks
+      tags:
+      - Tasks
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      - $ref: '#/components/parameters/Page'
+      - $ref: '#/components/parameters/PerPage'
+      - $ref: '#/components/parameters/OrderBy'
+      - $ref: '#/components/parameters/CreatedAts'
+      - $ref: '#/components/parameters/UpdatedAts'
+      - $ref: '#/components/parameters/LabelSelector'
+      - name: guids
+        in: query
+        schema:
+          type: array
+          items:
+            type: string
+        description: Comma-delimited list of task guids to filter by
+      - name: names
+        in: query
+        schema:
+          type: array
+          items:
+            type: string
+        description: Comma-delimited list of task names to filter by
+      - name: states
+        in: query
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - PENDING
+            - RUNNING
+            - SUCCEEDED
+            - CANCELING
+            - FAILED
+        description: Comma-delimited list of task states to filter by
+      - name: sequence_ids
+        in: query
+        schema:
+          type: array
+          items:
+            type: integer
+        description: Comma-delimited list of sequence ids to filter by
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskList'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    post:
+      summary: Create a task
+      description: Create a task.
+      operationId: createTask
+      tags:
+      - Tasks
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      requestBody:
+        $ref: '#/components/requestBodies/TaskCreateRequestBody'
+      responses:
+        '202':
+          description: Accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+          links:
+            app:
+              operationId: getApp
+              parameters:
+                guid: $response.body#/relationships/app/data/guid
+              description: Retrieve the app for this task
+            droplet:
+              operationId: getDroplet
+              parameters:
+                guid: $response.body#/droplet_guid
+              description: Retrieve the droplet for this task
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/500'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
 components:
   schemas:
-    BuildUpdate:
-      type: object
-      properties:
-        state:
-          type: string
-          description: State of the build
-          enum:
-          - STAGING
-          - STAGED
-          - FAILED
-        staging_memory_in_mb:
-          type:
-          - integer
-          - 'null'
-          description: Memory in MB allocated for staging of the build
-        staging_disk_in_mb:
-          type:
-          - integer
-          - 'null'
-          description: Disk space in MB allocated for staging of the build
-        staging_log_rate_limit_bytes_per_second:
-          type: integer
-          description: Log rate limit in bytes per second allocated for staging of the build
-        error:
-          type:
-          - string
-          - 'null'
-          description: A string describing errors during the build process
-        lifecycle:
-          $ref: '#/components/schemas/Lifecycle'
-          description: Provides the lifecycle object to use during staging
-        metadata:
-          $ref: '#/components/schemas/Metadata'
     Pagination:
       type: object
       properties:
@@ -459,6 +407,50 @@ components:
         The pagination object is a JSON object that contains information about the pagination state of the results. It includes the total number of results available, the total number of pages available, and links to the first, last, next, and previous pages of results.
 
         '
+    Task:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/BaseSchema'
+      - properties:
+          name:
+            type: string
+          command:
+            type: string
+          state:
+            type: string
+            enum:
+            - PENDING
+            - RUNNING
+            - SUCCEEDED
+            - FAILED
+            - CANCELING
+          sequence_id:
+            type: integer
+          memory_in_mb:
+            type:
+            - integer
+            - 'null'
+          disk_in_mb:
+            type:
+            - integer
+            - 'null'
+          droplet_guid:
+            type: string
+          result:
+            type: object
+            properties:
+              failure_reason:
+                type:
+                - string
+                - 'null'
+          metadata:
+            $ref: '#/components/schemas/Metadata'
+          links:
+            type: object
+            properties:
+              self:
+                $ref: '#/components/schemas/Link'
+      description: A task is a one-off process that can be run in the Cloud Foundry environment.
     Link:
       type: object
       properties:
@@ -473,7 +465,7 @@ components:
       description: 'Each link is keyed by its type and will include a href for the URL and an optional method for links that cannot be followed using GET.
 
         '
-    BuildList:
+    TaskList:
       type: object
       properties:
         pagination:
@@ -481,66 +473,7 @@ components:
         resources:
           type: array
           items:
-            $ref: '#/components/schemas/Build'
-    Relationships:
-      type: object
-      description: 'Relationships represent associations between resources. When relationships are mutable, they can be used to create, read, update, and delete these associations. An app’s relationship to its current droplet is mutable, but an app’s relationship to its space is not.
-
-
-        Relationships do not affect the fundamental properties of a resource, but may affect their behavior and permissions logic. Relationships are tied to the lifecycles of the associated resources and will be removed if either of the associated resources are deleted. For example, if a user is removed from an organization, both the user and the organization persist, but the relationship between them does not.
-
-
-        Not all resources implement every relationship operation demonstrated in the examples below. See the docs for each resource to see how it interacts with its relationships.
-
-
-        Endpoints that return relationship data list this information under the relationships key.
-
-
-        The relationship object
-
-        The relationship object is a key-value pair that uniquely identifies a resource. In practice this is almost always the guid of a resource.
-
-        '
-    Lifecycle:
-      type: object
-      properties:
-        type:
-          type: string
-          description: Type of the lifecycle; valid values are buildpack, cnb, docker
-        data:
-          type: object
-          additionalProperties: true
-          description: Data specific to the lifecycle
-          properties:
-            buildpacks:
-              type: array
-              items:
-                type: string
-              description: List of the names of buildpacks, URLs from which they may be downloaded, or null to auto-detect a suitable buildpack during staging (applicable for buildpack and cnb lifecycles)
-            stack:
-              type:
-              - string
-              - 'null'
-              description: The root filesystem to use with the buildpack, for example cflinuxfs4 (applicable for buildpack lifecycle)
-            credentials:
-              type: object
-              additionalProperties:
-                type: object
-                properties:
-                  username:
-                    type:
-                    - string
-                    - 'null'
-                  password:
-                    type:
-                    - string
-                    - 'null'
-                  token:
-                    type: string
-              description: Credentials used to download the configured buildpacks (applicable for cnb lifecycle)
-      description: 'The lifecycle type defines how the application droplet is created and run. The following lifecycle types are supported: - buildpack: Traditional buildpacks for Cloud Foundry applications. - cnb: Cloud Native Buildpacks that are OCI-compliant. - docker: Run pre-built Docker images.
-
-        '
+            $ref: '#/components/schemas/Task'
     Metadata:
       type: object
       properties:
@@ -683,99 +616,6 @@ components:
         Clients should use the code and title fields for programmatically handling specific errors. The message in the detail field is subject to change over time.
 
         '
-    Build:
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/BaseSchema'
-      - properties:
-          state:
-            type: string
-            description: State of the build
-            enum:
-            - STAGING
-            - STAGED
-            - FAILED
-          staging_memory_in_mb:
-            type:
-            - integer
-            - 'null'
-            description: Memory in MB allocated for staging of the build
-          staging_disk_in_mb:
-            type:
-            - integer
-            - 'null'
-            description: Disk space in MB allocated for staging of the build
-          staging_log_rate_limit_bytes_per_second:
-            type: integer
-            description: Log rate limit in bytes per second allocated for staging of the build
-          error:
-            type:
-            - string
-            - 'null'
-            description: A string describing errors during the build process
-          lifecycle:
-            $ref: '#/components/schemas/Lifecycle'
-            description: Provides the lifecycle object to use during staging; this will override the build’s application’s default lifecycle for this build
-          checksum:
-            type: object
-            properties:
-              type:
-                type: string
-                description: Hashing algorithm for checksum; supported algorithms are sha256 and sha1
-              value:
-                type: string
-                description: Checksum of build
-          metadata:
-            $ref: '#/components/schemas/Metadata'
-          relationships:
-            $ref: '#/components/schemas/Relationships'
-          package:
-            type: object
-            properties:
-              guid:
-                type: string
-                format: uuid
-            description: The package that is the input to the staging process
-          droplet:
-            type:
-            - object
-            - 'null'
-            properties:
-              guid:
-                type: string
-                format: uuid
-            description: A resulting droplet from the staging process; `droplet` will be `null` if staging has not completed
-          created_by:
-            type: object
-            properties:
-              guid:
-                type: string
-                description: The guid of the user that created the build
-              name:
-                type:
-                - string
-                - 'null'
-                description: The name of the user that created the build
-              email:
-                type:
-                - string
-                - 'null'
-                description: The email of the user that created the build
-          links:
-            type: object
-            properties:
-              self:
-                $ref: '#/components/schemas/Link'
-                description: The URL to get this build
-              app:
-                $ref: '#/components/schemas/Link'
-                description: The URL to get the app for this build
-              droplet:
-                $ref: '#/components/schemas/Link'
-                description: The URL to get the droplet for this build
-      description: 'Builds represent the process of transforming source code into a runnable artifact. Builds can be triggered manually or automatically as part of the app lifecycle. A successful build results in a droplet that can be used to run the app.
-
-        '
     Error:
       type: object
       properties:
@@ -788,13 +628,6 @@ components:
         title:
           type: string
           description: Name of the error
-    Relationship:
-      type: object
-      properties:
-        guid:
-          type: string
-          format: uuid
-          description: The GUID of the resource
     BaseSchema:
       type: object
       properties:
@@ -938,6 +771,57 @@ components:
         type: string
         format: uuid
       description: The unique identifier for the resource
+  requestBodies:
+    TaskCreateRequestBody:
+      description: Task object that needs to be created
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              command:
+                type: string
+                description: The command to run for the task. **NOTE:** optional if a `template.process.guid` is provided
+              name:
+                type: string
+                description: Human-readable name for the task
+              memory_in_mb:
+                type: integer
+                description: Amount of memory to allocate for the task in MB
+              disk_in_mb:
+                type: integer
+                description: Amount of disk to allocate for the task in MB
+              log_rate_limit_in_bytes_per_second:
+                type: integer
+                description: Amount of log rate limit to allocate for the task in bytes per second
+              droplet_guid:
+                type: string
+                format: uuid
+                description: The GUID of a droplet to use to run the task
+              template:
+                type: object
+                description: An object with a process field to template the task from
+                properties:
+                  process:
+                    type: object
+                    properties:
+                      guid:
+                        type: string
+                        format: uuid
+                    required:
+                    - guid
+                    description: The guid of the process that will be used as a template
+              metadata:
+                $ref: '#/components/schemas/Metadata'
+            description: Request schema for creating a task
+          examples:
+            default:
+              summary: default
+              value:
+                template:
+                  process:
+                    guid: 123e4567-e89b-12d3-a456-426614174000
   securitySchemes:
     oauth:
       type: oauth2

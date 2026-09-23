@@ -1,6 +1,6 @@
 openapi: 3.2.0
 info:
-  title: Cloud Foundry V3 Builds API
+  title: Cloud Foundry V3 Service Brokers API
   description: '# Welcome to the Experimental Cloud Foundry V3 API Docs!'
   version: latest
   license:
@@ -17,92 +17,80 @@ security:
   - cloud_controller.read
   - cloud_controller.write
 tags:
-- name: Builds
-  description: Builds represent the process of staging an application package.
+- name: Service Brokers
+  description: Service brokers are used to manage services.
 paths:
-  /v3/builds:
+  /v3/service_brokers:
     get:
-      summary: List builds
-      description: Retrieve all builds.
-      operationId: listBuilds
+      summary: List service brokers
+      description: This endpoint retrieves the service brokers the user has access to.
+      operationId: listServiceBrokers
       tags:
-      - Builds
+      - Service Brokers
       parameters:
       - $ref: '#/components/parameters/Page'
       - $ref: '#/components/parameters/PerPage'
       - $ref: '#/components/parameters/OrderBy'
+      - name: names
+        in: query
+        schema:
+          type: array
+          items:
+            type: string
+        description: Comma-delimited list of service broker names to filter by
+      - name: space_guids
+        in: query
+        schema:
+          type: array
+          items:
+            type: string
+        description: Comma-delimited list of space guids to filter by
+      - $ref: '#/components/parameters/LabelSelector'
       - $ref: '#/components/parameters/CreatedAts'
       - $ref: '#/components/parameters/UpdatedAts'
-      - $ref: '#/components/parameters/LabelSelector'
-      - name: states
-        in: query
-        schema:
-          type: array
-          items:
-            type: string
-            enum:
-            - STAGING
-            - STAGED
-            - FAILED
-        description: Comma-delimited list of build states to filter by
-      - name: app_guids
-        in: query
-        schema:
-          type: array
-          items:
-            type: string
-        description: Comma-delimited list of app GUIDs to filter by
-      - name: package_guids
-        in: query
-        schema:
-          type: array
-          items:
-            type: string
-        description: Comma-delimited list of package GUIDs to filter by
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BuildList'
+                $ref: '#/components/schemas/ServiceBrokerList'
               examples:
                 default:
                   summary: default
                   value:
                     pagination:
-                      total_results: 1
-                      total_pages: 1
+                      total_results: 3
+                      total_pages: 2
                       first:
-                        href: https://api.example.org?states=STAGING&page=1&per_page=2
+                        href: https://api.example.org?page=1&per_page=2
                       last:
-                        href: https://api.example.org?states=STAGING&page=1&per_page=2
-                      next: null
+                        href: https://api.example.org?page=2&per_page=2
+                      next:
+                        href: https://api.example.org?page=2&per_page=2
                       previous: null
                     resources:
                     - guid: 123e4567-e89b-12d3-a456-426614174000
-                      created_at: '2016-03-28T23:39:34Z'
+                      name: my_service_broker
+                      url: https://example.service-broker.com
+                      created_at: '2015-11-13T17:02:56Z'
                       updated_at: '2016-06-08T16:41:26Z'
-                      created_by:
-                        guid: 123e4567-e89b-12d3-a456-426614174000
-                        name: bill
-                        email: bill@example.com
-                      state: STAGING
-                      staging_memory_in_mb: 1024
-                      staging_disk_in_mb: 1024
-                      staging_log_rate_limit_bytes_per_second: 1024
-                      error: null
-                      lifecycle:
-                        type: buildpack
-                        data:
-                          buildpacks:
-                          - ruby_buildpack
-                          stack: cflinuxfs4
-                      package:
-                        guid: 123e4567-e89b-12d3-a456-426614174000
-                      droplet: null
+                      relationships: {}
+                      metadata:
+                        labels: {}
+                        annotations: {}
+                      links:
+                        self:
+                          href: https://api.example.org/v3/service_brokers/dde5ad2a-d8f4-44dc-a56f-0452d744f1c3
+                        service_offerings:
+                          href: https://api.example.org/v3/service_offerings?service_broker_guids=dde5ad2a-d8f4-44dc-a56f-0452d744f1c3
+                    - guid: 123e4567-e89b-12d3-a456-426614174000
+                      name: another_service_broker
+                      url: https://another-example.service-broker.com
+                      created_at: '2015-11-13T17:02:56Z'
+                      updated_at: '2016-06-08T16:41:26Z'
                       relationships:
-                        app:
+                        space:
                           data:
                             guid: 123e4567-e89b-12d3-a456-426614174000
                       metadata:
@@ -110,9 +98,11 @@ paths:
                         annotations: {}
                       links:
                         self:
-                          href: https://api.example.org/v3/builds/585bc3c1-3743-497d-88b0-403ad6b56d16
-                        app:
-                          href: https://api.example.org/v3/apps/7b34f1cf-7e73-428a-bb5a-8a17a8058396
+                          href: https://api.example.org/v3/service_brokers/7aa37bad-6ccb-4ef9-ba48-9ce3a91b2b62
+                        service_offerings:
+                          href: https://api.example.org/v3/service_offerings?service_broker_guids=7aa37bad-6ccb-4ef9-ba48-9ce3a91b2b62
+                        space:
+                          href: https://api.example.org/v3/spaces/2f35885d-0c9d-4423-83ad-fd05066f8576
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -130,56 +120,22 @@ paths:
         '503':
           $ref: '#/components/responses/ServiceUnavailable'
     post:
-      summary: Create a build
-      description: Create a build.
-      operationId: createBuild
+      summary: Create a service broker
+      description: This endpoint creates a new service broker and a job to synchronize the service offerings and service plans with those in the broker’s catalog. The `Location` header refers to the created job which syncs the broker with the catalog. See _Service broker jobs_ for more information and limitations.
+      operationId: createServiceBroker
       tags:
-      - Builds
+      - Service Brokers
       requestBody:
-        description: Build object that needs to be created
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                package:
-                  $ref: '#/components/schemas/Relationship'
-                lifecycle:
-                  $ref: '#/components/schemas/Lifecycle'
-                staging_memory_in_mb:
-                  type: integer
-                  description: Memory in MB allocated for staging of the build
-                staging_disk_in_mb:
-                  type: integer
-                  description: Disk space in MB allocated for staging of the build
-                staging_log_rate_limit_bytes_per_second:
-                  type: integer
-                  description: Log rate limit in bytes per second allocated for staging of the build
-                metadata:
-                  $ref: '#/components/schemas/Metadata'
-              required:
-              - package
-              description: Request schema for creating a build
-            examples:
-              default:
-                summary: default
-                value:
-                  package:
-                    guid: 123e4567-e89b-12d3-a456-426614174000
+        $ref: '#/components/requestBodies/ServiceBrokerCreate'
       responses:
-        '201':
-          description: Successfully created build
-          content:
-            application/json:
+        '202':
+          description: Accepted
+          headers:
+            Location:
+              description: URL of the job that is creating the service broker
               schema:
-                $ref: '#/components/schemas/Build'
-          links:
-            app:
-              operationId: getApp
-              parameters:
-                guid: $response.body#/relationships/app/data/guid
-              description: Retrieve the app for this build
+                type: string
+                format: uri
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -194,164 +150,52 @@ paths:
           $ref: '#/components/responses/500'
         '503':
           $ref: '#/components/responses/ServiceUnavailable'
-  /v3/builds/{guid}:
+  /v3/service_brokers/{guid}:
     get:
-      summary: Get a build
-      description: Retrieve a build.
-      operationId: getBuild
+      summary: Get a service broker
+      description: This endpoint retrieves the service broker by GUID.
+      operationId: getServiceBroker
       tags:
-      - Builds
+      - Service Brokers
       parameters:
       - $ref: '#/components/parameters/Guid'
-      responses:
-        '200':
-          description: Successfully retrieved build
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Build'
-          links:
-            app:
-              operationId: getApp
-              parameters:
-                guid: $response.body#/relationships/app/data/guid
-              description: Retrieve the app for this build
-            droplet:
-              operationId: getDroplet
-              parameters:
-                guid: $response.body#/droplet/guid
-              description: Retrieve the droplet for this build
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-    patch:
-      summary: Update a build
-      description: Update a build.
-      operationId: updateBuild
-      tags:
-      - Builds
-      parameters:
-      - $ref: '#/components/parameters/Guid'
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/BuildUpdate'
-            examples:
-              default:
-                summary: default
-                value:
-                  metadata:
-                    labels:
-                      key: value
-                    annotations:
-                      note: detailed information
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Build'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '409':
-          $ref: '#/components/responses/Conflict'
-        '422':
-          $ref: '#/components/responses/UnprocessableEntity'
-        '500':
-          $ref: '#/components/responses/500'
-        '503':
-          $ref: '#/components/responses/ServiceUnavailable'
-  /v3/apps/{guid}/builds:
-    get:
-      summary: List builds for an app
-      description: Retrieve all builds for an app.
-      operationId: listAppBuilds
-      tags:
-      - Builds
-      parameters:
-      - $ref: '#/components/parameters/Guid'
-      - $ref: '#/components/parameters/Page'
-      - $ref: '#/components/parameters/PerPage'
-      - $ref: '#/components/parameters/OrderBy'
-      - name: states
-        in: query
-        schema:
-          type: array
-          items:
-            type: string
-            enum:
-            - STAGING
-            - STAGED
-            - FAILED
-        description: Comma-delimited list of build states to filter by
-      - $ref: '#/components/parameters/LabelSelector'
-      - $ref: '#/components/parameters/CreatedAts'
-      - $ref: '#/components/parameters/UpdatedAts'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BuildList'
+                $ref: '#/components/schemas/ServiceBroker'
               examples:
                 default:
                   summary: default
                   value:
-                    pagination:
-                      total_results: 1
-                      total_pages: 1
-                      first:
-                        href: https://api.example.org?states=STAGING&page=1&per_page=2
-                      last:
-                        href: https://api.example.org?states=STAGING&page=1&per_page=2
-                      next: null
-                      previous: null
-                    resources:
-                    - guid: 123e4567-e89b-12d3-a456-426614174000
-                      created_at: '2016-03-28T23:39:34Z'
-                      updated_at: '2016-06-08T16:41:26Z'
-                      created_by:
-                        guid: 123e4567-e89b-12d3-a456-426614174000
-                        name: bill
-                        email: bill@example.com
-                      state: STAGING
-                      staging_memory_in_mb: 1024
-                      staging_disk_in_mb: 1024
-                      staging_log_rate_limit_bytes_per_second: 1024
-                      error: null
-                      lifecycle:
-                        type: buildpack
+                    guid: 123e4567-e89b-12d3-a456-426614174000
+                    name: my_service_broker
+                    url: https://example.service-broker.com
+                    created_at: '2015-11-13T17:02:56Z'
+                    updated_at: '2016-06-08T16:41:26Z'
+                    relationships:
+                      space:
                         data:
-                          buildpacks:
-                          - ruby_buildpack
-                          stack: cflinuxfs4
-                      package:
-                        guid: 123e4567-e89b-12d3-a456-426614174000
-                      droplet: null
-                      relationships:
-                        app:
-                          data:
-                            guid: 123e4567-e89b-12d3-a456-426614174000
-                      metadata:
-                        labels: {}
-                        annotations: {}
-                      links:
-                        self:
-                          href: https://api.example.org/v3/builds/585bc3c1-3743-497d-88b0-403ad6b56d16
-                        app:
-                          href: https://api.example.org/v3/apps/7b34f1cf-7e73-428a-bb5a-8a17a8058396
+                          guid: 123e4567-e89b-12d3-a456-426614174000
+                    metadata:
+                      labels:
+                        type: dev
+                      annotations: {}
+                    links:
+                      self:
+                        href: https://api.example.org/v3/service_brokers/dde5ad2a-d8f4-44dc-a56f-0452d744f1c3
+                      service_offerings:
+                        href: https://api.example.org/v3/service_offerings?service_broker_guids=dde5ad2a-d8f4-44dc-a56f-0452d744f1c3
+                      space:
+                        href: https://api.example.org/v3/spaces/2f35885d-0c9d-4423-83ad-fd05066f8576
+          links:
+            space:
+              operationId: getSpace
+              parameters:
+                guid: $response.body#/relationships/space/data/guid
+              description: Retrieve the space for this service broker (space-scoped brokers only)
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -359,31 +203,96 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
     patch:
-      summary: Update a build
-      description: Update a build.
-      operationId: updateBuildViaApp
+      summary: Update a service broker
+      description: 'This endpoint updates a service broker. Depending on the parameters specified, the endpoint may respond with a background job, and it may synchronize the service offerings and service plans with those in the broker’s catalog.
+
+
+        When a service broker has a synchronization job in progress, only updates with `metadata` are permitted until the synchronization job is complete.'
+      operationId: updateServiceBroker
       tags:
-      - Builds
+      - Service Brokers
       parameters:
       - $ref: '#/components/parameters/Guid'
       requestBody:
-        description: Build object that needs to be updated
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                metadata:
-                  $ref: '#/components/schemas/Metadata'
-              description: Request schema for updating a build
+        $ref: '#/components/requestBodies/ServiceBrokerUpdateRequestBody'
       responses:
         '200':
-          description: Successfully updated build
+          description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Build'
+                $ref: '#/components/schemas/ServiceBroker'
+              examples:
+                default:
+                  summary: default
+                  value:
+                    guid: 123e4567-e89b-12d3-a456-426614174000
+                    name: my_service_broker
+                    url: https://example.service-broker.com
+                    created_at: '2015-11-13T17:02:56Z'
+                    updated_at: '2016-06-08T16:41:26Z'
+                    relationships:
+                      space:
+                        data:
+                          guid: 123e4567-e89b-12d3-a456-426614174000
+                    metadata:
+                      labels:
+                        type: dev
+                      annotations: {}
+                    links:
+                      self:
+                        href: https://api.example.org/v3/service_brokers/dde5ad2a-d8f4-44dc-a56f-0452d744f1c3
+                      service_offerings:
+                        href: https://api.example.org/v3/service_offerings?service_broker_guids=dde5ad2a-d8f4-44dc-a56f-0452d744f1c3
+                      space:
+                        href: https://api.example.org/v3/spaces/2f35885d-0c9d-4423-83ad-fd05066f8576
+          links:
+            space:
+              operationId: getSpace
+              parameters:
+                guid: $response.body#/relationships/space/data/guid
+              description: Retrieve the space for this service broker (space-scoped brokers only)
+        '202':
+          description: Accepted
+          headers:
+            Location:
+              description: URL of the job that is updating the service broker
+              schema:
+                type: string
+                format: uri
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/500'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+    delete:
+      summary: Delete a service broker
+      description: This endpoint creates a job to delete an existing service broker. The `Location` header refers to the created job. See _Service broker jobs_ for more information and limitations.
+      operationId: deleteServiceBroker
+      tags:
+      - Service Brokers
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      responses:
+        '202':
+          description: Accepted
+          headers:
+            Location:
+              description: URL of the job that is deleting the service broker
+              schema:
+                type: string
+                format: uri
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -392,41 +301,130 @@ paths:
           $ref: '#/components/responses/NotFound'
         '422':
           $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/500'
 components:
+  requestBodies:
+    ServiceBrokerCreate:
+      description: Service broker to create
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+                description: Name of the service broker
+              url:
+                type: string
+                format: uri
+                description: URL of the service broker
+              authentication:
+                type: object
+                properties:
+                  type:
+                    type: string
+                    enum:
+                    - basic
+                    description: Type of authentication
+                  credentials:
+                    type: object
+                    properties:
+                      username:
+                        type: string
+                      password:
+                        type: string
+                    required:
+                    - username
+                    - password
+                required:
+                - type
+                - credentials
+                description: Authentication details for the service broker
+              relationships:
+                type: object
+                properties:
+                  space:
+                    $ref: '#/components/schemas/RelationshipToOne'
+                description: Relationships for the service broker
+              metadata:
+                $ref: '#/components/schemas/Metadata'
+            required:
+            - name
+            - url
+          examples:
+            default:
+              summary: default
+              value:
+                name: my_service_broker
+                url: https://example.service-broker.com
+                authentication:
+                  type: basic
+                  credentials:
+                    username: us3rn4me
+                    password: p4ssw0rd
+                relationships:
+                  space:
+                    data:
+                      guid: 123e4567-e89b-12d3-a456-426614174000
+    ServiceBrokerUpdateRequestBody:
+      description: Service broker object that needs to be updated
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+                description: Name of the service broker
+              url:
+                type: string
+                description: URL of the service broker
+              authentication:
+                type: object
+                description: Credentials used to authenticate against the service broker
+                properties:
+                  type:
+                    type: string
+                    enum:
+                    - basic
+                    description: Authentication type
+                  credentials:
+                    type: object
+                    description: Authentication credentials
+                    properties:
+                      username:
+                        type: string
+                        description: Username for basic authentication
+                      password:
+                        type: string
+                        description: Password for basic authentication
+                    required:
+                    - username
+                    - password
+                required:
+                - type
+                - credentials
+              metadata:
+                $ref: '#/components/schemas/Metadata'
+          examples:
+            default:
+              summary: default
+              value:
+                name: my_service_broker
+                url: https://example.service-broker.com
+                authentication:
+                  type: basic
+                  credentials:
+                    username: us3rn4me
+                    password: p4ssw0rd
+                metadata:
+                  labels:
+                    key: value
+                  annotations:
+                    note: detailed information
   schemas:
-    BuildUpdate:
-      type: object
-      properties:
-        state:
-          type: string
-          description: State of the build
-          enum:
-          - STAGING
-          - STAGED
-          - FAILED
-        staging_memory_in_mb:
-          type:
-          - integer
-          - 'null'
-          description: Memory in MB allocated for staging of the build
-        staging_disk_in_mb:
-          type:
-          - integer
-          - 'null'
-          description: Disk space in MB allocated for staging of the build
-        staging_log_rate_limit_bytes_per_second:
-          type: integer
-          description: Log rate limit in bytes per second allocated for staging of the build
-        error:
-          type:
-          - string
-          - 'null'
-          description: A string describing errors during the build process
-        lifecycle:
-          $ref: '#/components/schemas/Lifecycle'
-          description: Provides the lifecycle object to use during staging
-        metadata:
-          $ref: '#/components/schemas/Metadata'
     Pagination:
       type: object
       properties:
@@ -473,72 +471,22 @@ components:
       description: 'Each link is keyed by its type and will include a href for the URL and an optional method for links that cannot be followed using GET.
 
         '
-    BuildList:
+    RelationshipToOne:
       type: object
       properties:
-        pagination:
-          $ref: '#/components/schemas/Pagination'
-        resources:
-          type: array
-          items:
-            $ref: '#/components/schemas/Build'
-    Relationships:
-      type: object
-      description: 'Relationships represent associations between resources. When relationships are mutable, they can be used to create, read, update, and delete these associations. An app’s relationship to its current droplet is mutable, but an app’s relationship to its space is not.
-
-
-        Relationships do not affect the fundamental properties of a resource, but may affect their behavior and permissions logic. Relationships are tied to the lifecycles of the associated resources and will be removed if either of the associated resources are deleted. For example, if a user is removed from an organization, both the user and the organization persist, but the relationship between them does not.
-
-
-        Not all resources implement every relationship operation demonstrated in the examples below. See the docs for each resource to see how it interacts with its relationships.
-
-
-        Endpoints that return relationship data list this information under the relationships key.
-
-
-        The relationship object
-
-        The relationship object is a key-value pair that uniquely identifies a resource. In practice this is almost always the guid of a resource.
-
-        '
-    Lifecycle:
-      type: object
-      properties:
-        type:
-          type: string
-          description: Type of the lifecycle; valid values are buildpack, cnb, docker
         data:
+          type:
+          - object
+          - 'null'
+          $ref: '#/components/schemas/Relationship'
+        links:
           type: object
-          additionalProperties: true
-          description: Data specific to the lifecycle
           properties:
-            buildpacks:
-              type: array
-              items:
-                type: string
-              description: List of the names of buildpacks, URLs from which they may be downloaded, or null to auto-detect a suitable buildpack during staging (applicable for buildpack and cnb lifecycles)
-            stack:
-              type:
-              - string
-              - 'null'
-              description: The root filesystem to use with the buildpack, for example cflinuxfs4 (applicable for buildpack lifecycle)
-            credentials:
-              type: object
-              additionalProperties:
-                type: object
-                properties:
-                  username:
-                    type:
-                    - string
-                    - 'null'
-                  password:
-                    type:
-                    - string
-                    - 'null'
-                  token:
-                    type: string
-              description: Credentials used to download the configured buildpacks (applicable for cnb lifecycle)
-      description: 'The lifecycle type defines how the application droplet is created and run. The following lifecycle types are supported: - buildpack: Traditional buildpacks for Cloud Foundry applications. - cnb: Cloud Native Buildpacks that are OCI-compliant. - docker: Run pre-built Docker images.
+            self:
+              $ref: '#/components/schemas/Link'
+            related:
+              $ref: '#/components/schemas/Link'
+      description: 'Some relationships relate a resource to exactly one other resource. For example an app can belong to only one space.
 
         '
     Metadata:
@@ -683,99 +631,48 @@ components:
         Clients should use the code and title fields for programmatically handling specific errors. The message in the detail field is subject to change over time.
 
         '
-    Build:
+    ServiceBrokerList:
+      type: object
+      properties:
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+        resources:
+          type: array
+          items:
+            $ref: '#/components/schemas/ServiceBroker'
+    ServiceBroker:
       type: object
       allOf:
       - $ref: '#/components/schemas/BaseSchema'
       - properties:
-          state:
+          name:
             type: string
-            description: State of the build
-            enum:
-            - STAGING
-            - STAGED
-            - FAILED
-          staging_memory_in_mb:
-            type:
-            - integer
-            - 'null'
-            description: Memory in MB allocated for staging of the build
-          staging_disk_in_mb:
-            type:
-            - integer
-            - 'null'
-            description: Disk space in MB allocated for staging of the build
-          staging_log_rate_limit_bytes_per_second:
-            type: integer
-            description: Log rate limit in bytes per second allocated for staging of the build
-          error:
-            type:
-            - string
-            - 'null'
-            description: A string describing errors during the build process
-          lifecycle:
-            $ref: '#/components/schemas/Lifecycle'
-            description: Provides the lifecycle object to use during staging; this will override the build’s application’s default lifecycle for this build
-          checksum:
-            type: object
-            properties:
-              type:
-                type: string
-                description: Hashing algorithm for checksum; supported algorithms are sha256 and sha1
-              value:
-                type: string
-                description: Checksum of build
-          metadata:
-            $ref: '#/components/schemas/Metadata'
+            description: Name of the service broker
+          url:
+            type: string
+            format: uri
+            description: URL of the service broker
           relationships:
-            $ref: '#/components/schemas/Relationships'
-          package:
             type: object
             properties:
-              guid:
-                type: string
-                format: uuid
-            description: The package that is the input to the staging process
-          droplet:
-            type:
-            - object
-            - 'null'
-            properties:
-              guid:
-                type: string
-                format: uuid
-            description: A resulting droplet from the staging process; `droplet` will be `null` if staging has not completed
-          created_by:
-            type: object
-            properties:
-              guid:
-                type: string
-                description: The guid of the user that created the build
-              name:
-                type:
-                - string
-                - 'null'
-                description: The name of the user that created the build
-              email:
-                type:
-                - string
-                - 'null'
-                description: The email of the user that created the build
+              space:
+                $ref: '#/components/schemas/RelationshipToOne'
+            description: Relationships for the service broker
           links:
             type: object
             properties:
               self:
                 $ref: '#/components/schemas/Link'
-                description: The URL to get this build
-              app:
+              space:
                 $ref: '#/components/schemas/Link'
-                description: The URL to get the app for this build
-              droplet:
+              service_offerings:
                 $ref: '#/components/schemas/Link'
-                description: The URL to get the droplet for this build
-      description: 'Builds represent the process of transforming source code into a runnable artifact. Builds can be triggered manually or automatically as part of the app lifecycle. A successful build results in a droplet that can be used to run the app.
-
-        '
+          metadata:
+            $ref: '#/components/schemas/Metadata'
+        required:
+        - name
+        - url
+        - links
     Error:
       type: object
       properties:

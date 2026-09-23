@@ -1,0 +1,108 @@
+openapi: 3.2.0
+info:
+  title: Cloud Foundry V3 Admin API
+  description: '# Welcome to the Experimental Cloud Foundry V3 API Docs!'
+  version: latest
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+  contact:
+    name: Cloud Foundry
+    url: https://www.cloudfoundry.org/
+servers:
+- url: https://api.example.local
+  description: Cloud Foundry V3 API server
+security:
+- oauth:
+  - cloud_controller.read
+  - cloud_controller.write
+tags:
+- name: Admin
+  description: Administrative operations for Cloud Foundry platform management.
+paths:
+  /v3/admin/actions/clear_buildpack_cache:
+    post:
+      summary: Clear the buildpack cache
+      description: This endpoint will delete all of the existing buildpack caches in the blobstore. The buildpack cache is used during staging by buildpacks as a way to cache certain resources, e.g. downloaded Ruby gems. An admin who wants to decrease the size of their blobstore could use this endpoint to delete unnecessary blobs.
+      operationId: clearBuildpackCache
+      tags:
+      - Admin
+      responses:
+        '202':
+          description: Accepted
+          headers:
+            Location:
+              description: URL of the job that is clearing the buildpack cache
+              schema:
+                type: string
+                format: uri
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+components:
+  responses:
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    NotFound:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+  schemas:
+    Errors:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/Error'
+      description: 'An error response will always return a list of error objects. Errors appear on the job resource for asynchronous operations.
+
+        Clients should use the code and title fields for programmatically handling specific errors. The message in the detail field is subject to change over time.
+
+        '
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: A numeric code for this error
+        detail:
+          type: string
+          description: Detailed description of the error
+        title:
+          type: string
+          description: Name of the error
+  securitySchemes:
+    oauth:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: https://uaa.cloudfoundry.local/api-oauth/dialog
+          scopes:
+            cloud_controller.admin: This scope provides read and write access to all resources
+            cloud_controller.admin_read_only: This scope provides read only access to all resources
+            cloud_controller.global_auditor: This scope provides read access to all resources
+            cloud_controller.read: Read access to the Cloud Controller
+            cloud_controller.write: Write access to the Cloud Controller
+            cloud_controller.update_build_state: This scope allows its bearer to update the state of a build; currently only used when updating builds
+            cloud_controller_service_permissions.read: This scope provides read only access for service instance permissions
+    bearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Bearer JWT token authentication

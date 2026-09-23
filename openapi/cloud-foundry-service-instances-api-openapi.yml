@@ -1,144 +1,1962 @@
 openapi: 3.2.0
 info:
-  title: Cloud Foundry Cloud Controller API v3 Apps Service Instances API
-  description: 'Cloud Foundry Cloud Controller API v3 is the primary control plane of
-
-    Cloud Foundry. It manages apps, packages, droplets, processes, tasks,
-
-    organizations, spaces, service instances, and related resources.
-
-    Requests authenticate with OAuth 2.0 bearer tokens issued by the
-
-    Cloud Foundry UAA server.
-
-    '
-  version: 3.220.0
+  title: Cloud Foundry Service Instances API
+  version: latest
+  contact:
+    name: Cloud Foundry
+    url: https://www.cloudfoundry.org/
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+  description: 'Operations tagged Service Instances across 2 of this provider''s published API definitions: cloud-foundry-capi-v3-openapi.yaml, cloud-foundry-service-instances-api-openapi.yml. Each path carries the servers of the definition it was published in.'
 servers:
-- url: https://api.cloudfoundry.org
-  description: Public Cloud Foundry CC API endpoint (replace with your foundation host)
+- url: https://api.example.local
+  description: Cloud Foundry V3 API server
 security:
-- bearerAuth: []
+- oauth:
+  - cloud_controller.read
+  - cloud_controller.write
 tags:
 - name: Service Instances
+  description: Service instances are instances of a service.
 paths:
   /v3/service_instances:
     get:
       summary: List service instances
+      description: This endpoint retrieves the service instances the user has access to, including access granted by service instance sharing.
+      operationId: listServiceInstances
+      tags:
+      - Service Instances
       parameters:
+      - name: names
+        in: query
+        schema:
+          type: array
+          items:
+            type: string
+        description: Comma-delimited list of service instance names to filter by
+      - name: guids
+        in: query
+        schema:
+          type: array
+          items:
+            type: string
+        description: Comma-delimited list of service instance guids to filter by
+      - name: type
+        in: query
+        schema:
+          type: string
+          enum:
+          - managed
+          - user-provided
+        description: Filter by type; valid values are 'managed' and 'user-provided'
+      - name: space_guids
+        in: query
+        schema:
+          type: array
+          items:
+            type: string
+        description: Comma-delimited list of space guids to filter by
+      - name: organization_guids
+        in: query
+        schema:
+          type: array
+          items:
+            type: string
+        description: Comma-delimited list of organization guids to filter by
+      - name: service_plan_guids
+        in: query
+        schema:
+          type: array
+          items:
+            type: string
+        description: Comma-delimited list of service plan guids to filter by
+      - name: service_plan_names
+        in: query
+        schema:
+          type: array
+          items:
+            type: string
+        description: Comma-delimited list of service plan names to filter by
       - $ref: '#/components/parameters/Page'
       - $ref: '#/components/parameters/PerPage'
+      - $ref: '#/components/parameters/OrderBy'
+      - $ref: '#/components/parameters/LabelSelector'
+      - $ref: '#/components/parameters/CreatedAts'
+      - $ref: '#/components/parameters/UpdatedAts'
+      - name: fields
+        in: query
+        schema:
+          type: object
+        description: Fields to include in the response
       responses:
         '200':
-          description: Service instances page
+          description: Request succeeded
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaginatedResponse'
-      tags:
-      - Service Instances
+                $ref: '#/components/schemas/ServiceInstanceList'
+              examples:
+                default:
+                  summary: default
+                  value:
+                    pagination:
+                      total_results: 2
+                      total_pages: 1
+                      first:
+                        href: https://api.example.org/v3/service_instances?page=1&per_page=50
+                      last:
+                        href: https://api.example.org/v3/service_instances?page=1&per_page=50
+                      next: null
+                      previous: null
+                    resources:
+                    - guid: 123e4567-e89b-12d3-a456-426614174000
+                      created_at: '2020-03-10T15:49:29Z'
+                      updated_at: '2020-03-10T15:49:29Z'
+                      name: my-managed-instance
+                      tags: []
+                      type: managed
+                      maintenance_info:
+                        version: 1.0.0
+                      upgrade_available: false
+                      dashboard_url: https://service-broker.example.org/dashboard
+                      broker_provided_metadata:
+                        labels:
+                          service_engine_version: '16.6'
+                        attributes:
+                          max_connections: '100'
+                      last_operation:
+                        type: create
+                        state: succeeded
+                        description: Operation succeeded
+                        updated_at: '2020-03-10T15:49:32Z'
+                        created_at: '2020-03-10T15:49:29Z'
+                      relationships:
+                        service_plan:
+                          data:
+                            guid: 123e4567-e89b-12d3-a456-426614174000
+                        space:
+                          data:
+                            guid: 123e4567-e89b-12d3-a456-426614174000
+                      metadata:
+                        labels: {}
+                        annotations: {}
+                      links:
+                        self:
+                          href: https://api.example.org/v3/service_instances/c89b3280-fe8d-4aa0-a42e-44465bb1c61c
+                        service_plan:
+                          href: https://api.example.org/v3/service_plans/5358d122-638e-11ea-afca-bf6e756684ac
+                        space:
+                          href: https://api.example.org/v3/spaces/5a84d315-9513-4d74-95e5-f6a5501eeef7
+                        parameters:
+                          href: https://api.example.org/v3/service_instances/c89b3280-fe8d-4aa0-a42e-44465bb1c61c/parameters
+                        shared_spaces:
+                          href: https://api.example.org/v3/service_instances/c89b3280-fe8d-4aa0-a42e-44465bb1c61c/relationships/shared_spaces
+                        service_credential_bindings:
+                          href: https://api.example.org/v3/service_credential_bindings?service_instance_guids=c89b3280-fe8d-4aa0-a42e-44465bb1c61c
+                        service_route_bindings:
+                          href: https://api.example.org/v3/service_route_bindings?service_instance_guids=c89b3280-fe8d-4aa0-a42e-44465bb1c61c
+                    - guid: 123e4567-e89b-12d3-a456-426614174000
+                      created_at: '2020-03-10T15:56:08Z'
+                      updated_at: '2020-03-10T15:56:08Z'
+                      name: my-user-provided-instance
+                      tags:
+                      - sql
+                      type: user-provided
+                      syslog_drain_url: http://logs.com
+                      route_service_url: https://routes.com
+                      last_operation:
+                        type: update
+                        state: succeeded
+                        description: Operation succeeded
+                        updated_at: '2020-03-10T15:59:32Z'
+                        created_at: '2020-03-10T15:59:29Z'
+                      relationships:
+                        space:
+                          data:
+                            guid: 123e4567-e89b-12d3-a456-426614174000
+                      metadata:
+                        labels: {}
+                        annotations: {}
+                      links:
+                        self:
+                          href: https://api.example.org/v3/service_instances/88ce23e5-27c3-4381-a2df-32a28ec43133
+                        space:
+                          href: https://api.example.org/v3/spaces/5a84d315-9513-4d74-95e5-f6a5501eeef7
+                        credentials:
+                          href: https://api.example.org/v3/service_instances/88ce23e5-27c3-4381-a2df-32a28ec43133/credentials
+                        service_credential_bindings:
+                          href: https://api.example.org/v3/service_credential_bindings?service_instance_guids=88ce23e5-27c3-4381-a2df-32a28ec43133
+                        service_route_bindings:
+                          href: https://api.example.org/v3/service_route_bindings?service_instance_guids=88ce23e5-27c3-4381-a2df-32a28ec43133
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/500'
+        '502':
+          $ref: '#/components/responses/BadGateway'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
     post:
-      summary: Create service instance
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ServiceInstance'
-      responses:
-        '202':
-          description: Accepted (asynchronous)
+      summary: Create a service instance
+      description: 'This endpoint creates a new service instance. Service instances can be of type `managed` or `user-provided`, and the required parameters are different for each type. User provided service instances do not require interactions with service brokers.
+
+
+        If failures occur when creating managed service instances, the API might execute orphan mitigation steps accordingly to cases outlined in the OSBAPI specification'
+      operationId: createServiceInstance
       tags:
       - Service Instances
-  /v3/service_instances/{guid}:
-    parameters:
-    - $ref: '#/components/parameters/GuidParam'
-    get:
-      summary: Get service instance
+      requestBody:
+        $ref: '#/components/requestBodies/ServiceInstanceCreateRequestBody'
       responses:
-        '200':
-          description: Service instance
+        '201':
+          description: User Provided Service instance created
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ServiceInstance'
+                $ref: '#/components/schemas/UserProvidedServiceInstance'
+          links:
+            space:
+              operationId: getSpace
+              parameters:
+                guid: $response.body#/relationships/space/data/guid
+              description: Retrieve the space for this service instance
+        '202':
+          description: Service instance creation in progress
+          headers:
+            Location:
+              description: URL of the job that is creating the service instance
+              schema:
+                type: string
+                format: uri
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/500'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+    servers:
+    - url: https://api.example.local
+      description: Cloud Foundry V3 API server
+  /v3/service_instances/{guid}:
+    get:
+      summary: Get a service instance
+      description: This endpoint retrieves the service instance by GUID.
+      operationId: getServiceInstance
       tags:
       - Service Instances
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      - name: fields
+        in: query
+        schema:
+          type: object
+        description: Fields to include in the response
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/ManagedServiceInstance'
+                - $ref: '#/components/schemas/UserProvidedServiceInstance'
+                discriminator:
+                  propertyName: type
+                  mapping:
+                    managed: '#/components/schemas/ManagedServiceInstance'
+                    user-provided: '#/components/schemas/UserProvidedServiceInstance'
+          links:
+            space:
+              operationId: getSpace
+              parameters:
+                guid: $response.body#/relationships/space/data/guid
+              description: Retrieve the space for this service instance
+            service_plan:
+              operationId: getServicePlan
+              parameters:
+                guid: $response.body#/relationships/service_plan/data/guid
+              description: Retrieve the service plan for this service instance (managed instances only)
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
     patch:
-      summary: Update service instance
+      summary: Update a service instance
+      description: 'Some updates can be performed entirely within the Cloud Controller in which case the response is synchronous. Some updates require communication with the service broker, in which case the response will be asynchronous. The response will be asynchronous if any of these parameters are specified:
+
+        * `parameters`
+
+        * `service_plan`
+
+        * `maintenance_info`
+
+        * `name` - when the service offering has `allow_context_updates` feature enabled
+
+
+        Otherwise the response will be synchronous.'
+      operationId: updateServiceInstance
+      tags:
+      - Service Instances
+      parameters:
+      - $ref: '#/components/parameters/Guid'
       requestBody:
+        $ref: '#/components/requestBodies/ServiceInstanceUpdateRequestBody'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/ManagedServiceInstance'
+                - $ref: '#/components/schemas/UserProvidedServiceInstance'
+                discriminator:
+                  propertyName: type
+                  mapping:
+                    managed: '#/components/schemas/ManagedServiceInstance'
+                    user-provided: '#/components/schemas/UserProvidedServiceInstance'
+          links:
+            space:
+              operationId: getSpace
+              parameters:
+                guid: $response.body#/relationships/space/data/guid
+              description: Retrieve the space for this service instance
+            service_plan:
+              operationId: getServicePlan
+              parameters:
+                guid: $response.body#/relationships/service_plan/data/guid
+              description: Retrieve the service plan for this service instance (managed instances only)
+        '202':
+          description: Accepted
+          headers:
+            Location:
+              description: URL of the job that is updating the service instance
+              schema:
+                type: string
+                format: uri
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/500'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+    delete:
+      summary: Delete a service instance
+      description: 'This endpoint deletes a service instance and any associated service credential
+
+        bindings or service route bindings. The service instance is removed from all
+
+        spaces where it is available. User provided service instances do not require interactions with service brokers,
+
+        therefore the API will respond synchronously to the delete request. For managed service instances, the API will respond asynchronously.
+
+        If a service credential binding or service route binding cannot be deleted
+
+        synchronously, then the operation will fail, and the deletion of the binding
+
+        will continue in the background. The operation can be retried until it is successful.'
+      operationId: deleteServiceInstance
+      tags:
+      - Service Instances
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      - name: purge
+        in: query
+        schema:
+          type: boolean
+        description: If `true`, deletes the service instance and all associated resources without any interaction with the service broker.
+      responses:
+        '202':
+          description: Accepted
+          headers:
+            Location:
+              description: URL of the job that is deleting the service instance
+              schema:
+                type: string
+                format: uri
+        '204':
+          description: No Content
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+    servers:
+    - url: https://api.example.local
+      description: Cloud Foundry V3 API server
+  /v3/service_instances/{guid}/credentials:
+    get:
+      summary: Get credentials for a user-provided service instance
+      description: Retrieves the credentials for a user-provided service instance. This endpoint is not available for managed service instances.
+      operationId: getServiceInstanceCredentials
+      tags:
+      - Service Instances
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+              examples:
+                default:
+                  summary: default
+                  value:
+                    username: my-username
+                    password: super-secret
+                    other: credential
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    servers:
+    - url: https://api.example.local
+      description: Cloud Foundry V3 API server
+  /v3/service_instances/{guid}/parameters:
+    get:
+      summary: Get parameters for a managed service instance
+      description: Queries the Service Broker for the parameters associated with this service instance. The broker catalog must have enabled the `instances_retrievable` feature for the Service Offering. Check the Service Offering object for the value of this feature flag.
+      operationId: getServiceInstanceParameters
+      tags:
+      - Service Instances
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+              examples:
+                default:
+                  summary: default
+                  value:
+                    key_1: value_1
+                    key_2: value_2
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    servers:
+    - url: https://api.example.local
+      description: Cloud Foundry V3 API server
+  /v3/service_instances/{guid}/permissions:
+    get:
+      summary: Get permissions for a service instance
+      description: 'Get the current user’s permissions for the given service instance. If a user can get a service instance then they can ‘read’ it. Users who can update a service instance can ‘manage’ it.
+
+
+        This endpoint’s primary purpose is to enable third-party service dashboards to determine the permissions of a given Cloud Foundry user that has authenticated with the dashboard via single sign-on (SSO). For more information, see the Cloud Foundry documentation on Dashboard Single Sign-On.'
+      operationId: getServiceInstancePermissions
+      tags:
+      - Service Instances
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  read:
+                    type: boolean
+                  manage:
+                    type: boolean
+              examples:
+                default:
+                  summary: default
+                  value:
+                    read: true
+                    manage: false
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    servers:
+    - url: https://api.example.local
+      description: Cloud Foundry V3 API server
+  /v3/service_instances/{guid}/relationships/shared_spaces:
+    get:
+      summary: List shared spaces relationship
+      description: This endpoint lists the spaces that the service instance has been shared to.
+      operationId: listServiceInstanceSharedSpaces
+      tags:
+      - Service Instances
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      - name: fields
+        in: query
+        schema:
+          type: object
+        description: Fields to include in the response
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RelationshipToMany'
+              examples:
+                default:
+                  summary: default
+                  value:
+                    data:
+                    - guid: 123e4567-e89b-12d3-a456-426614174000
+                    - guid: 123e4567-e89b-12d3-a456-426614174000
+                    links:
+                      self:
+                        href: https://api.example.org/v3/service_instances/bdeg4371-cbd3-4155-b156-dc0c2a431b4c/relationships/shared_spaces
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    post:
+      summary: Share a service instance to other spaces
+      description: This endpoint shares the service instance with the specified spaces. In order to share into a space the requesting user must be a space developer in the target space.
+      operationId: shareServiceInstance
+      tags:
+      - Service Instances
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RelationshipToMany'
+            examples:
+              default:
+                summary: default
+                value:
+                  data:
+                  - guid: 123e4567-e89b-12d3-a456-426614174000
+                  - guid: 123e4567-e89b-12d3-a456-426614174000
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RelationshipToMany'
+              examples:
+                default:
+                  summary: default
+                  value:
+                    data:
+                    - guid: 123e4567-e89b-12d3-a456-426614174000
+                    - guid: 123e4567-e89b-12d3-a456-426614174000
+                    links:
+                      self:
+                        href: https://api.example.org/v3/service_instances/bdeg4371-cbd3-4155-b156-dc0c2a431b4c/relationships/shared_spaces
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+    servers:
+    - url: https://api.example.local
+      description: Cloud Foundry V3 API server
+  /v3/service_instances/{guid}/relationships/shared_spaces/usage_summary:
+    get:
+      summary: Get usage summary in shared spaces
+      description: This endpoint returns the number of bound apps in spaces where the service instance has been shared to.
+      operationId: getServiceInstanceUsageSummaryInSharedSpaces
+      tags:
+      - Service Instances
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  usage_summary:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        space:
+                          $ref: '#/components/schemas/Relationship'
+                        bound_app_count:
+                          type: integer
+              examples:
+                default:
+                  summary: default
+                  value:
+                    usage_summary:
+                    - space:
+                        guid: 123e4567-e89b-12d3-a456-426614174000
+                      bound_app_count: 2
+                    - space:
+                        guid: 123e4567-e89b-12d3-a456-426614174000
+                      bound_app_count: 0
+                    links:
+                      self:
+                        href: https://api.example.org/v3/service_instances/bdeg4371-cbd3-4155-b156-dc0c2a431b4c/relationships/shared_spaces/usage_summary
+                      shared_spaces:
+                        href: https://api.example.org/v3/service_instances/bdeg4371-cbd3-4155-b156-dc0c2a431b4c/relationships/shared_spaces
+                      service_instance:
+                        href: https://api.example.org/v3/service_instances/bdeg4371-cbd3-4155-b156-dc0c2a431b4c
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    servers:
+    - url: https://api.example.local
+      description: Cloud Foundry V3 API server
+  /v3/service_instances/{guid}/relationships/shared_spaces/{space_guid}:
+    delete:
+      summary: Unshare a service instance from another space
+      description: This endpoint unshares the service instance from the specified space. This will automatically unbind any applications bound to this service instance in the specified space. Unsharing a service instance from a space will not delete any service keys.
+      operationId: unshareServiceInstance
+      tags:
+      - Service Instances
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      - name: space_guid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '204':
+          description: No Content
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/500'
+    servers:
+    - url: https://api.example.local
+      description: Cloud Foundry V3 API server
+  /v2/service_instances/{instance_id}:
+    put:
+      summary: provision a service instance
+      tags:
+      - Service Instances
+      operationId: serviceInstance.provision
+      parameters:
+      - $ref: '#/components/parameters/APIVersion'
+      - $ref: '#/components/parameters/OriginatingIdentity'
+      - name: instance_id
+        in: path
+        description: instance id of instance to provision
+        required: true
+        schema:
+          type: string
+      - name: accepts_incomplete
+        in: query
+        description: asynchronous operations supported
+        schema:
+          type: boolean
+      requestBody:
+        description: parameters for the requested service instance provision
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ServiceInstance'
+              $ref: '#/components/schemas/ServiceInstanceProvisionRequestBody'
       responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceInstanceProvisionResponse'
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceInstanceProvisionResponse'
         '202':
           description: Accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceInstanceAsyncOperation'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Unprocessable Entity
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    patch:
+      summary: update a service instance
       tags:
       - Service Instances
+      operationId: serviceInstance.update
+      parameters:
+      - $ref: '#/components/parameters/APIVersion'
+      - $ref: '#/components/parameters/OriginatingIdentity'
+      - name: instance_id
+        in: path
+        description: instance id of instance to update
+        required: true
+        schema:
+          type: string
+      - name: accepts_incomplete
+        in: query
+        description: asynchronous operations supported
+        schema:
+          type: boolean
+      requestBody:
+        description: parameters for the requested service instance update
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ServiceInstanceUpdateRequestBody'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Object'
+        '202':
+          description: Accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceInstanceAsyncOperation'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Unprocessable entity
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
     delete:
-      summary: Delete service instance
-      responses:
-        '202':
-          description: Accepted
+      summary: deprovision a service instance
       tags:
       - Service Instances
+      operationId: serviceInstance.deprovision
+      parameters:
+      - $ref: '#/components/parameters/APIVersion'
+      - $ref: '#/components/parameters/OriginatingIdentity'
+      - name: instance_id
+        in: path
+        description: id of instance being deleted
+        required: true
+        schema:
+          type: string
+      - name: service_id
+        in: query
+        description: id of the service associated with the instance being deleted
+        required: true
+        schema:
+          type: string
+      - name: plan_id
+        in: query
+        description: id of the plan associated with the instance being deleted
+        required: true
+        schema:
+          type: string
+      - name: accepts_incomplete
+        in: query
+        description: asynchronous deprovision supported
+        schema:
+          type: boolean
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Object'
+        '202':
+          description: Accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AsyncOperation'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '410':
+          description: Gone
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Unprocessable Entity
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    get:
+      summary: get a service instance
+      tags:
+      - Service Instances
+      operationId: serviceInstance.get
+      parameters:
+      - $ref: '#/components/parameters/APIVersion'
+      - $ref: '#/components/parameters/OriginatingIdentity'
+      - name: instance_id
+        in: path
+        description: instance id of instance to fetch
+        required: true
+        schema:
+          type: string
+      - name: service_id
+        in: query
+        description: id of the service associated with the instance
+        schema:
+          type: string
+      - name: plan_id
+        in: query
+        description: id of the plan associated with the instance
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceInstanceResource'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    servers:
+    - url: https://api.example.local
+      description: Cloud Foundry V3 API server
+  /v2/service_instances/{instance_id}/last_operation:
+    get:
+      summary: get the last requested operation state for service instance
+      tags:
+      - Service Instances
+      operationId: serviceInstance.lastOperation.get
+      parameters:
+      - $ref: '#/components/parameters/APIVersion'
+      - name: instance_id
+        in: path
+        description: instance id of instance to find last operation applied to it
+        required: true
+        schema:
+          type: string
+      - name: service_id
+        in: query
+        description: id of the service associated with the instance
+        schema:
+          type: string
+      - name: plan_id
+        in: query
+        description: id of the plan associated with the instance
+        schema:
+          type: string
+      - name: operation
+        in: query
+        description: a provided identifier for the operation
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LastOperationResource'
+          headers:
+            Retry-After:
+              description: Indicates when to retry the request
+              required: false
+              schema:
+                type: string
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '410':
+          description: Gone
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    servers:
+    - url: https://api.example.local
+      description: Cloud Foundry V3 API server
 components:
   schemas:
-    PaginatedResponse:
+    Pagination:
+      type: object
+      properties:
+        total_results:
+          type: integer
+          description: The total number of results available
+        total_pages:
+          type: integer
+          description: The total number of pages available
+        first:
+          allOf:
+          - $ref: '#/components/schemas/Link'
+          - description: The first page of results
+        last:
+          allOf:
+          - $ref: '#/components/schemas/Link'
+          - description: The last page of results
+        next:
+          oneOf:
+          - $ref: '#/components/schemas/Link'
+          - type: 'null'
+          description: The next page of results
+        previous:
+          oneOf:
+          - $ref: '#/components/schemas/Link'
+          - type: 'null'
+          description: The previous page of results
+      description: 'Pagination is a technique used to divide a large set of results into smaller, more manageable sets. This allows clients to retrieve results in smaller chunks, reducing the amount of data transferred and improving performance.
+
+        The pagination object is a JSON object that contains information about the pagination state of the results. It includes the total number of results available, the total number of pages available, and links to the first, last, next, and previous pages of results.
+
+        '
+    ServiceInstanceLastOperation:
+      type: object
+      properties:
+        type:
+          type: string
+          description: Type of the last operation
+          enum:
+          - create
+          - update
+          - delete
+        state:
+          type: string
+          description: State of the last operation
+          enum:
+          - initial
+          - in progress
+          - succeeded
+          - failed
+        description:
+          type:
+          - string
+          - 'null'
+          description: A textual explanation associated with this state
+        created_at:
+          type: string
+          format: date-time
+          description: When the last operation was created
+        updated_at:
+          type: string
+          format: date-time
+          description: When the last operation was last updated
+      description: The last operation object for service instances
+    RelationshipToMany:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Relationship'
+        links:
+          type: object
+          properties:
+            self:
+              $ref: '#/components/schemas/Link'
+            related:
+              $ref: '#/components/schemas/Link'
+      description: 'Some relationships relate a resource to several other resources. For example, an isolation segment can be entitled to multiple organizations.
+
+        '
+    Link:
+      type: object
+      properties:
+        href:
+          type: string
+          description: The URL of the link
+        method:
+          type: string
+          description: An optional field containing the HTTP method to be used when following the URL
+      required:
+      - href
+      description: 'Each link is keyed by its type and will include a href for the URL and an optional method for links that cannot be followed using GET.
+
+        '
+    RelationshipToOne:
+      type: object
+      properties:
+        data:
+          type:
+          - object
+          - 'null'
+          $ref: '#/components/schemas/Relationship'
+        links:
+          type: object
+          properties:
+            self:
+              $ref: '#/components/schemas/Link'
+            related:
+              $ref: '#/components/schemas/Link'
+      description: 'Some relationships relate a resource to exactly one other resource. For example an app can belong to only one space.
+
+        '
+    ManagedServiceInstance:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/BaseSchema'
+      - properties:
+          type:
+            type: string
+            enum:
+            - managed
+            description: Type of service instance
+          name:
+            type: string
+            description: Name of the service instance
+          tags:
+            type: array
+            items:
+              type: string
+            description: Tags for the service instance
+          syslog_drain_url:
+            type:
+            - string
+            - 'null'
+            format: uri
+            description: URL for syslog drain
+          route_service_url:
+            type:
+            - string
+            - 'null'
+            format: uri
+            description: URL for route service
+          dashboard_url:
+            type:
+            - string
+            - 'null'
+            format: uri
+            description: URL for service dashboard
+          maintenance_info:
+            type: object
+            properties:
+              version:
+                type: string
+                description: Version of maintenance info
+              description:
+                type:
+                - string
+                - 'null'
+                description: Description of maintenance info
+          upgrade_available:
+            type: boolean
+            description: Whether an upgrade is available
+          last_operation:
+            $ref: '#/components/schemas/ServiceInstanceLastOperation'
+          relationships:
+            type: object
+            properties:
+              space:
+                $ref: '#/components/schemas/RelationshipToOne'
+              service_plan:
+                $ref: '#/components/schemas/RelationshipToOne'
+            description: Relationships for the service instance
+          links:
+            type: object
+            properties:
+              self:
+                $ref: '#/components/schemas/Link'
+              space:
+                $ref: '#/components/schemas/Link'
+              service_plan:
+                $ref: '#/components/schemas/Link'
+              parameters:
+                $ref: '#/components/schemas/Link'
+              service_credential_bindings:
+                $ref: '#/components/schemas/Link'
+              service_route_bindings:
+                $ref: '#/components/schemas/Link'
+              shared_spaces:
+                $ref: '#/components/schemas/Link'
+          metadata:
+            $ref: '#/components/schemas/Metadata'
+        required:
+        - type
+        - name
+        - relationships
+        - links
+    ServiceInstanceList:
       type: object
       properties:
         pagination:
-          type: object
-          properties:
-            total_results:
-              type: integer
-            total_pages:
-              type: integer
-            first:
-              type: object
-            last:
-              type: object
-            next:
-              type: object
-            previous:
-              type: object
+          $ref: '#/components/schemas/Pagination'
         resources:
           type: array
           items:
+            oneOf:
+            - $ref: '#/components/schemas/ManagedServiceInstance'
+            - $ref: '#/components/schemas/UserProvidedServiceInstance'
+            discriminator:
+              propertyName: type
+              mapping:
+                managed: '#/components/schemas/ManagedServiceInstance'
+                user-provided: '#/components/schemas/UserProvidedServiceInstance'
+    Metadata:
+      type: object
+      properties:
+        labels:
+          type: object
+          additionalProperties:
+            type:
+            - string
+            - 'null'
+          description: 'A set of key-value pairs that describe the resource. Labels are a JSON object that contains information about a resource. They are used to tag resources with metadata that can be used to filter and group resources. Labels are included in the response body of a request to retrieve a resource.
+
+            Labels are user-specified key/value pairs that are attached to API Resources. They are queryable, identifying attributes of a resource, but they do not affect the operation of CloudFoundry.
+
+
+            For example, an app may be assigned a label with key sensitive and possible values true or false.
+
+
+            Users could then find all sensitive apps with a selector for sensitive=true, resulting in a response containing only apps having the label key sensitive with a label value of true.
+
+
+            Labels
+
+            Labels allow users to apply identifying attributes to resources that are meaningful to the user, but not the CloudFoundry system.
+
+
+            Examples may include (but are not limited to):
+
+
+            "production" : "true" or "production" : "false"
+
+            "env" : "dev" or "env" : "test" or "env" : "prod"
+
+            "chargeback-code" : "abc123"
+
+            Label keys
+
+            Label keys are made up of an (optional) prefix, and name. If a prefix is present, it is separated from the name by a /. Prefixes are dns names intended to enable namespacing of label keys.
+
+
+            A label key prefix must adhere to the following restrictions:
+
+
+            Length: 0-253 characters
+
+            Allowed characters: alphanumeric ( [a-z0-9A-Z] ), -, and .
+
+            DNS subdomain format (series of subdomain labels separated by .)
+
+            A label key name must adhere to the following restrictions:
+
+
+            Length: 1-63 characters
+
+            Allowed characters: alphanumeric ( [a-z0-9A-Z] ), -, _, and .
+
+            Must begin and end with an alphanumeric character
+
+            Label values
+
+            Label values must adhere to the following restrictions:
+
+
+            Length: 0-63 characters
+
+            Allowed characters: alphanumeric ( [a-z0-9A-Z] ), -, _, and .
+
+            Must begin and end with an alphanumeric character
+
+            Empty values are allowed
+
+            '
+        annotations:
+          type: object
+          additionalProperties:
+            type:
+            - string
+            - 'null'
+          description: 'A set of key-value pairs that describe the resource. Annotations are a JSON object that contains information about a resource. They are used to tag resources with metadata that can be used to filter and group resources. Annotations are included in the response body of a request to retrieve a resource.
+
+            Annotations are user-specified key-value pairs that are attached to API resources. They do not affect the operation of Cloud Foundry. Annotations cannot be used in filters.
+
+
+            When a service instance is being created, the service broker is sent the annotations of the service instance, and the space and organization in which the service instance resides. When a service instance is being updated, the service broker is sent the annotations of the space and organization in which the service instance resides. When a service binding is being created, the service broker is sent annotations of any associated app, and the space and organization in which the binding resides. Only annotations with a prefix (e.g. company.com/contacts) are sent to service brokers.
+
+
+            Examples may include (but are not limited to):
+
+
+            "contact info": "bob@example.com jane@example.com"
+
+            "library versions": "Spring: 5.1, Redis Client: a184098. yaml parser: 38"
+
+            "git-sha": "d56fe0367554ae5e878e37ed6c5b9a82f5995512"
+
+            Annotation keys
+
+            Annotation keys are made up of an (optional) prefix and name. If a prefix is present, it is separated from the name by a /. Prefixes are DNS names intended to enable namespacing of annotation keys.
+
+
+            An annotation key prefix must adhere to the following restrictions:
+
+
+            Length: 0-253 characters
+
+            Allowed characters: a-z, A-Z, 0-9, -, and .; emojis cannot be used in keys
+
+            DNS subdomain format (series of subdomain annotations separated by .)
+
+            An annotation key name must adhere to the following restrictions:
+
+
+            Length: 1-63 characters
+
+            Allowed characters: a-z, A-Z, 0-9, -, _, and .; emojis cannot be used in keys
+
+            Must begin and end with an alphanumeric character
+
+            Annotation values
+
+            Annotation values must adhere to the following restrictions:
+
+
+            Length: 0-5000 unicode characters
+
+            '
+      description: 'Metadata is a JSON object that contains information about a resource. It includes the GUID of the resource, the time the resource was created, the time the resource was last updated, and links to the resource.
+
+        Metadata is included in the response body of a request to retrieve a resource.
+
+        '
+    Errors:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/Error'
+      description: 'An error response will always return a list of error objects. Errors appear on the job resource for asynchronous operations.
+
+        Clients should use the code and title fields for programmatically handling specific errors. The message in the detail field is subject to change over time.
+
+        '
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: A numeric code for this error
+        detail:
+          type: string
+          description: Detailed description of the error
+        title:
+          type: string
+          description: Name of the error
+    UserProvidedServiceInstance:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/BaseSchema'
+      - properties:
+          type:
+            type: string
+            enum:
+            - user-provided
+            description: Type of service instance
+          name:
+            type: string
+            description: Name of the service instance
+          tags:
+            type: array
+            items:
+              type: string
+            description: Tags for the service instance
+          syslog_drain_url:
+            type:
+            - string
+            - 'null'
+            format: uri
+            description: URL for syslog drain
+          route_service_url:
+            type:
+            - string
+            - 'null'
+            format: uri
+            description: URL for route service
+          relationships:
             type: object
-    ServiceInstance:
+            properties:
+              space:
+                $ref: '#/components/schemas/RelationshipToOne'
+            description: Relationships for the service instance
+          links:
+            type: object
+            properties:
+              self:
+                $ref: '#/components/schemas/Link'
+              space:
+                $ref: '#/components/schemas/Link'
+              service_credential_bindings:
+                $ref: '#/components/schemas/Link'
+              service_route_bindings:
+                $ref: '#/components/schemas/Link'
+              credentials:
+                $ref: '#/components/schemas/Link'
+          metadata:
+            $ref: '#/components/schemas/Metadata'
+        required:
+        - type
+        - name
+        - relationships
+        - links
+    Relationship:
       type: object
       properties:
         guid:
           type: string
-        name:
+          format: uuid
+          description: The GUID of the resource
+    BaseSchema:
+      type: object
+      properties:
+        guid:
           type: string
-        type:
+          format: uuid
+          description: The unique identifier for the resource
+        created_at:
           type: string
-        relationships:
+          format: date-time
+          description: The ISO8601 compatible date and time when resource was created
+        updated_at:
+          type: string
+          format: date-time
+          description: The ISO8601 compatible date and time when resource was last updated
+      description: 'A resource represents an individual object within the system, such as an app or a service. It is represented as a JSON object.
+
+        A resource consists of several required resource fields and other attributes specific to the resource.
+
+        See Resources and Experimental Resources for specific resources.
+
+        '
+    ServiceInstanceResource:
+      type: object
+      properties:
+        service_id:
+          type: string
+        plan_id:
+          type: string
+        dashboard_url:
+          type: string
+        parameters:
+          $ref: '#/components/schemas/Object'
+        maintenance_info:
+          $ref: '#/components/schemas/MaintenanceInfo'
+        metadata:
+          $ref: '#/components/schemas/ServiceInstanceMetadata'
+    ServiceInstanceProvisionResponse:
+      type: object
+      properties:
+        dashboard_url:
+          type: string
+        metadata:
+          $ref: '#/components/schemas/ServiceInstanceMetadata'
+    MaintenanceInfo:
+      type: object
+      required:
+      - version
+      properties:
+        version:
+          type: string
+        description:
+          type: string
+    Object:
+      type: object
+    ServiceInstanceMetadata:
+      type: object
+      properties:
+        labels:
           type: object
+        attributes:
+          type: object
+    ServiceInstanceUpdateRequestBody:
+      type: object
+      required:
+      - service_id
+      properties:
+        context:
+          $ref: '#/components/schemas/Context'
+        service_id:
+          type: string
+        plan_id:
+          type: string
+        parameters:
+          $ref: '#/components/schemas/Object'
+        previous_values:
+          $ref: '#/components/schemas/ServiceInstancePreviousValues'
+    LastOperationResource:
+      type: object
+      required:
+      - state
+      properties:
+        state:
+          type: string
+          enum:
+          - in progress
+          - succeeded
+          - failed
+        description:
+          type: string
+        instance_usable:
+          type: boolean
+        update_repeatable:
+          type: boolean
+    ServiceInstancePreviousValues:
+      type: object
+      properties:
+        service_id:
+          type: string
+          deprecated: true
+        plan_id:
+          type: string
+        organization_id:
+          type: string
+          deprecated: true
+        space_id:
+          type: string
+          deprecated: true
+    AsyncOperation:
+      type: object
+      properties:
+        operation:
+          type: string
+    ServiceInstanceProvisionRequestBody:
+      type: object
+      required:
+      - service_id
+      - plan_id
+      - organization_guid
+      - space_guid
+      properties:
+        service_id:
+          type: string
+        plan_id:
+          type: string
+        context:
+          $ref: '#/components/schemas/Context'
+        organization_guid:
+          type: string
+          deprecated: true
+        space_guid:
+          type: string
+          deprecated: true
+        parameters:
+          $ref: '#/components/schemas/Object'
+    Context:
+      description: See [Context Conventions](https://github.com/openservicebrokerapi/servicebroker/blob/master/profile.md#context-object) for more details.
+      type: object
+    ServiceInstanceAsyncOperation:
+      type: object
+      properties:
+        dashboard_url:
+          type: string
+        operation:
+          type: string
+        metadata:
+          $ref: '#/components/schemas/ServiceInstanceMetadata'
+  requestBodies:
+    ServiceInstanceCreateRequestBody:
+      description: A request to create a service instance
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+            - type
+            - name
+            - relationships
+            properties:
+              type:
+                type: string
+                enum:
+                - managed
+                - user-provided
+                description: The type of service instance
+              name:
+                type: string
+                description: Name of the service instance
+              parameters:
+                type: object
+                description: A JSON object that is passed to the service broker
+              credentials:
+                type: object
+                description: A JSON object that is made available to apps bound to this service instance (user-provided services only)
+              tags:
+                type: array
+                items:
+                  type: string
+                description: Tags are used by apps to identify service instances; they are shown in the app VCAP_SERVICES env
+              syslog_drain_url:
+                type: string
+                description: URL to which logs for bound applications will be streamed (user-provided services only)
+              route_service_url:
+                type: string
+                description: URL to which requests for bound routes will be forwarded; must use the https protocol (user-provided services only)
+              relationships:
+                type: object
+                required:
+                - space
+                properties:
+                  space:
+                    $ref: '#/components/schemas/RelationshipToOne'
+                    description: The space in which to create the service instance
+                  service_plan:
+                    $ref: '#/components/schemas/RelationshipToOne'
+                    description: The service plan from which to create the service instance
+                description: Relationships for the service instance
+              metadata:
+                $ref: '#/components/schemas/Metadata'
+          examples:
+            managed_service_instance:
+              summary: Managed service instance
+              value:
+                type: managed
+                name: my_service_instance
+                parameters:
+                  foo: bar
+                  baz: qux
+                tags:
+                - foo
+                - bar
+                - baz
+                metadata:
+                  annotations:
+                    foo: bar
+                  labels:
+                    baz: qux
+                relationships:
+                  space:
+                    data:
+                      guid: 7304bc3c-7010-11ea-8840-48bf6bec2d78
+                  service_plan:
+                    data:
+                      guid: e0e4417c-74ee-11ea-a604-48bf6bec2d78
+            user_provided_service_instance:
+              summary: User-provided service instance
+              value:
+                type: user-provided
+                name: my_service_instance
+                credentials:
+                  foo: bar
+                  baz: qux
+                tags:
+                - foo
+                - bar
+                - baz
+                syslog_drain_url: https://syslog.com/drain
+                route_service_url: https://route.com/service
+                metadata:
+                  annotations:
+                    foo: bar
+                  labels:
+                    baz: qux
+                relationships:
+                  space:
+                    data:
+                      guid: 7304bc3c-7010-11ea-8840-48bf6bec2d78
+            default:
+              summary: default
+              value:
+                type: user-provided
+                name: my_service_instance
+                credentials:
+                  foo: bar
+                  baz: qux
+                tags:
+                - foo
+                - bar
+                - baz
+                syslog_drain_url: https://syslog.com/drain
+                route_service_url: https://route.com/service
+                metadata:
+                  annotations:
+                    foo: bar
+                  labels:
+                    baz: qux
+                relationships:
+                  space:
+                    data:
+                      guid: 123e4567-e89b-12d3-a456-426614174000
+    ServiceInstanceUpdateRequestBody:
+      description: A request to update a service instance
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+                description: Name of the service instance
+              parameters:
+                type: object
+                description: A JSON object that is passed to the service broker (managed services only)
+              credentials:
+                type: object
+                description: A JSON object that is made available to apps bound to this service instance (user-provided services only)
+              tags:
+                type: array
+                items:
+                  type: string
+                description: Tags are used by apps to identify service instances; they are shown in the app VCAP_SERVICES env
+              syslog_drain_url:
+                type: string
+                description: URL to which logs for bound applications will be streamed (user-provided services only)
+              route_service_url:
+                type: string
+                description: URL to which requests for bound routes will be forwarded; must use the https protocol (user-provided services only)
+              relationships:
+                type: object
+                properties:
+                  service_plan:
+                    $ref: '#/components/schemas/RelationshipToOne'
+                    description: The service plan from which to create the service instance
+                description: Relationships for the service instance
+              maintenance_info:
+                type: object
+                required:
+                - version
+                properties:
+                  version:
+                    type: string
+                    description: Must be a semantic version value and it must match the version in the maintenance_info for the service instance plan in the updated broker catalog
+                description: If provided, must have the `version` field; `version` must be a semantic version value and it must match the `version` in the `maintenance_info` for the service instance plan in the updated broker catalog. Any other value for `version` will cause a `MaintenanceInfoConflict` error
+              metadata:
+                $ref: '#/components/schemas/Metadata'
+          examples:
+            managed_service_instance:
+              summary: Update managed service instance
+              value:
+                name: my_service_instance
+                parameters:
+                  foo: bar
+                  baz: qux
+                tags:
+                - foo
+                - bar
+                - baz
+                relationships:
+                  service_plan:
+                    data:
+                      guid: f2b6ba9c-a4d2-11ea-8ae6-48bf6bec2d78
+                metadata:
+                  annotations:
+                    note: detailed information
+                  labels:
+                    key: value
+            managed_service_instance_upgrade:
+              summary: Upgrade managed service instance
+              value:
+                maintenance_info:
+                  version: 2.1.1
+            user_provided_service_instance:
+              summary: Update user-provided service instance
+              value:
+                name: my_service_instance
+                credentials:
+                  foo: bar
+                  baz: qux
+                tags:
+                - foo
+                - bar
+                - baz
+                syslog_drain_url: https://syslog.com/drain
+                route_service_url: https://route.com/service
+                metadata:
+                  annotations:
+                    foo: bar
+                  labels:
+                    baz: qux
+            default:
+              summary: default
+              value:
+                name: my_service_instance
+                credentials:
+                  foo: bar
+                  baz: qux
+                tags:
+                - foo
+                - bar
+                - baz
+                syslog_drain_url: https://syslog.com/drain
+                route_service_url: https://route.com/service
+                metadata:
+                  annotations:
+                    foo: bar
+                  labels:
+                    baz: qux
+  responses:
+    UnprocessableEntity:
+      description: Unprocessable Entity
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    NotFound:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    BadGateway:
+      description: Bad Gateway
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Conflict:
+      description: Conflict
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    '500':
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    BadRequest:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+        text/html:
+          schema:
+            type: string
+    ServiceUnavailable:
+      description: Service Unavailable
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
   parameters:
+    OrderBy:
+      name: order_by
+      in: query
+      required: false
+      schema:
+        type: string
+      description: 'Value to sort by. Defaults to ascending; prepend with `-` to sort descending.
+
+        '
+      example: created_at
+    CreatedAts:
+      name: created_ats
+      in: query
+      required: false
+      schema:
+        type: string
+      description: 'Timestamp to filter by. When filtering on equality, several comma-delimited timestamps may be passed. Also supports filtering with [relational operators](#relational-operators).
+
+        '
+      example: '2021-01-01T00:00:00Z'
     PerPage:
       name: per_page
       in: query
+      required: false
       schema:
         type: integer
-        default: 50
-    GuidParam:
+      description: Number of results per page, valid values are 1 through 5000
+      example: 50
+    LabelSelector:
+      name: label_selector
+      in: query
+      description: A query string containing a list of [label selector](#labels-and-selectors) requirements
+      required: false
+      schema:
+        type: string
+      example: environment=production
+    Page:
+      name: page
+      in: query
+      required: false
+      schema:
+        type: integer
+      description: Page to display; valid values are integers >= 1
+      example: 1
+    UpdatedAts:
+      name: updated_ats
+      in: query
+      required: false
+      schema:
+        type: string
+      description: 'Timestamp to filter by. When filtering on equality, several comma-delimited timestamps may be passed. Also supports filtering with [relational operators](#relational-operators).
+
+        '
+      example: '2021-01-01T00:00:00Z'
+    Guid:
       name: guid
       in: path
       required: true
       schema:
         type: string
-    Page:
-      name: page
-      in: query
+        format: uuid
+      description: The unique identifier for the resource
+    APIVersion:
+      name: X-Broker-API-Version
+      in: header
+      description: version number of the Service Broker API that the Platform will use
+      required: true
       schema:
-        type: integer
-        default: 1
+        type: string
+        default: '2.13'
+    OriginatingIdentity:
+      name: X-Broker-API-Originating-Identity
+      in: header
+      description: identity of the user that initiated the request from the Platform
+      schema:
+        type: string
   securitySchemes:
-    bearerAuth:
+    oauth:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: https://uaa.cloudfoundry.local/api-oauth/dialog
+          scopes:
+            cloud_controller.admin: This scope provides read and write access to all resources
+            cloud_controller.admin_read_only: This scope provides read only access to all resources
+            cloud_controller.global_auditor: This scope provides read access to all resources
+            cloud_controller.read: Read access to the Cloud Controller
+            cloud_controller.write: Write access to the Cloud Controller
+            cloud_controller.update_build_state: This scope allows its bearer to update the state of a build; currently only used when updating builds
+            cloud_controller_service_permissions.read: This scope provides read only access for service instance permissions
+    bearer:
       type: http
       scheme: bearer
       bearerFormat: JWT
+      description: Bearer JWT token authentication
+    basicAuth:
+      type: http
+      scheme: basic
+x-refined-from:
+- cloud-foundry-capi-v3-openapi.yaml
+- cloud-foundry-service-instances-api-openapi.yml

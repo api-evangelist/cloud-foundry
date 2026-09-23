@@ -66,19 +66,22 @@ packages:
   version: 5.17.0.RELEASE
   published: '2026-05-19'
   source: https://repo1.maven.org/maven2/org/cloudfoundry/cloudfoundry-client-reactor/maven-metadata.xml
-- name: github.com/cloudfoundry/go-cfclient
+- name: github.com/cloudfoundry/go-cfclient/v3
   language: go
   registry: go
-  registry_url: https://pkg.go.dev/github.com/cloudfoundry/go-cfclient
+  registry_url: https://pkg.go.dev/github.com/cloudfoundry/go-cfclient/v3
   repository: https://github.com/cloudfoundry/go-cfclient
   official: true
   kind: sdk
-  version: null
-  published: null
-  source: https://docs.cloudfoundry.org/devguide/capi/client-libraries.html
+  version: v3.0.0-beta.1
+  published: '2026-07-13'
+  source: https://proxy.golang.org/github.com/cloudfoundry/go-cfclient/v3/@latest
   note: >-
-    Foundation-owned but labelled EXPERIMENTAL and "a work in progress" on the CAPI client-libraries page.
-    version/published left null — not resolved against a registry endpoint in this pass.
+    Foundation-owned but labelled EXPERIMENTAL and "a work in progress" on the CAPI client-libraries page,
+    and the registry agrees: the only resolvable module path is /v3, and its latest tag is still a BETA
+    (v3.0.0-beta.1, 2026-07-13). The UNVERSIONED path github.com/cloudfoundry/go-cfclient has NO published
+    version at all — proxy.golang.org answers "no matching versions for query latest" — so a consumer who
+    imports the bare path from the docs page gets a resolution failure, not an old release.
 - name: cf-uaa-lib
   language: ruby
   registry: rubygems
@@ -130,12 +133,13 @@ packages:
   official: false
   kind: sdk
   version: 1.40.4
-  published: null
+  published: '2026-07-15'
   source: https://pypi.org/pypi/cloudfoundry-client/json
   note: >-
     The CAPI docs name this library and state explicitly that it is NOT supported by Cloud Foundry.
-    Maintained under the cloudfoundry-community org, so official:false. published left null — the PyPI
-    JSON info block does not carry a release date for the current version without walking releases[].
+    Maintained under the cloudfoundry-community org, so official:false. Date read from
+    releases['1.40.4'][0].upload_time_iso_8601 — the current release is the most recently published of
+    every library on this page, which is a notable inversion: the UNSUPPORTED client is the liveliest one.
 - name: bosh_cli
   language: ruby
   registry: rubygems
@@ -157,6 +161,15 @@ absent:
     (0.1.0, 2011-05-08) are third-party wrappers; `@cloudfoundry/cli` does not exist (404).
   source: https://registry.npmjs.org/
 - registry: nuget
-  note: Not probed in this pass; no .NET client is named on the CAPI client-libraries page.
+  note: >-
+    PROBED 2026-09-05 — no first-party Cloud Foundry client on NuGet. The .NET surface is Steeltoe
+    (Steeltoe.Configuration.CloudFoundry 4.2.0, Steeltoe.Extensions.Configuration.CloudFoundryBase 4.0.0
+    and siblings), published by Broadcom/VMware rather than by the Cloud Foundry Foundation, and it reads
+    VCAP_* environment variables inside an app rather than calling the Cloud Controller API. Not recorded
+    as a CF client library.
+  source: https://azuresearch-usnc.nuget.org/query?q=cloudfoundry
 - registry: crates.io
-  note: Not probed in this pass; no Rust client is named on the CAPI client-libraries page.
+  note: >-
+    PROBED 2026-09-05 — no first-party Rust client. The only match is `cf-env` (0.1.9, last updated
+    2024-02-13), a third-party VCAP_SERVICES parser, not a CAPI client.
+  source: https://crates.io/api/v1/crates?q=cloudfoundry

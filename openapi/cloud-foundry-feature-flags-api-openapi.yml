@@ -1,0 +1,450 @@
+openapi: 3.2.0
+info:
+  title: Cloud Foundry V3 Feature Flags API
+  description: '# Welcome to the Experimental Cloud Foundry V3 API Docs!'
+  version: latest
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+  contact:
+    name: Cloud Foundry
+    url: https://www.cloudfoundry.org/
+servers:
+- url: https://api.example.local
+  description: Cloud Foundry V3 API server
+security:
+- oauth:
+  - cloud_controller.read
+  - cloud_controller.write
+tags:
+- name: Feature Flags
+  description: Feature flags are runtime flags that enable or disable functionality on the API.
+paths:
+  /v3/feature_flags:
+    get:
+      summary: List feature flags
+      description: Retrieve all feature_flags.
+      operationId: listFeatureFlags
+      tags:
+      - Feature Flags
+      parameters:
+      - $ref: '#/components/parameters/Page'
+      - $ref: '#/components/parameters/PerPage'
+      - $ref: '#/components/parameters/OrderBy'
+      - name: updated_ats
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'Timestamp to filter by. When filtering on equality, several comma-delimited timestamps may be passed.
+
+          '
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeatureFlagList'
+              examples:
+                default:
+                  summary: default
+                  value:
+                    pagination:
+                      total_results: 3
+                      total_pages: 2
+                      first:
+                        href: https://api.example.org/v3/feature_flags?page=1&per_page=2
+                      last:
+                        href: https://api.example.org/v3/feature_flags?page=2&per_page=2
+                      next:
+                        href: https://api.example.org/v3/feature_flags?page=2&per_page=2
+                      previous: null
+                    resources:
+                    - name: my_feature_flag
+                      enabled: true
+                      updated_at: '2016-10-17T20:00:42Z'
+                      custom_error_message: error message the user sees
+                      links:
+                        self:
+                          href: https://api.example.org/v3/feature_flags/my_feature_flag
+                    - name: my_second_feature_flag
+                      enabled: false
+                      updated_at: null
+                      custom_error_message: null
+                      links:
+                        self:
+                          href: https://api.example.org/v3/feature_flags/my_second_feature_flag
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/500'
+        '502':
+          $ref: '#/components/responses/BadGateway'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+  /v3/feature_flags/{name}:
+    get:
+      summary: Get a feature flag
+      description: Get a feature flag.
+      operationId: getFeatureFlag
+      tags:
+      - Feature Flags
+      parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+          enum:
+          - app_bits_upload
+          - app_scaling
+          - diego_docker
+          - diego_cnb
+          - env_var_visibility
+          - hide_marketplace_from_unauthenticated_users
+          - private_domain_creation
+          - resource_matching
+          - route_creation
+          - route_sharing
+          - service_instance_creation
+          - service_instance_sharing
+          - set_roles_by_username
+          - space_developer_env_var_visibility
+          - space_scoped_private_broker_creation
+          - task_creation
+          - unset_roles_by_username
+          - user_org_creation
+        description: The name of the feature flag
+      responses:
+        '200':
+          description: Successfully retrieved feature flag
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeatureFlag'
+              examples:
+                default:
+                  summary: default
+                  value:
+                    name: my_feature_flag
+                    enabled: true
+                    updated_at: '2016-10-17T20:00:42Z'
+                    custom_error_message: error message the user sees
+                    links:
+                      self:
+                        href: https://api.example.org/v3/feature_flags/my_feature_flag
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      summary: Update a feature flag
+      description: Update a feature flag.
+      operationId: updateFeatureFlag
+      tags:
+      - Feature Flags
+      parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+          enum:
+          - app_bits_upload
+          - app_scaling
+          - diego_docker
+          - diego_cnb
+          - env_var_visibility
+          - hide_marketplace_from_unauthenticated_users
+          - private_domain_creation
+          - resource_matching
+          - route_creation
+          - route_sharing
+          - service_instance_creation
+          - service_instance_sharing
+          - set_roles_by_username
+          - space_developer_env_var_visibility
+          - space_scoped_private_broker_creation
+          - task_creation
+          - unset_roles_by_username
+          - user_org_creation
+        description: The name of the feature flag
+      requestBody:
+        description: Feature flag object that needs to be updated
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                enabled:
+                  type: boolean
+                  description: Whether the feature flag is enabled
+                custom_error_message:
+                  type: string
+                  description: The error string returned by the API when a client performs an action disabled by the feature flag
+            examples:
+              default:
+                summary: default
+                value:
+                  enabled: true
+                  custom_error_message: error message the user sees
+      responses:
+        '200':
+          description: Successfully updated feature flag
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeatureFlag'
+              examples:
+                default:
+                  summary: default
+                  value:
+                    name: my_feature_flag
+                    enabled: true
+                    updated_at: '2016-10-17T20:00:42Z'
+                    custom_error_message: error message the user sees
+                    links:
+                      self:
+                        href: https://api.example.org/v3/feature_flags/my_feature_flag
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/500'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+components:
+  schemas:
+    FeatureFlag:
+      type: object
+      properties:
+        name:
+          type: string
+          description: The name of the feature flag
+        enabled:
+          type: boolean
+          description: Whether the feature flag is enabled
+        updated_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+          description: The time the feature flag was last updated; this will be blank for feature flags that have not been configured
+        custom_error_message:
+          type:
+          - string
+          - 'null'
+          description: The error string returned by the API when a client performs an action disabled by the feature flag
+        links:
+          type: object
+          properties:
+            self:
+              $ref: '#/components/schemas/Link'
+              description: The URL to get this feature flag
+      description: 'Feature flags are runtime flags that enable or disable functionality on the API.
+
+        '
+    Errors:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/Error'
+      description: 'An error response will always return a list of error objects. Errors appear on the job resource for asynchronous operations.
+
+        Clients should use the code and title fields for programmatically handling specific errors. The message in the detail field is subject to change over time.
+
+        '
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: A numeric code for this error
+        detail:
+          type: string
+          description: Detailed description of the error
+        title:
+          type: string
+          description: Name of the error
+    Pagination:
+      type: object
+      properties:
+        total_results:
+          type: integer
+          description: The total number of results available
+        total_pages:
+          type: integer
+          description: The total number of pages available
+        first:
+          allOf:
+          - $ref: '#/components/schemas/Link'
+          - description: The first page of results
+        last:
+          allOf:
+          - $ref: '#/components/schemas/Link'
+          - description: The last page of results
+        next:
+          oneOf:
+          - $ref: '#/components/schemas/Link'
+          - type: 'null'
+          description: The next page of results
+        previous:
+          oneOf:
+          - $ref: '#/components/schemas/Link'
+          - type: 'null'
+          description: The previous page of results
+      description: 'Pagination is a technique used to divide a large set of results into smaller, more manageable sets. This allows clients to retrieve results in smaller chunks, reducing the amount of data transferred and improving performance.
+
+        The pagination object is a JSON object that contains information about the pagination state of the results. It includes the total number of results available, the total number of pages available, and links to the first, last, next, and previous pages of results.
+
+        '
+    FeatureFlagList:
+      type: object
+      properties:
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+        resources:
+          type: array
+          items:
+            $ref: '#/components/schemas/FeatureFlag'
+    Link:
+      type: object
+      properties:
+        href:
+          type: string
+          description: The URL of the link
+        method:
+          type: string
+          description: An optional field containing the HTTP method to be used when following the URL
+      required:
+      - href
+      description: 'Each link is keyed by its type and will include a href for the URL and an optional method for links that cannot be followed using GET.
+
+        '
+  responses:
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    ServiceUnavailable:
+      description: Service Unavailable
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    BadRequest:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+        text/html:
+          schema:
+            type: string
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    UnprocessableEntity:
+      description: Unprocessable Entity
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    NotFound:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    BadGateway:
+      description: Bad Gateway
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Conflict:
+      description: Conflict
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    '500':
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+  parameters:
+    Page:
+      name: page
+      in: query
+      required: false
+      schema:
+        type: integer
+      description: Page to display; valid values are integers >= 1
+      example: 1
+    PerPage:
+      name: per_page
+      in: query
+      required: false
+      schema:
+        type: integer
+      description: Number of results per page, valid values are 1 through 5000
+      example: 50
+    OrderBy:
+      name: order_by
+      in: query
+      required: false
+      schema:
+        type: string
+      description: 'Value to sort by. Defaults to ascending; prepend with `-` to sort descending.
+
+        '
+      example: created_at
+  securitySchemes:
+    oauth:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: https://uaa.cloudfoundry.local/api-oauth/dialog
+          scopes:
+            cloud_controller.admin: This scope provides read and write access to all resources
+            cloud_controller.admin_read_only: This scope provides read only access to all resources
+            cloud_controller.global_auditor: This scope provides read access to all resources
+            cloud_controller.read: Read access to the Cloud Controller
+            cloud_controller.write: Write access to the Cloud Controller
+            cloud_controller.update_build_state: This scope allows its bearer to update the state of a build; currently only used when updating builds
+            cloud_controller_service_permissions.read: This scope provides read only access for service instance permissions
+    bearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Bearer JWT token authentication

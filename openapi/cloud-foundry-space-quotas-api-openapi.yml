@@ -1,0 +1,1095 @@
+openapi: 3.2.0
+info:
+  title: Cloud Foundry V3 Space Quotas API
+  description: '# Welcome to the Experimental Cloud Foundry V3 API Docs!'
+  version: latest
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+  contact:
+    name: Cloud Foundry
+    url: https://www.cloudfoundry.org/
+servers:
+- url: https://api.example.local
+  description: Cloud Foundry V3 API server
+security:
+- oauth:
+  - cloud_controller.read
+  - cloud_controller.write
+tags:
+- name: Space Quotas
+  description: Space quotas are named sets of memory, log rate, service, and instance usage quotas.
+paths:
+  /v3/space_quotas:
+    get:
+      summary: List space quotas
+      description: This endpoint lists all space quota resources that the user has permission to view.
+      operationId: listSpaceQuotas
+      tags:
+      - Space Quotas
+      parameters:
+      - $ref: '#/components/parameters/Page'
+      - $ref: '#/components/parameters/PerPage'
+      - $ref: '#/components/parameters/OrderBy'
+      - name: guids
+        in: query
+        schema:
+          type: array
+          items:
+            type: string
+        description: Comma-delimited list of space quota guids to filter by
+      - name: names
+        in: query
+        schema:
+          type: array
+          items:
+            type: string
+        description: Comma-delimited list of space quota names to filter by
+      - name: organization_guids
+        in: query
+        schema:
+          type: array
+          items:
+            type: string
+        description: Comma-delimited list of organization guids to filter by
+      - name: space_guids
+        in: query
+        schema:
+          type: array
+          items:
+            type: string
+        description: Comma-delimited list of space guids to filter by
+      - $ref: '#/components/parameters/CreatedAts'
+      - $ref: '#/components/parameters/UpdatedAts'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SpaceQuotaList'
+              examples:
+                default:
+                  summary: default
+                  value:
+                    pagination:
+                      total_results: 2
+                      total_pages: 1
+                      first:
+                        href: https://api.example.org/v3/space_quotas?page=1&per_page=50
+                      last:
+                        href: https://api.example.org/v3/space_quotas?page=1&per_page=50
+                      next: null
+                      previous: null
+                    resources:
+                    - guid: 123e4567-e89b-12d3-a456-426614174000
+                      created_at: '2016-05-04T17:00:41Z'
+                      updated_at: '2016-05-04T17:00:41Z'
+                      name: don-quixote
+                      apps:
+                        total_memory_in_mb: 5120
+                        per_process_memory_in_mb: 1024
+                        log_rate_limit_in_bytes_per_second: 1024
+                        total_instances: 10
+                        per_app_tasks: null
+                      services:
+                        paid_services_allowed: true
+                        total_service_instances: 10
+                        total_service_keys: 20
+                      routes:
+                        total_routes: 8
+                        total_reserved_ports: 20
+                      relationships:
+                        organizations:
+                          data:
+                            guid: 123e4567-e89b-12d3-a456-426614174000
+                        spaces:
+                          data:
+                          - guid: 123e4567-e89b-12d3-a456-426614174000
+                      links:
+                        self:
+                          href: https://api.example.org/v3/space_quotas/f919ef8a-e333-472a-8172-baaf2c30d301
+                        organization:
+                          href: https://api.example.org/v3/organizations/9b370018-c38e-44c9-86d6-155c76801104
+                    - guid: 123e4567-e89b-12d3-a456-426614174000
+                      created_at: '2017-05-04T17:00:41Z'
+                      updated_at: '2017-05-04T17:00:41Z'
+                      name: sancho-panza
+                      apps:
+                        total_memory_in_mb: 2048
+                        per_process_memory_in_mb: 1024
+                        log_rate_limit_in_bytes_per_second: 1024
+                        total_instances: 5
+                        per_app_tasks: 2
+                      services:
+                        paid_services_allowed: true
+                        total_service_instances: 10
+                        total_service_keys: 20
+                      routes:
+                        total_routes: 8
+                        total_reserved_ports: 4
+                      relationships:
+                        organizations:
+                          data:
+                            guid: 123e4567-e89b-12d3-a456-426614174000
+                        spaces:
+                          data: []
+                      links:
+                        self:
+                          href: https://api.example.org/v3/space_quotas/554bcf32-7032-4cb0-92bc-738f9d2089d3
+                        organization:
+                          href: https://api.example.org/v3/organizations/9b370018-c38e-44c9-86d6-155c76801104
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/500'
+        '502':
+          $ref: '#/components/responses/BadGateway'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+    post:
+      summary: Create a space quota
+      description: This endpoint creates a new space quota scoped to a specific organization.
+      operationId: createSpaceQuota
+      tags:
+      - Space Quotas
+      requestBody:
+        $ref: '#/components/requestBodies/SpaceQuotaCreate'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SpaceQuota'
+              examples:
+                default:
+                  summary: default
+                  value:
+                    guid: 123e4567-e89b-12d3-a456-426614174000
+                    created_at: '2016-05-04T17:00:41Z'
+                    updated_at: '2016-05-04T17:00:41Z'
+                    name: don-quixote
+                    apps:
+                      total_memory_in_mb: 5120
+                      per_process_memory_in_mb: 1024
+                      log_rate_limit_in_bytes_per_second: 1024
+                      total_instances: 10
+                      per_app_tasks: null
+                    services:
+                      paid_services_allowed: true
+                      total_service_instances: 10
+                      total_service_keys: 20
+                    routes:
+                      total_routes: 8
+                      total_reserved_ports: 20
+                    relationships:
+                      organization:
+                        data:
+                          guid: 123e4567-e89b-12d3-a456-426614174000
+                      spaces:
+                        data:
+                        - guid: 123e4567-e89b-12d3-a456-426614174000
+                    links:
+                      self:
+                        href: https://api.example.org/v3/space_quotas/f919ef8a-e333-472a-8172-baaf2c30d301
+                      organization:
+                        href: https://api.example.org/v3/organizations/9b370018-c38e-44c9-86d6-155c76801104
+          links:
+            organization:
+              operationId: getOrganization
+              parameters:
+                guid: $response.body#/relationships/organization/data/guid
+              description: Retrieve the organization for this space quota
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/500'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+  /v3/space_quotas/{guid}:
+    get:
+      summary: Get a space quota
+      operationId: getSpaceQuota
+      tags:
+      - Space Quotas
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SpaceQuota'
+              examples:
+                default:
+                  summary: default
+                  value:
+                    guid: 123e4567-e89b-12d3-a456-426614174000
+                    created_at: '2016-05-04T17:00:41Z'
+                    updated_at: '2016-05-04T17:00:41Z'
+                    name: don-quixote
+                    apps:
+                      total_memory_in_mb: 5120
+                      per_process_memory_in_mb: 1024
+                      log_rate_limit_in_bytes_per_second: 1024
+                      total_instances: 10
+                      per_app_tasks: null
+                    services:
+                      paid_services_allowed: true
+                      total_service_instances: 10
+                      total_service_keys: 20
+                    routes:
+                      total_routes: 8
+                      total_reserved_ports: 20
+                    relationships:
+                      organization:
+                        data:
+                          guid: 123e4567-e89b-12d3-a456-426614174000
+                      spaces:
+                        data:
+                        - guid: 123e4567-e89b-12d3-a456-426614174000
+                    links:
+                      self:
+                        href: https://api.example.org/v3/space_quotas/f919ef8a-e333-472a-8172-baaf2c30d301
+                      organization:
+                        href: https://api.example.org/v3/organizations/9b370018-c38e-44c9-86d6-155c76801104
+          links:
+            organization:
+              operationId: getOrganization
+              parameters:
+                guid: $response.body#/relationships/organization/data/guid
+              description: Retrieve the organization for this space quota
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      summary: Update a space quota
+      description: This endpoint will only update the parameters specified in the request body. Any unspecified parameters will retain their existing values.
+      operationId: updateSpaceQuota
+      tags:
+      - Space Quotas
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      requestBody:
+        $ref: '#/components/requestBodies/SpaceQuotaUpdate'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SpaceQuota'
+              examples:
+                default:
+                  summary: default
+                  value:
+                    guid: 123e4567-e89b-12d3-a456-426614174000
+                    created_at: '2016-05-04T17:00:41Z'
+                    updated_at: '2016-05-04T17:00:41Z'
+                    name: don-quixote
+                    apps:
+                      total_memory_in_mb: 5120
+                      per_process_memory_in_mb: 1024
+                      log_rate_limit_in_bytes_per_second: 1024
+                      total_instances: 10
+                      per_app_tasks: null
+                    services:
+                      paid_services_allowed: true
+                      total_service_instances: 10
+                      total_service_keys: 20
+                    routes:
+                      total_routes: 8
+                      total_reserved_ports: 20
+                    relationships:
+                      organization:
+                        data:
+                          guid: 123e4567-e89b-12d3-a456-426614174000
+                      spaces:
+                        data:
+                        - guid: 123e4567-e89b-12d3-a456-426614174000
+                    links:
+                      self:
+                        href: https://api.example.org/v3/space_quotas/f919ef8a-e333-472a-8172-baaf2c30d301
+                      organization:
+                        href: https://api.example.org/v3/organizations/9b370018-c38e-44c9-86d6-155c76801104
+          links:
+            organization:
+              operationId: getOrganization
+              parameters:
+                guid: $response.body#/relationships/organization/data/guid
+              description: Retrieve the organization for this space quota
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/500'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+    delete:
+      summary: Delete a space quota
+      description: Space quotas cannot be deleted when applied to any spaces.
+      operationId: deleteSpaceQuota
+      tags:
+      - Space Quotas
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      responses:
+        '202':
+          description: Accepted
+          headers:
+            Location:
+              description: URL of the job that is deleting the space quota
+              schema:
+                type: string
+                format: uri
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/500'
+  /v3/space_quotas/{quota_guid}/relationships/spaces:
+    post:
+      summary: Apply a space quota to a space
+      description: 'This endpoint applies a space quota to one or more spaces.
+
+
+        Only an admin or an org manager in the quota’s parent organization can apply a space quota to a space.'
+      operationId: applySpaceQuota
+      tags:
+      - Space Quotas
+      parameters:
+      - name: quota_guid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RelationshipToMany'
+            examples:
+              default:
+                summary: default
+                value:
+                  data:
+                  - guid: 123e4567-e89b-12d3-a456-426614174000
+                  - guid: 123e4567-e89b-12d3-a456-426614174000
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RelationshipToMany'
+              examples:
+                default:
+                  summary: default
+                  value:
+                    data:
+                    - guid: 123e4567-e89b-12d3-a456-426614174000
+                    - guid: 123e4567-e89b-12d3-a456-426614174000
+                    - guid: 123e4567-e89b-12d3-a456-426614174000
+                    links:
+                      self:
+                        href: https://api.example.org/v3/space_quotas/quota-guid/relationships/spaces
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /v3/space_quotas/{guid}/relationships/spaces/{space_guid}:
+    delete:
+      summary: Remove a space quota from a space
+      description: 'This endpoint removes a space quota from a space.
+
+
+        Only an admin or an org manager in the quota’s parent organization can remove a space quota from a space.'
+      operationId: removeSpaceQuotaFromSpace
+      tags:
+      - Space Quotas
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      - name: space_guid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '204':
+          description: No Content
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+components:
+  schemas:
+    Pagination:
+      type: object
+      properties:
+        total_results:
+          type: integer
+          description: The total number of results available
+        total_pages:
+          type: integer
+          description: The total number of pages available
+        first:
+          allOf:
+          - $ref: '#/components/schemas/Link'
+          - description: The first page of results
+        last:
+          allOf:
+          - $ref: '#/components/schemas/Link'
+          - description: The last page of results
+        next:
+          oneOf:
+          - $ref: '#/components/schemas/Link'
+          - type: 'null'
+          description: The next page of results
+        previous:
+          oneOf:
+          - $ref: '#/components/schemas/Link'
+          - type: 'null'
+          description: The previous page of results
+      description: 'Pagination is a technique used to divide a large set of results into smaller, more manageable sets. This allows clients to retrieve results in smaller chunks, reducing the amount of data transferred and improving performance.
+
+        The pagination object is a JSON object that contains information about the pagination state of the results. It includes the total number of results available, the total number of pages available, and links to the first, last, next, and previous pages of results.
+
+        '
+    RelationshipToMany:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Relationship'
+        links:
+          type: object
+          properties:
+            self:
+              $ref: '#/components/schemas/Link'
+            related:
+              $ref: '#/components/schemas/Link'
+      description: 'Some relationships relate a resource to several other resources. For example, an isolation segment can be entitled to multiple organizations.
+
+        '
+    Link:
+      type: object
+      properties:
+        href:
+          type: string
+          description: The URL of the link
+        method:
+          type: string
+          description: An optional field containing the HTTP method to be used when following the URL
+      required:
+      - href
+      description: 'Each link is keyed by its type and will include a href for the URL and an optional method for links that cannot be followed using GET.
+
+        '
+    RelationshipToOne:
+      type: object
+      properties:
+        data:
+          type:
+          - object
+          - 'null'
+          $ref: '#/components/schemas/Relationship'
+        links:
+          type: object
+          properties:
+            self:
+              $ref: '#/components/schemas/Link'
+            related:
+              $ref: '#/components/schemas/Link'
+      description: 'Some relationships relate a resource to exactly one other resource. For example an app can belong to only one space.
+
+        '
+    Metadata:
+      type: object
+      properties:
+        labels:
+          type: object
+          additionalProperties:
+            type:
+            - string
+            - 'null'
+          description: 'A set of key-value pairs that describe the resource. Labels are a JSON object that contains information about a resource. They are used to tag resources with metadata that can be used to filter and group resources. Labels are included in the response body of a request to retrieve a resource.
+
+            Labels are user-specified key/value pairs that are attached to API Resources. They are queryable, identifying attributes of a resource, but they do not affect the operation of CloudFoundry.
+
+
+            For example, an app may be assigned a label with key sensitive and possible values true or false.
+
+
+            Users could then find all sensitive apps with a selector for sensitive=true, resulting in a response containing only apps having the label key sensitive with a label value of true.
+
+
+            Labels
+
+            Labels allow users to apply identifying attributes to resources that are meaningful to the user, but not the CloudFoundry system.
+
+
+            Examples may include (but are not limited to):
+
+
+            "production" : "true" or "production" : "false"
+
+            "env" : "dev" or "env" : "test" or "env" : "prod"
+
+            "chargeback-code" : "abc123"
+
+            Label keys
+
+            Label keys are made up of an (optional) prefix, and name. If a prefix is present, it is separated from the name by a /. Prefixes are dns names intended to enable namespacing of label keys.
+
+
+            A label key prefix must adhere to the following restrictions:
+
+
+            Length: 0-253 characters
+
+            Allowed characters: alphanumeric ( [a-z0-9A-Z] ), -, and .
+
+            DNS subdomain format (series of subdomain labels separated by .)
+
+            A label key name must adhere to the following restrictions:
+
+
+            Length: 1-63 characters
+
+            Allowed characters: alphanumeric ( [a-z0-9A-Z] ), -, _, and .
+
+            Must begin and end with an alphanumeric character
+
+            Label values
+
+            Label values must adhere to the following restrictions:
+
+
+            Length: 0-63 characters
+
+            Allowed characters: alphanumeric ( [a-z0-9A-Z] ), -, _, and .
+
+            Must begin and end with an alphanumeric character
+
+            Empty values are allowed
+
+            '
+        annotations:
+          type: object
+          additionalProperties:
+            type:
+            - string
+            - 'null'
+          description: 'A set of key-value pairs that describe the resource. Annotations are a JSON object that contains information about a resource. They are used to tag resources with metadata that can be used to filter and group resources. Annotations are included in the response body of a request to retrieve a resource.
+
+            Annotations are user-specified key-value pairs that are attached to API resources. They do not affect the operation of Cloud Foundry. Annotations cannot be used in filters.
+
+
+            When a service instance is being created, the service broker is sent the annotations of the service instance, and the space and organization in which the service instance resides. When a service instance is being updated, the service broker is sent the annotations of the space and organization in which the service instance resides. When a service binding is being created, the service broker is sent annotations of any associated app, and the space and organization in which the binding resides. Only annotations with a prefix (e.g. company.com/contacts) are sent to service brokers.
+
+
+            Examples may include (but are not limited to):
+
+
+            "contact info": "bob@example.com jane@example.com"
+
+            "library versions": "Spring: 5.1, Redis Client: a184098. yaml parser: 38"
+
+            "git-sha": "d56fe0367554ae5e878e37ed6c5b9a82f5995512"
+
+            Annotation keys
+
+            Annotation keys are made up of an (optional) prefix and name. If a prefix is present, it is separated from the name by a /. Prefixes are DNS names intended to enable namespacing of annotation keys.
+
+
+            An annotation key prefix must adhere to the following restrictions:
+
+
+            Length: 0-253 characters
+
+            Allowed characters: a-z, A-Z, 0-9, -, and .; emojis cannot be used in keys
+
+            DNS subdomain format (series of subdomain annotations separated by .)
+
+            An annotation key name must adhere to the following restrictions:
+
+
+            Length: 1-63 characters
+
+            Allowed characters: a-z, A-Z, 0-9, -, _, and .; emojis cannot be used in keys
+
+            Must begin and end with an alphanumeric character
+
+            Annotation values
+
+            Annotation values must adhere to the following restrictions:
+
+
+            Length: 0-5000 unicode characters
+
+            '
+      description: 'Metadata is a JSON object that contains information about a resource. It includes the GUID of the resource, the time the resource was created, the time the resource was last updated, and links to the resource.
+
+        Metadata is included in the response body of a request to retrieve a resource.
+
+        '
+    Errors:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/Error'
+      description: 'An error response will always return a list of error objects. Errors appear on the job resource for asynchronous operations.
+
+        Clients should use the code and title fields for programmatically handling specific errors. The message in the detail field is subject to change over time.
+
+        '
+    SpaceQuotaList:
+      type: object
+      properties:
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+        resources:
+          type: array
+          items:
+            $ref: '#/components/schemas/SpaceQuota'
+    BaseSchema:
+      type: object
+      properties:
+        guid:
+          type: string
+          format: uuid
+          description: The unique identifier for the resource
+        created_at:
+          type: string
+          format: date-time
+          description: The ISO8601 compatible date and time when resource was created
+        updated_at:
+          type: string
+          format: date-time
+          description: The ISO8601 compatible date and time when resource was last updated
+      description: 'A resource represents an individual object within the system, such as an app or a service. It is represented as a JSON object.
+
+        A resource consists of several required resource fields and other attributes specific to the resource.
+
+        See Resources and Experimental Resources for specific resources.
+
+        '
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: A numeric code for this error
+        detail:
+          type: string
+          description: Detailed description of the error
+        title:
+          type: string
+          description: Name of the error
+    Relationship:
+      type: object
+      properties:
+        guid:
+          type: string
+          format: uuid
+          description: The GUID of the resource
+    SpaceQuota:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/BaseSchema'
+      - properties:
+          name:
+            type: string
+            description: Name of the space quota
+          apps:
+            type: object
+            properties:
+              total_memory_in_mb:
+                type:
+                - integer
+                - 'null'
+                description: Total memory allowed for all apps in MB
+              per_process_memory_in_mb:
+                type:
+                - integer
+                - 'null'
+                description: Maximum memory per process in MB
+              log_rate_limit_in_bytes_per_second:
+                type:
+                - integer
+                - 'null'
+                description: Log rate limit in bytes per second
+              total_instances:
+                type:
+                - integer
+                - 'null'
+                description: Total number of app instances allowed
+              per_app_tasks:
+                type:
+                - integer
+                - 'null'
+                description: Maximum number of tasks per app
+            description: App limits for the space quota
+          services:
+            type: object
+            properties:
+              paid_services_allowed:
+                type: boolean
+                description: Whether paid services are allowed
+              total_service_instances:
+                type:
+                - integer
+                - 'null'
+                description: Total number of service instances allowed
+              total_service_keys:
+                type:
+                - integer
+                - 'null'
+                description: Total number of service keys allowed
+            description: Service limits for the space quota
+          routes:
+            type: object
+            properties:
+              total_routes:
+                type:
+                - integer
+                - 'null'
+                description: Total number of routes allowed
+              total_reserved_ports:
+                type:
+                - integer
+                - 'null'
+                description: Total number of reserved ports allowed
+            description: Route limits for the space quota
+          relationships:
+            type: object
+            properties:
+              organization:
+                $ref: '#/components/schemas/RelationshipToOne'
+              spaces:
+                $ref: '#/components/schemas/RelationshipToMany'
+            description: Relationships for the space quota
+          links:
+            type: object
+            properties:
+              self:
+                $ref: '#/components/schemas/Link'
+              organization:
+                $ref: '#/components/schemas/Link'
+          metadata:
+            $ref: '#/components/schemas/Metadata'
+        required:
+        - name
+        - apps
+        - services
+        - routes
+        - relationships
+        - links
+  responses:
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    UnprocessableEntity:
+      description: Unprocessable Entity
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    NotFound:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    BadGateway:
+      description: Bad Gateway
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Conflict:
+      description: Conflict
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    '500':
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    BadRequest:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+        text/html:
+          schema:
+            type: string
+    ServiceUnavailable:
+      description: Service Unavailable
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+  parameters:
+    OrderBy:
+      name: order_by
+      in: query
+      required: false
+      schema:
+        type: string
+      description: 'Value to sort by. Defaults to ascending; prepend with `-` to sort descending.
+
+        '
+      example: created_at
+    CreatedAts:
+      name: created_ats
+      in: query
+      required: false
+      schema:
+        type: string
+      description: 'Timestamp to filter by. When filtering on equality, several comma-delimited timestamps may be passed. Also supports filtering with [relational operators](#relational-operators).
+
+        '
+      example: '2021-01-01T00:00:00Z'
+    PerPage:
+      name: per_page
+      in: query
+      required: false
+      schema:
+        type: integer
+      description: Number of results per page, valid values are 1 through 5000
+      example: 50
+    Page:
+      name: page
+      in: query
+      required: false
+      schema:
+        type: integer
+      description: Page to display; valid values are integers >= 1
+      example: 1
+    UpdatedAts:
+      name: updated_ats
+      in: query
+      required: false
+      schema:
+        type: string
+      description: 'Timestamp to filter by. When filtering on equality, several comma-delimited timestamps may be passed. Also supports filtering with [relational operators](#relational-operators).
+
+        '
+      example: '2021-01-01T00:00:00Z'
+    Guid:
+      name: guid
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: The unique identifier for the resource
+  requestBodies:
+    SpaceQuotaUpdate:
+      description: Space quota to update
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+                description: Name of the space quota
+              apps:
+                type: object
+                properties:
+                  total_memory_in_mb:
+                    type: integer
+                    description: Total memory allowed for all apps in MB
+                  per_process_memory_in_mb:
+                    type: integer
+                    description: Maximum memory per process in MB
+                  log_rate_limit_in_bytes_per_second:
+                    type: integer
+                    description: Log rate limit in bytes per second
+                  total_instances:
+                    type: integer
+                    description: Total number of app instances allowed
+                  per_app_tasks:
+                    type: integer
+                    description: Maximum number of tasks per app
+                description: App limits for the space quota
+              services:
+                type: object
+                properties:
+                  paid_services_allowed:
+                    type: boolean
+                    description: Whether paid services are allowed
+                  total_service_instances:
+                    type: integer
+                    description: Total number of service instances allowed
+                  total_service_keys:
+                    type: integer
+                    description: Total number of service keys allowed
+                description: Service limits for the space quota
+              routes:
+                type: object
+                properties:
+                  total_routes:
+                    type: integer
+                    description: Total number of routes allowed
+                  total_reserved_ports:
+                    type: integer
+                    description: Total number of reserved ports allowed
+                description: Route limits for the space quota
+              metadata:
+                $ref: '#/components/schemas/Metadata'
+    SpaceQuotaCreate:
+      description: Space quota to create
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+                description: Name of the space quota
+              apps:
+                type: object
+                properties:
+                  total_memory_in_mb:
+                    type: integer
+                    description: Total memory allowed for all apps in MB
+                  per_process_memory_in_mb:
+                    type: integer
+                    description: Maximum memory per process in MB
+                  log_rate_limit_in_bytes_per_second:
+                    type: integer
+                    description: Log rate limit in bytes per second
+                  total_instances:
+                    type: integer
+                    description: Total number of app instances allowed
+                  per_app_tasks:
+                    type: integer
+                    description: Maximum number of tasks per app
+                description: App limits for the space quota
+              services:
+                type: object
+                properties:
+                  paid_services_allowed:
+                    type: boolean
+                    description: Whether paid services are allowed
+                  total_service_instances:
+                    type: integer
+                    description: Total number of service instances allowed
+                  total_service_keys:
+                    type: integer
+                    description: Total number of service keys allowed
+                description: Service limits for the space quota
+              routes:
+                type: object
+                properties:
+                  total_routes:
+                    type: integer
+                    description: Total number of routes allowed
+                  total_reserved_ports:
+                    type: integer
+                    description: Total number of reserved ports allowed
+                description: Route limits for the space quota
+              relationships:
+                type: object
+                properties:
+                  organization:
+                    $ref: '#/components/schemas/RelationshipToOne'
+                  spaces:
+                    $ref: '#/components/schemas/RelationshipToMany'
+                description: Relationships for the space quota
+              metadata:
+                $ref: '#/components/schemas/Metadata'
+            required:
+            - name
+          examples:
+            default:
+              summary: default
+              value:
+                name: production
+                relationships:
+                  organization:
+                    data:
+                      guid: 123e4567-e89b-12d3-a456-426614174000
+  securitySchemes:
+    oauth:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: https://uaa.cloudfoundry.local/api-oauth/dialog
+          scopes:
+            cloud_controller.admin: This scope provides read and write access to all resources
+            cloud_controller.admin_read_only: This scope provides read only access to all resources
+            cloud_controller.global_auditor: This scope provides read access to all resources
+            cloud_controller.read: Read access to the Cloud Controller
+            cloud_controller.write: Write access to the Cloud Controller
+            cloud_controller.update_build_state: This scope allows its bearer to update the state of a build; currently only used when updating builds
+            cloud_controller_service_permissions.read: This scope provides read only access for service instance permissions
+    bearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Bearer JWT token authentication

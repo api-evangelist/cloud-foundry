@@ -1,93 +1,923 @@
 openapi: 3.2.0
 info:
-  title: Cloud Foundry Cloud Controller API v3 Apps Deployments API
-  description: 'Cloud Foundry Cloud Controller API v3 is the primary control plane of
-
-    Cloud Foundry. It manages apps, packages, droplets, processes, tasks,
-
-    organizations, spaces, service instances, and related resources.
-
-    Requests authenticate with OAuth 2.0 bearer tokens issued by the
-
-    Cloud Foundry UAA server.
-
-    '
-  version: 3.220.0
+  title: Cloud Foundry V3 Deployments API
+  description: '# Welcome to the Experimental Cloud Foundry V3 API Docs!'
+  version: latest
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+  contact:
+    name: Cloud Foundry
+    url: https://www.cloudfoundry.org/
 servers:
-- url: https://api.cloudfoundry.org
-  description: Public Cloud Foundry CC API endpoint (replace with your foundation host)
+- url: https://api.example.local
+  description: Cloud Foundry V3 API server
 security:
-- bearerAuth: []
+- oauth:
+  - cloud_controller.read
+  - cloud_controller.write
 tags:
 - name: Deployments
+  description: Deployments are objects that manage updates to applications with zero downtime.
 paths:
   /v3/deployments:
     get:
       summary: List deployments
+      description: Retrieve all deployments.
+      operationId: listDeployments
+      tags:
+      - Deployments
       parameters:
       - $ref: '#/components/parameters/Page'
       - $ref: '#/components/parameters/PerPage'
+      - $ref: '#/components/parameters/OrderBy'
+      - $ref: '#/components/parameters/CreatedAts'
+      - $ref: '#/components/parameters/UpdatedAts'
+      - $ref: '#/components/parameters/LabelSelector'
+      - name: app_guids
+        in: query
+        schema:
+          type: array
+          items:
+            type: string
+        description: Comma-delimited list of app GUIDs to filter by
+      - name: states
+        in: query
+        schema:
+          type: array
+          items:
+            type: string
+        description: Comma-delimited list of states to filter by
+      - name: status_reasons
+        in: query
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - DEPLOYING
+            - PAUSED
+            - CANCELING
+            - DEPLOYED
+            - CANCELED
+            - SUPERSEDED
+        description: Comma-delimited list of status reasons to filter by
+      - name: status_values
+        in: query
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - ACTIVE
+            - FINALIZED
+        description: Comma-delimited list of status values to filter by
       responses:
         '200':
-          description: Deployments page
+          description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaginatedResponse'
+                $ref: '#/components/schemas/DeploymentList'
+              examples:
+                default:
+                  summary: default
+                  value:
+                    pagination:
+                      total_results: 1
+                      total_pages: 1
+                      first:
+                        href: https://api.example.org?page=1&per_page=2
+                      last:
+                        href: https://api.example.org?page=1&per_page=2
+                      next: null
+                      previous: null
+                    resources:
+                    - guid: 123e4567-e89b-12d3-a456-426614174000
+                      status:
+                        value: FINALIZED
+                        reason: DEPLOYED
+                        details:
+                          last_successful_healthcheck: '2018-04-25T22:42:10Z'
+                          last_status_change: '2018-04-25T22:42:10Z'
+                      strategy: rolling
+                      options:
+                        max_in_flight: 1
+                      droplet:
+                        guid: 123e4567-e89b-12d3-a456-426614174000
+                      previous_droplet:
+                        guid: 123e4567-e89b-12d3-a456-426614174000
+                      new_processes:
+                      - guid: 123e4567-e89b-12d3-a456-426614174000
+                        type: web-deployment-59c3d133-2b83-46f3-960e-7765a129aea4
+                      revision:
+                        guid: 123e4567-e89b-12d3-a456-426614174000
+                        version: 1
+                      created_at: '2018-04-25T22:42:10Z'
+                      updated_at: '2018-04-25T22:42:10Z'
+                      metadata:
+                        labels: {}
+                        annotations: {}
+                      relationships:
+                        app:
+                          data:
+                            guid: 123e4567-e89b-12d3-a456-426614174000
+                      links:
+                        self:
+                          href: https://api.example.org/v3/deployments/59c3d133-2b83-46f3-960e-7765a129aea4
+                        app:
+                          href: https://api.example.org/v3/apps/305cea31-5a44-45ca-b51b-e89c7a8ef8b2
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/500'
+        '502':
+          $ref: '#/components/responses/BadGateway'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+    post:
+      summary: Create a deployment
+      description: When you create a new deployment you can either provide a specific droplet or revision to deploy. If no revision or droplet is provided, the droplet associated with the app is deployed.
+      operationId: createDeployment
       tags:
       - Deployments
-    post:
-      summary: Create deployment
       requestBody:
+        description: Deployment object that needs to be created
         required: true
         content:
           application/json:
             schema:
               type: object
+              properties:
+                relationships:
+                  $ref: '#/components/schemas/Relationships'
+                strategy:
+                  type: string
+                  enum:
+                  - rolling
+                  - canary
+                options:
+                  type: object
+                  properties:
+                    max_in_flight:
+                      type: integer
+                      description: The maximum number of instances that will be deployed simultaneously
+                      default: 1
+                      minimum: 1
+                    web_instances:
+                      type: integer
+                      description: The number of instances for the web process of the new droplet
+                    memory_in_mb:
+                      type: integer
+                      description: The amount of memory in megabytes to allocate for the web process
+                    disk_in_mb:
+                      type: integer
+                      description: The amount of disk space in megabytes to allocate for the web process
+                    log_rate_limit_in_bytes_per_second:
+                      type: integer
+                      description: The log rate limit in bytes per second for the web process. A value of -1 indicates unlimited, 0 prevents any logs from being emitted.
+                    canary:
+                      type: object
+                      description: Canary steps to use for the deployment. Only available for deployments with strategy ‘canary’.
+                      properties:
+                        steps:
+                          type: array
+                          description: Array of steps defining the canary deployment progression
+                          items:
+                            type: object
+                            properties:
+                              instance_weight:
+                                type: integer
+                                description: The percentage of instances to be deployed as part of the canary process in this step
+                droplet:
+                  $ref: '#/components/schemas/Relationship'
+                revision:
+                  $ref: '#/components/schemas/Relationship'
+                metadata:
+                  $ref: '#/components/schemas/Metadata'
+            examples:
+              default:
+                summary: default
+                value:
+                  revision:
+                    guid: 123e4567-e89b-12d3-a456-426614174000
+                  strategy: rolling
+                  relationships:
+                    app:
+                      data:
+                        guid: 123e4567-e89b-12d3-a456-426614174000
       responses:
         '201':
-          description: Deployment created
+          description: Successfully created deployment
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Deployment'
+          links:
+            app:
+              operationId: getApp
+              parameters:
+                guid: $response.body#/relationships/app/data/guid
+              description: Retrieve the app for this deployment
+            droplet:
+              operationId: getDroplet
+              parameters:
+                guid: $response.body#/droplet/data/guid
+              description: Retrieve the droplet for this deployment
+            previous_droplet:
+              operationId: getDroplet
+              parameters:
+                guid: $response.body#/previous_droplet/data/guid
+              description: Retrieve the previous droplet for this deployment
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/500'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+  /v3/deployments/{guid}:
+    get:
+      summary: Get a deployment
+      description: Retrieve a deployment.
+      operationId: getDeployment
       tags:
       - Deployments
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      responses:
+        '200':
+          description: Successfully retrieved deployment
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Deployment'
+          links:
+            app:
+              operationId: getApp
+              parameters:
+                guid: $response.body#/relationships/app/data/guid
+              description: Retrieve the app for this deployment
+            droplet:
+              operationId: getDroplet
+              parameters:
+                guid: $response.body#/droplet/data/guid
+              description: Retrieve the droplet for this deployment
+            previous_droplet:
+              operationId: getDroplet
+              parameters:
+                guid: $response.body#/previous_droplet/data/guid
+              description: Retrieve the previous droplet for this deployment
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      summary: Update a deployment
+      description: Update a deployment.
+      operationId: updateDeployment
+      tags:
+      - Deployments
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      requestBody:
+        description: Deployment object that needs to be updated
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                metadata:
+                  $ref: '#/components/schemas/Metadata'
+              description: Request schema for updating a deployment
+            examples:
+              default:
+                summary: default
+                value:
+                  metadata:
+                    labels:
+                      key: value
+                    annotations:
+                      note: detailed information
+      responses:
+        '200':
+          description: Successfully updated deployment
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Deployment'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/500'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+  /v3/deployments/{guid}/actions/cancel:
+    post:
+      summary: Cancel a deployment
+      description: Cancel a deployment.
+      operationId: cancelDeployment
+      tags:
+      - Deployments
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      responses:
+        '200':
+          description: Successfully canceled deployment
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Deployment'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /v3/deployments/{guid}/actions/continue:
+    post:
+      summary: Continue a deployment
+      description: Continue a deployment.
+      operationId: continueDeployment
+      tags:
+      - Deployments
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      responses:
+        '200':
+          description: Successfully continued deployment
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Deployment'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
 components:
-  parameters:
-    PerPage:
-      name: per_page
-      in: query
-      schema:
-        type: integer
-        default: 50
-    Page:
-      name: page
-      in: query
-      schema:
-        type: integer
-        default: 1
   schemas:
-    PaginatedResponse:
+    Pagination:
+      type: object
+      properties:
+        total_results:
+          type: integer
+          description: The total number of results available
+        total_pages:
+          type: integer
+          description: The total number of pages available
+        first:
+          allOf:
+          - $ref: '#/components/schemas/Link'
+          - description: The first page of results
+        last:
+          allOf:
+          - $ref: '#/components/schemas/Link'
+          - description: The last page of results
+        next:
+          oneOf:
+          - $ref: '#/components/schemas/Link'
+          - type: 'null'
+          description: The next page of results
+        previous:
+          oneOf:
+          - $ref: '#/components/schemas/Link'
+          - type: 'null'
+          description: The previous page of results
+      description: 'Pagination is a technique used to divide a large set of results into smaller, more manageable sets. This allows clients to retrieve results in smaller chunks, reducing the amount of data transferred and improving performance.
+
+        The pagination object is a JSON object that contains information about the pagination state of the results. It includes the total number of results available, the total number of pages available, and links to the first, last, next, and previous pages of results.
+
+        '
+    Link:
+      type: object
+      properties:
+        href:
+          type: string
+          description: The URL of the link
+        method:
+          type: string
+          description: An optional field containing the HTTP method to be used when following the URL
+      required:
+      - href
+      description: 'Each link is keyed by its type and will include a href for the URL and an optional method for links that cannot be followed using GET.
+
+        '
+    Relationships:
+      type: object
+      description: 'Relationships represent associations between resources. When relationships are mutable, they can be used to create, read, update, and delete these associations. An app’s relationship to its current droplet is mutable, but an app’s relationship to its space is not.
+
+
+        Relationships do not affect the fundamental properties of a resource, but may affect their behavior and permissions logic. Relationships are tied to the lifecycles of the associated resources and will be removed if either of the associated resources are deleted. For example, if a user is removed from an organization, both the user and the organization persist, but the relationship between them does not.
+
+
+        Not all resources implement every relationship operation demonstrated in the examples below. See the docs for each resource to see how it interacts with its relationships.
+
+
+        Endpoints that return relationship data list this information under the relationships key.
+
+
+        The relationship object
+
+        The relationship object is a key-value pair that uniquely identifies a resource. In practice this is almost always the guid of a resource.
+
+        '
+    DeploymentList:
       type: object
       properties:
         pagination:
-          type: object
-          properties:
-            total_results:
-              type: integer
-            total_pages:
-              type: integer
-            first:
-              type: object
-            last:
-              type: object
-            next:
-              type: object
-            previous:
-              type: object
+          $ref: '#/components/schemas/Pagination'
         resources:
           type: array
           items:
+            $ref: '#/components/schemas/Deployment'
+    Metadata:
+      type: object
+      properties:
+        labels:
+          type: object
+          additionalProperties:
+            type:
+            - string
+            - 'null'
+          description: 'A set of key-value pairs that describe the resource. Labels are a JSON object that contains information about a resource. They are used to tag resources with metadata that can be used to filter and group resources. Labels are included in the response body of a request to retrieve a resource.
+
+            Labels are user-specified key/value pairs that are attached to API Resources. They are queryable, identifying attributes of a resource, but they do not affect the operation of CloudFoundry.
+
+
+            For example, an app may be assigned a label with key sensitive and possible values true or false.
+
+
+            Users could then find all sensitive apps with a selector for sensitive=true, resulting in a response containing only apps having the label key sensitive with a label value of true.
+
+
+            Labels
+
+            Labels allow users to apply identifying attributes to resources that are meaningful to the user, but not the CloudFoundry system.
+
+
+            Examples may include (but are not limited to):
+
+
+            "production" : "true" or "production" : "false"
+
+            "env" : "dev" or "env" : "test" or "env" : "prod"
+
+            "chargeback-code" : "abc123"
+
+            Label keys
+
+            Label keys are made up of an (optional) prefix, and name. If a prefix is present, it is separated from the name by a /. Prefixes are dns names intended to enable namespacing of label keys.
+
+
+            A label key prefix must adhere to the following restrictions:
+
+
+            Length: 0-253 characters
+
+            Allowed characters: alphanumeric ( [a-z0-9A-Z] ), -, and .
+
+            DNS subdomain format (series of subdomain labels separated by .)
+
+            A label key name must adhere to the following restrictions:
+
+
+            Length: 1-63 characters
+
+            Allowed characters: alphanumeric ( [a-z0-9A-Z] ), -, _, and .
+
+            Must begin and end with an alphanumeric character
+
+            Label values
+
+            Label values must adhere to the following restrictions:
+
+
+            Length: 0-63 characters
+
+            Allowed characters: alphanumeric ( [a-z0-9A-Z] ), -, _, and .
+
+            Must begin and end with an alphanumeric character
+
+            Empty values are allowed
+
+            '
+        annotations:
+          type: object
+          additionalProperties:
+            type:
+            - string
+            - 'null'
+          description: 'A set of key-value pairs that describe the resource. Annotations are a JSON object that contains information about a resource. They are used to tag resources with metadata that can be used to filter and group resources. Annotations are included in the response body of a request to retrieve a resource.
+
+            Annotations are user-specified key-value pairs that are attached to API resources. They do not affect the operation of Cloud Foundry. Annotations cannot be used in filters.
+
+
+            When a service instance is being created, the service broker is sent the annotations of the service instance, and the space and organization in which the service instance resides. When a service instance is being updated, the service broker is sent the annotations of the space and organization in which the service instance resides. When a service binding is being created, the service broker is sent annotations of any associated app, and the space and organization in which the binding resides. Only annotations with a prefix (e.g. company.com/contacts) are sent to service brokers.
+
+
+            Examples may include (but are not limited to):
+
+
+            "contact info": "bob@example.com jane@example.com"
+
+            "library versions": "Spring: 5.1, Redis Client: a184098. yaml parser: 38"
+
+            "git-sha": "d56fe0367554ae5e878e37ed6c5b9a82f5995512"
+
+            Annotation keys
+
+            Annotation keys are made up of an (optional) prefix and name. If a prefix is present, it is separated from the name by a /. Prefixes are DNS names intended to enable namespacing of annotation keys.
+
+
+            An annotation key prefix must adhere to the following restrictions:
+
+
+            Length: 0-253 characters
+
+            Allowed characters: a-z, A-Z, 0-9, -, and .; emojis cannot be used in keys
+
+            DNS subdomain format (series of subdomain annotations separated by .)
+
+            An annotation key name must adhere to the following restrictions:
+
+
+            Length: 1-63 characters
+
+            Allowed characters: a-z, A-Z, 0-9, -, _, and .; emojis cannot be used in keys
+
+            Must begin and end with an alphanumeric character
+
+            Annotation values
+
+            Annotation values must adhere to the following restrictions:
+
+
+            Length: 0-5000 unicode characters
+
+            '
+      description: 'Metadata is a JSON object that contains information about a resource. It includes the GUID of the resource, the time the resource was created, the time the resource was last updated, and links to the resource.
+
+        Metadata is included in the response body of a request to retrieve a resource.
+
+        '
+    Errors:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/Error'
+      description: 'An error response will always return a list of error objects. Errors appear on the job resource for asynchronous operations.
+
+        Clients should use the code and title fields for programmatically handling specific errors. The message in the detail field is subject to change over time.
+
+        '
+    Deployment:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/BaseSchema'
+      - properties:
+          status:
             type: object
+            properties:
+              value:
+                type: string
+                description: The current status of the deployment
+                enum:
+                - ACTIVE
+                - FINALIZED
+              reason:
+                type: string
+                description: The reason for the status of the deployment
+                enum:
+                - DEPLOYING
+                - PAUSED
+                - CANCELING
+                - DEPLOYED
+                - CANCELED
+                - SUPERSEDED
+              details:
+                type: object
+                properties:
+                  last_successful_healthcheck:
+                    type: string
+                    format: date-time
+                    description: Timestamp of the last successful health check
+                  last_status_change:
+                    type: string
+                    format: date-time
+                    description: Timestamp of last change to status.value or status.reason
+          strategy:
+            type: string
+            description: Strategy used for the deployment
+            enum:
+            - rolling
+            - canary
+          options:
+            type: object
+            properties:
+              max_in_flight:
+                type: integer
+                description: The maximum number of new instances to deploy simultaneously
+              web_instances:
+                type: integer
+                description: The number of instances for the web process of the new droplet
+              memory_in_mb:
+                type: integer
+                description: The amount of memory in megabytes to allocate for the web process
+              disk_in_mb:
+                type: integer
+                description: The amount of disk space in megabytes to allocate for the web process
+              log_rate_limit_in_bytes_per_second:
+                type: integer
+                description: The log rate limit in bytes per second for the web process. A value of -1 indicates unlimited, 0 prevents any logs from being emitted.
+              canary:
+                type: object
+                description: Configuration for canary deployments. Present when strategy is 'canary'.
+                properties:
+                  steps:
+                    type: array
+                    description: Array of steps defining the canary deployment progression
+                    items:
+                      type: object
+                      properties:
+                        instance_weight:
+                          type: integer
+                          description: The percentage of instances to be deployed as part of the canary process in this step
+          droplet:
+            type: object
+            properties:
+              guid:
+                type: string
+                format: uuid
+            description: The droplet guid that the deployment is transitioning the app to
+          previous_droplet:
+            type: object
+            properties:
+              guid:
+                type: string
+                format: uuid
+            description: The app’s [current droplet guid](#get-current-droplet-association-for-an-app) before the deployment was created
+          new_processes:
+            type: array
+            items:
+              type: object
+              properties:
+                guid:
+                  type: string
+                  format: uuid
+                  description: The GUID of the new process created as part of the deployment
+                type:
+                  type: string
+                  description: The type of the new process created as part of the deployment
+          revision:
+            type:
+            - object
+            - 'null'
+            properties:
+              guid:
+                type: string
+                format: uuid
+                description: The revision the deployment is transitioning the app to
+              version:
+                type: integer
+                description: The version of the revision
+          relationships:
+            $ref: '#/components/schemas/Relationships'
+          metadata:
+            $ref: '#/components/schemas/Metadata'
+          links:
+            type: object
+            properties:
+              self:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get this deployment
+              app:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get the app for this deployment
+              cancel:
+                $ref: '#/components/schemas/Link'
+                description: The URL to cancel this deployment
+              continue:
+                $ref: '#/components/schemas/Link'
+                description: The URL to continue this deployment
+      description: 'Deployments are objects that manage updates to applications with zero downtime. They can either: - Manage updating an app’s droplet directly after an application package is staged - Roll an app back to a specific revision along with its associated droplet
+
+        Deployment strategies supported: - Rolling deployments allow for applications to be deployed without incurring downtime by gradually rolling out instances. Max-in-flight can be configured to specify how many instances are rolled out simultaneously. - Canary deployments deploy a single instance and pause for user evaluation. If the canary instance is deemed successful, the deployment can be resumed via the continue action. The deployment then continues like a rolling deployment. This feature is experimental and is subject to change.
+
+        '
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: A numeric code for this error
+        detail:
+          type: string
+          description: Detailed description of the error
+        title:
+          type: string
+          description: Name of the error
+    Relationship:
+      type: object
+      properties:
+        guid:
+          type: string
+          format: uuid
+          description: The GUID of the resource
+    BaseSchema:
+      type: object
+      properties:
+        guid:
+          type: string
+          format: uuid
+          description: The unique identifier for the resource
+        created_at:
+          type: string
+          format: date-time
+          description: The ISO8601 compatible date and time when resource was created
+        updated_at:
+          type: string
+          format: date-time
+          description: The ISO8601 compatible date and time when resource was last updated
+      description: 'A resource represents an individual object within the system, such as an app or a service. It is represented as a JSON object.
+
+        A resource consists of several required resource fields and other attributes specific to the resource.
+
+        See Resources and Experimental Resources for specific resources.
+
+        '
+  responses:
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    UnprocessableEntity:
+      description: Unprocessable Entity
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    NotFound:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    BadGateway:
+      description: Bad Gateway
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Conflict:
+      description: Conflict
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    '500':
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    BadRequest:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+        text/html:
+          schema:
+            type: string
+    ServiceUnavailable:
+      description: Service Unavailable
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+  parameters:
+    OrderBy:
+      name: order_by
+      in: query
+      required: false
+      schema:
+        type: string
+      description: 'Value to sort by. Defaults to ascending; prepend with `-` to sort descending.
+
+        '
+      example: created_at
+    CreatedAts:
+      name: created_ats
+      in: query
+      required: false
+      schema:
+        type: string
+      description: 'Timestamp to filter by. When filtering on equality, several comma-delimited timestamps may be passed. Also supports filtering with [relational operators](#relational-operators).
+
+        '
+      example: '2021-01-01T00:00:00Z'
+    PerPage:
+      name: per_page
+      in: query
+      required: false
+      schema:
+        type: integer
+      description: Number of results per page, valid values are 1 through 5000
+      example: 50
+    LabelSelector:
+      name: label_selector
+      in: query
+      description: A query string containing a list of [label selector](#labels-and-selectors) requirements
+      required: false
+      schema:
+        type: string
+      example: environment=production
+    Page:
+      name: page
+      in: query
+      required: false
+      schema:
+        type: integer
+      description: Page to display; valid values are integers >= 1
+      example: 1
+    UpdatedAts:
+      name: updated_ats
+      in: query
+      required: false
+      schema:
+        type: string
+      description: 'Timestamp to filter by. When filtering on equality, several comma-delimited timestamps may be passed. Also supports filtering with [relational operators](#relational-operators).
+
+        '
+      example: '2021-01-01T00:00:00Z'
+    Guid:
+      name: guid
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: The unique identifier for the resource
   securitySchemes:
-    bearerAuth:
+    oauth:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: https://uaa.cloudfoundry.local/api-oauth/dialog
+          scopes:
+            cloud_controller.admin: This scope provides read and write access to all resources
+            cloud_controller.admin_read_only: This scope provides read only access to all resources
+            cloud_controller.global_auditor: This scope provides read access to all resources
+            cloud_controller.read: Read access to the Cloud Controller
+            cloud_controller.write: Write access to the Cloud Controller
+            cloud_controller.update_build_state: This scope allows its bearer to update the state of a build; currently only used when updating builds
+            cloud_controller_service_permissions.read: This scope provides read only access for service instance permissions
+    bearer:
       type: http
       scheme: bearer
       bearerFormat: JWT
+      description: Bearer JWT token authentication

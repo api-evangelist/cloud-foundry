@@ -1,0 +1,183 @@
+openapi: 3.2.0
+info:
+  title: Open Service Broker Catalog API
+  description: The Open Service Broker API defines an HTTP(S) interface between Platforms and Service Brokers.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  contact:
+    name: Open Service Broker API
+    url: https://www.openservicebrokerapi.org/
+    email: open-service-broker-api@googlegroups.com
+  version: master - might contain changes that are not yet released
+servers:
+- url: http://example.com
+  description: Broker Endpoint
+- url: http://localhost:3000
+  description: OSB Checker - MockOSB
+security:
+- basicAuth: []
+tags:
+- name: Catalog
+paths:
+  /v2/catalog:
+    get:
+      summary: get the catalog of services that the service broker offers
+      tags:
+      - Catalog
+      operationId: catalog.get
+      parameters:
+      - $ref: '#/components/parameters/APIVersion'
+      responses:
+        '200':
+          description: catalog response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Catalog'
+components:
+  schemas:
+    ServiceBindingSchema:
+      type: object
+      properties:
+        create:
+          type: object
+          properties:
+            parameters:
+              type: object
+    Catalog:
+      type: object
+      properties:
+        services:
+          type: array
+          items:
+            $ref: '#/components/schemas/Service'
+    MaintenanceInfo:
+      type: object
+      required:
+      - version
+      properties:
+        version:
+          type: string
+        description:
+          type: string
+    Metadata:
+      description: See [Service Metadata Conventions](https://github.com/openservicebrokerapi/servicebroker/blob/master/profile.md#service-metadata) for more details.
+      type: object
+    Service:
+      type: object
+      required:
+      - name
+      - id
+      - description
+      - bindable
+      - plans
+      properties:
+        name:
+          type: string
+        id:
+          type: string
+        description:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        requires:
+          type: array
+          items:
+            type: string
+            enum:
+            - syslog_drain
+            - route_forwarding
+            - volume_mount
+        bindable:
+          type: boolean
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+        dashboard_client:
+          $ref: '#/components/schemas/DashboardClient'
+        binding_rotatable:
+          type: boolean
+        plan_updateable:
+          type: boolean
+        plans:
+          type: array
+          items:
+            $ref: '#/components/schemas/Plan'
+    Plan:
+      type: object
+      required:
+      - id
+      - name
+      - description
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+        maintenance_info:
+          $ref: '#/components/schemas/MaintenanceInfo'
+        free:
+          type: boolean
+          default: true
+        bindable:
+          type: boolean
+        schemas:
+          $ref: '#/components/schemas/Schemas'
+        maximum_polling_duration:
+          type: integer
+        plan_updateable:
+          type: boolean
+        binding_rotatable:
+          type: boolean
+          default: false
+    ServiceInstanceSchema:
+      type: object
+      properties:
+        create:
+          type: object
+          properties:
+            parameters:
+              type: object
+        update:
+          type: object
+          properties:
+            parameters:
+              type: object
+    DashboardClient:
+      type: object
+      properties:
+        id:
+          type: string
+        secret:
+          type: string
+        redirect_uri:
+          type: string
+    Schemas:
+      type: object
+      properties:
+        service_instance:
+          $ref: '#/components/schemas/ServiceInstanceSchema'
+        service_binding:
+          $ref: '#/components/schemas/ServiceBindingSchema'
+  parameters:
+    APIVersion:
+      name: X-Broker-API-Version
+      in: header
+      description: version number of the Service Broker API that the Platform will use
+      required: true
+      schema:
+        type: string
+        default: '2.13'
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+externalDocs:
+  description: The official Open Service Broker API specification
+  url: https://github.com/openservicebrokerapi/servicebroker/

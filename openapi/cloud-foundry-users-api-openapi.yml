@@ -1,0 +1,680 @@
+openapi: 3.2.0
+info:
+  title: Cloud Foundry V3 Users API
+  description: '# Welcome to the Experimental Cloud Foundry V3 API Docs!'
+  version: latest
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+  contact:
+    name: Cloud Foundry
+    url: https://www.cloudfoundry.org/
+servers:
+- url: https://api.example.local
+  description: Cloud Foundry V3 API server
+security:
+- oauth:
+  - cloud_controller.read
+  - cloud_controller.write
+tags:
+- name: Users
+  description: Users are the users of the Cloud Foundry platform.
+paths:
+  /v3/users:
+    get:
+      summary: List users
+      description: Retrieve all users that the current user can see.
+      operationId: listUsers
+      tags:
+      - Users
+      parameters:
+      - $ref: '#/components/parameters/Page'
+      - $ref: '#/components/parameters/PerPage'
+      - $ref: '#/components/parameters/OrderBy'
+      - $ref: '#/components/parameters/CreatedAts'
+      - $ref: '#/components/parameters/UpdatedAts'
+      - $ref: '#/components/parameters/LabelSelector'
+      - name: guids
+        in: query
+        schema:
+          type: array
+          items:
+            type: string
+        description: Comma-delimited list of user guids to filter by (can include UAA user IDs or client IDs)
+      - name: usernames
+        in: query
+        schema:
+          type: array
+          items:
+            type: string
+        description: Comma-delimited list of usernames to filter by
+      - name: origins
+        in: query
+        schema:
+          type: array
+          items:
+            type: string
+        description: Comma-delimited list of user origins to filter by
+      - name: partial_usernames
+        in: query
+        schema:
+          type: array
+          items:
+            type: string
+        description: Comma-delimited list of partial usernames to filter by
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserList'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/500'
+        '502':
+          $ref: '#/components/responses/BadGateway'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+    post:
+      summary: Create a user
+      description: 'Creating a user requires one value, a GUID. This creates a user in the Cloud Controller database.
+
+
+        Generally, the GUID should match the GUID of an already-created user in the UAA database, though this is not required. Creating a user by guid is only permitted by admins.
+
+
+        If CAPI property `cc.allow_user_creation_by_org_manager` is enabled, a UAA user will be automatically created if it does not exist yet. The UAA user will be only created when `username` and `origin` have been provided instead of a guid. Additionally `origin` must be different from `uaa`. Admins and OrgManagers can make use of the UAA user creation.'
+      operationId: createUser
+      tags:
+      - Users
+      requestBody:
+        $ref: '#/components/requestBodies/UserCreate'
+      responses:
+        '201':
+          $ref: '#/components/responses/UserCreateResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/500'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+  /v3/users/{guid}:
+    get:
+      summary: Get a user
+      description: Retrieve a user.
+      operationId: getUser
+      tags:
+      - Users
+      parameters:
+      - $ref: '#/components/parameters/UserGuid'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      summary: Update a user
+      description: Update a user's metadata.
+      operationId: updateUser
+      tags:
+      - Users
+      parameters:
+      - $ref: '#/components/parameters/UserGuid'
+      requestBody:
+        $ref: '#/components/requestBodies/UserUpdate'
+      responses:
+        '200':
+          $ref: '#/components/responses/UserUpdateResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/500'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+    delete:
+      summary: Delete a user
+      description: All roles associated with a user will be deleted if the user is deleted.
+      operationId: deleteUser
+      tags:
+      - Users
+      parameters:
+      - $ref: '#/components/parameters/UserGuid'
+      responses:
+        '202':
+          description: Accepted
+          headers:
+            Location:
+              description: URL of the job that is deleting the user
+              schema:
+                type: string
+                format: uri
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/500'
+components:
+  schemas:
+    Pagination:
+      type: object
+      properties:
+        total_results:
+          type: integer
+          description: The total number of results available
+        total_pages:
+          type: integer
+          description: The total number of pages available
+        first:
+          allOf:
+          - $ref: '#/components/schemas/Link'
+          - description: The first page of results
+        last:
+          allOf:
+          - $ref: '#/components/schemas/Link'
+          - description: The last page of results
+        next:
+          oneOf:
+          - $ref: '#/components/schemas/Link'
+          - type: 'null'
+          description: The next page of results
+        previous:
+          oneOf:
+          - $ref: '#/components/schemas/Link'
+          - type: 'null'
+          description: The previous page of results
+      description: 'Pagination is a technique used to divide a large set of results into smaller, more manageable sets. This allows clients to retrieve results in smaller chunks, reducing the amount of data transferred and improving performance.
+
+        The pagination object is a JSON object that contains information about the pagination state of the results. It includes the total number of results available, the total number of pages available, and links to the first, last, next, and previous pages of results.
+
+        '
+    UserList:
+      type: object
+      properties:
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+        resources:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+    Link:
+      type: object
+      properties:
+        href:
+          type: string
+          description: The URL of the link
+        method:
+          type: string
+          description: An optional field containing the HTTP method to be used when following the URL
+      required:
+      - href
+      description: 'Each link is keyed by its type and will include a href for the URL and an optional method for links that cannot be followed using GET.
+
+        '
+    Metadata:
+      type: object
+      properties:
+        labels:
+          type: object
+          additionalProperties:
+            type:
+            - string
+            - 'null'
+          description: 'A set of key-value pairs that describe the resource. Labels are a JSON object that contains information about a resource. They are used to tag resources with metadata that can be used to filter and group resources. Labels are included in the response body of a request to retrieve a resource.
+
+            Labels are user-specified key/value pairs that are attached to API Resources. They are queryable, identifying attributes of a resource, but they do not affect the operation of CloudFoundry.
+
+
+            For example, an app may be assigned a label with key sensitive and possible values true or false.
+
+
+            Users could then find all sensitive apps with a selector for sensitive=true, resulting in a response containing only apps having the label key sensitive with a label value of true.
+
+
+            Labels
+
+            Labels allow users to apply identifying attributes to resources that are meaningful to the user, but not the CloudFoundry system.
+
+
+            Examples may include (but are not limited to):
+
+
+            "production" : "true" or "production" : "false"
+
+            "env" : "dev" or "env" : "test" or "env" : "prod"
+
+            "chargeback-code" : "abc123"
+
+            Label keys
+
+            Label keys are made up of an (optional) prefix, and name. If a prefix is present, it is separated from the name by a /. Prefixes are dns names intended to enable namespacing of label keys.
+
+
+            A label key prefix must adhere to the following restrictions:
+
+
+            Length: 0-253 characters
+
+            Allowed characters: alphanumeric ( [a-z0-9A-Z] ), -, and .
+
+            DNS subdomain format (series of subdomain labels separated by .)
+
+            A label key name must adhere to the following restrictions:
+
+
+            Length: 1-63 characters
+
+            Allowed characters: alphanumeric ( [a-z0-9A-Z] ), -, _, and .
+
+            Must begin and end with an alphanumeric character
+
+            Label values
+
+            Label values must adhere to the following restrictions:
+
+
+            Length: 0-63 characters
+
+            Allowed characters: alphanumeric ( [a-z0-9A-Z] ), -, _, and .
+
+            Must begin and end with an alphanumeric character
+
+            Empty values are allowed
+
+            '
+        annotations:
+          type: object
+          additionalProperties:
+            type:
+            - string
+            - 'null'
+          description: 'A set of key-value pairs that describe the resource. Annotations are a JSON object that contains information about a resource. They are used to tag resources with metadata that can be used to filter and group resources. Annotations are included in the response body of a request to retrieve a resource.
+
+            Annotations are user-specified key-value pairs that are attached to API resources. They do not affect the operation of Cloud Foundry. Annotations cannot be used in filters.
+
+
+            When a service instance is being created, the service broker is sent the annotations of the service instance, and the space and organization in which the service instance resides. When a service instance is being updated, the service broker is sent the annotations of the space and organization in which the service instance resides. When a service binding is being created, the service broker is sent annotations of any associated app, and the space and organization in which the binding resides. Only annotations with a prefix (e.g. company.com/contacts) are sent to service brokers.
+
+
+            Examples may include (but are not limited to):
+
+
+            "contact info": "bob@example.com jane@example.com"
+
+            "library versions": "Spring: 5.1, Redis Client: a184098. yaml parser: 38"
+
+            "git-sha": "d56fe0367554ae5e878e37ed6c5b9a82f5995512"
+
+            Annotation keys
+
+            Annotation keys are made up of an (optional) prefix and name. If a prefix is present, it is separated from the name by a /. Prefixes are DNS names intended to enable namespacing of annotation keys.
+
+
+            An annotation key prefix must adhere to the following restrictions:
+
+
+            Length: 0-253 characters
+
+            Allowed characters: a-z, A-Z, 0-9, -, and .; emojis cannot be used in keys
+
+            DNS subdomain format (series of subdomain annotations separated by .)
+
+            An annotation key name must adhere to the following restrictions:
+
+
+            Length: 1-63 characters
+
+            Allowed characters: a-z, A-Z, 0-9, -, _, and .; emojis cannot be used in keys
+
+            Must begin and end with an alphanumeric character
+
+            Annotation values
+
+            Annotation values must adhere to the following restrictions:
+
+
+            Length: 0-5000 unicode characters
+
+            '
+      description: 'Metadata is a JSON object that contains information about a resource. It includes the GUID of the resource, the time the resource was created, the time the resource was last updated, and links to the resource.
+
+        Metadata is included in the response body of a request to retrieve a resource.
+
+        '
+    User:
+      type: object
+      properties:
+        guid:
+          type: string
+          description: Unique identifier for the user, matching either a UAA user id or client id. A client id may not be a uuid.
+        created_at:
+          type: string
+          format: date-time
+          description: The ISO8601 compatible date and time when resource was created
+        updated_at:
+          type: string
+          format: date-time
+          description: The ISO8601 compatible date and time when resource was last updated
+        username:
+          type:
+          - string
+          - 'null'
+          description: The username of the user
+        presentation_name:
+          type: string
+          description: The presentation name of the user
+        origin:
+          type:
+          - string
+          - 'null'
+          description: The origin of the user
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+        links:
+          type: object
+          properties:
+            self:
+              $ref: '#/components/schemas/Link'
+              description: The URL to get this user
+    Errors:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/Error'
+      description: 'An error response will always return a list of error objects. Errors appear on the job resource for asynchronous operations.
+
+        Clients should use the code and title fields for programmatically handling specific errors. The message in the detail field is subject to change over time.
+
+        '
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: A numeric code for this error
+        detail:
+          type: string
+          description: Detailed description of the error
+        title:
+          type: string
+          description: Name of the error
+  responses:
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    UnprocessableEntity:
+      description: Unprocessable Entity
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    NotFound:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    BadGateway:
+      description: Bad Gateway
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Conflict:
+      description: Conflict
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    '500':
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    TooManyRequests:
+      description: Too Many Requests
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              errors:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    code:
+                      type: integer
+                      example: 10008
+                    title:
+                      type: string
+                      example: CF-RateLimitExceeded
+                    detail:
+                      type: string
+                      example: Rate limit exceeded
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    UserUpdateResponse:
+      description: User updated
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/User'
+    BadRequest:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+        text/html:
+          schema:
+            type: string
+    ServiceUnavailable:
+      description: Service Unavailable
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    UserCreateResponse:
+      description: User created
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/User'
+  parameters:
+    OrderBy:
+      name: order_by
+      in: query
+      required: false
+      schema:
+        type: string
+      description: 'Value to sort by. Defaults to ascending; prepend with `-` to sort descending.
+
+        '
+      example: created_at
+    CreatedAts:
+      name: created_ats
+      in: query
+      required: false
+      schema:
+        type: string
+      description: 'Timestamp to filter by. When filtering on equality, several comma-delimited timestamps may be passed. Also supports filtering with [relational operators](#relational-operators).
+
+        '
+      example: '2021-01-01T00:00:00Z'
+    PerPage:
+      name: per_page
+      in: query
+      required: false
+      schema:
+        type: integer
+      description: Number of results per page, valid values are 1 through 5000
+      example: 50
+    LabelSelector:
+      name: label_selector
+      in: query
+      description: A query string containing a list of [label selector](#labels-and-selectors) requirements
+      required: false
+      schema:
+        type: string
+      example: environment=production
+    Page:
+      name: page
+      in: query
+      required: false
+      schema:
+        type: integer
+      description: Page to display; valid values are integers >= 1
+      example: 1
+    UpdatedAts:
+      name: updated_ats
+      in: query
+      required: false
+      schema:
+        type: string
+      description: 'Timestamp to filter by. When filtering on equality, several comma-delimited timestamps may be passed. Also supports filtering with [relational operators](#relational-operators).
+
+        '
+      example: '2021-01-01T00:00:00Z'
+    UserGuid:
+      name: guid
+      in: path
+      required: true
+      schema:
+        type: string
+      description: The unique identifier for the user, matching either a UAA user id or client id. A client id may not be a uuid.
+  requestBodies:
+    UserCreate:
+      description: User to create
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              guid:
+                type: string
+                description: Unique identifier for the user
+              username:
+                type: string
+                description: Username of the user to be created. This can only be provided together with origin
+              origin:
+                type: string
+                description: Origin of the user to be created. This can only be provided together with username and cannot be uaa
+              metadata:
+                $ref: '#/components/schemas/Metadata'
+          examples:
+            default:
+              summary: default
+              value:
+                guid: 123e4567-e89b-12d3-a456-426614174000
+            by_username_and_origin:
+              summary: by username and origin
+              value:
+                username: some-user
+                origin: some-origin
+    UserUpdate:
+      description: User to update
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              username:
+                type: string
+                description: The username of the user
+              presentation_name:
+                type: string
+                description: The presentation name of the user
+              origin:
+                type: string
+                description: The origin of the user
+              metadata:
+                $ref: '#/components/schemas/Metadata'
+              links:
+                type: object
+                properties:
+                  self:
+                    $ref: '#/components/schemas/Link'
+                    description: The URL to get this user
+          examples:
+            default:
+              summary: default
+              value:
+                metadata:
+                  labels:
+                    environment: production
+                  annotations:
+                    note: detailed information
+                rate_limits:
+                  custom_request_limit: 2000
+  securitySchemes:
+    oauth:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: https://uaa.cloudfoundry.local/api-oauth/dialog
+          scopes:
+            cloud_controller.admin: This scope provides read and write access to all resources
+            cloud_controller.admin_read_only: This scope provides read only access to all resources
+            cloud_controller.global_auditor: This scope provides read access to all resources
+            cloud_controller.read: Read access to the Cloud Controller
+            cloud_controller.write: Write access to the Cloud Controller
+            cloud_controller.update_build_state: This scope allows its bearer to update the state of a build; currently only used when updating builds
+            cloud_controller_service_permissions.read: This scope provides read only access for service instance permissions
+    bearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Bearer JWT token authentication

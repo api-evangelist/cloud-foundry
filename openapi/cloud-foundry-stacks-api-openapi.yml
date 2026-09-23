@@ -1,6 +1,6 @@
 openapi: 3.2.0
 info:
-  title: Cloud Foundry V3 Spaces API
+  title: Cloud Foundry V3 Stacks API
   description: '# Welcome to the Experimental Cloud Foundry V3 API Docs!'
   version: latest
   license:
@@ -17,16 +17,16 @@ security:
   - cloud_controller.read
   - cloud_controller.write
 tags:
-- name: Spaces
-  description: Spaces are used to group apps and services.
+- name: Stacks
+  description: Stacks are used to specify the operating system and runtime environment for an app.
 paths:
-  /v3/spaces:
+  /v3/stacks:
     get:
-      summary: List spaces
-      description: Retrieve all spaces the user has access to.
-      operationId: listSpaces
+      summary: List stacks
+      description: Retrieve all stacks.
+      operationId: listStacks
       tags:
-      - Spaces
+      - Stacks
       parameters:
       - $ref: '#/components/parameters/Page'
       - $ref: '#/components/parameters/PerPage'
@@ -40,100 +40,61 @@ paths:
           type: array
           items:
             type: string
-        description: Comma-delimited list of space names to filter by
-      - name: guids
-        in: query
-        schema:
-          type: array
-          items:
-            type: string
-        description: Comma-delimited list of space guids to filter by
-      - name: organization_guids
-        in: query
-        schema:
-          type: array
-          items:
-            type: string
-        description: Comma-delimited list of organization guids to filter by
-      - name: include
-        in: query
-        schema:
-          type: array
-          items:
-            type: string
-            enum:
-            - organization
-        description: Optionally include a list of unique related resources in the response
+        description: Comma-delimited list of stack names to filter by
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SpaceList'
+                $ref: '#/components/schemas/StackList'
               examples:
                 default:
                   summary: default
                   value:
                     pagination:
-                      total_results: 2
-                      total_pages: 1
+                      total_results: 3
+                      total_pages: 2
                       first:
-                        href: https://api.example.org/v3/spaces?page=1&per_page=50
+                        href: https://api.example.org?page=1&per_page=2
                       last:
-                        href: https://api.example.org/v3/spaces?page=1&per_page=50
-                      next: null
+                        href: https://api.example.org?page=2&per_page=2
+                      next:
+                        href: https://api.example.org?page=2&per_page=2
                       previous: null
                     resources:
                     - guid: 123e4567-e89b-12d3-a456-426614174000
-                      created_at: '2017-02-01T01:33:58Z'
-                      updated_at: '2017-02-01T01:33:58Z'
-                      name: space1
-                      relationships:
-                        organization:
-                          data:
-                            guid: 123e4567-e89b-12d3-a456-426614174000
-                        quota:
-                          data: null
-                      links:
-                        self:
-                          href: https://api.example.org/v3/spaces/885735b5-aea4-4cf5-8e44-961af0e41920
-                        features:
-                          href: https://api.example.org/v3/spaces/885735b5-aea4-4cf5-8e44-961af0e41920/features
-                        organization:
-                          href: https://api.example.org/v3/organizations/e00705b9-7b42-4561-ae97-2520399d2133
-                        apply_manifest:
-                          href: https://api.example.org/v3/spaces/885735b5-aea4-4cf5-8e44-961af0e41920/actions/apply_manifest
-                          method: POST
+                      created_at: '2018-11-09T22:43:28Z'
+                      updated_at: '2018-11-09T22:43:28Z'
+                      name: my-stack-1
+                      build_rootfs_image: my-stack-1-build
+                      run_rootfs_image: my-stack-1-run
+                      description: This is my first stack!
+                      state: ACTIVE
+                      state_reason: null
+                      default: true
                       metadata:
                         labels: {}
                         annotations: {}
+                      links:
+                        self:
+                          href: https://api.example.org/11c916c9-c2f9-440e-8e73-102e79c4704d
                     - guid: 123e4567-e89b-12d3-a456-426614174000
-                      created_at: '2017-02-02T00:14:30Z'
-                      updated_at: '2017-02-02T00:14:30Z'
-                      name: space2
-                      relationships:
-                        organization:
-                          data:
-                            guid: 123e4567-e89b-12d3-a456-426614174000
-                        quota:
-                          data:
-                            guid: 123e4567-e89b-12d3-a456-426614174000
-                      links:
-                        self:
-                          href: https://api.example.org/v3/spaces/d4c91047-7b29-4fda-b7f9-04033e5c9c9f
-                        features:
-                          href: https://api.example.org/v3/spaces/d4c91047-7b29-4fda-b7f9-04033e5c9c9f/features
-                        organization:
-                          href: https://api.example.org/v3/organizations/b4ce91bd-31df-4b7d-8fd4-21a6b533276b
-                        quota:
-                          href: https://api.example.org/v3/space_quotas/6da62599-4890-4a08-8b6f-180a4f47e46b
-                        apply_manifest:
-                          href: https://api.example.org/v3/spaces/d4c91047-7b29-4fda-b7f9-04033e5c9c9/actions/apply_manifest
-                          method: POST
+                      created_at: '2018-11-09T22:43:29Z'
+                      updated_at: '2018-11-09T22:43:29Z'
+                      name: my-stack-2
+                      description: This is my second stack!
+                      build_rootfs_image: my-stack-2-build
+                      run_rootfs_image: my-stack-2-run
+                      state: DEPRECATED
+                      state_reason: Stack deprecated and will be removed in future release
+                      default: false
                       metadata:
                         labels: {}
                         annotations: {}
+                      links:
+                        self:
+                          href: https://api.example.org/81c916c9-c2f9-440e-8e73-102e79c4704h
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -144,8 +105,6 @@ paths:
           $ref: '#/components/responses/Conflict'
         '422':
           $ref: '#/components/responses/UnprocessableEntity'
-        '429':
-          $ref: '#/components/responses/TooManyRequests'
         '500':
           $ref: '#/components/responses/500'
         '502':
@@ -153,58 +112,20 @@ paths:
         '503':
           $ref: '#/components/responses/ServiceUnavailable'
     post:
-      summary: Create a space
-      description: Create a space.
-      operationId: createSpace
+      summary: Create a stack
+      description: Create a stack.
+      operationId: createStack
       tags:
-      - Spaces
+      - Stacks
       requestBody:
-        $ref: '#/components/requestBodies/SpaceCreateRequestBody'
+        $ref: '#/components/requestBodies/StackCreateRequestBody'
       responses:
         '201':
           description: Created
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Space'
-              examples:
-                default:
-                  summary: default
-                  value:
-                    guid: 123e4567-e89b-12d3-a456-426614174000
-                    created_at: '2017-02-01T01:33:58Z'
-                    updated_at: '2017-02-01T01:33:58Z'
-                    name: my-space
-                    relationships:
-                      organization:
-                        data:
-                          guid: 123e4567-e89b-12d3-a456-426614174000
-                      quota:
-                        data: null
-                    links:
-                      self:
-                        href: https://api.example.org/v3/spaces/885735b5-aea4-4cf5-8e44-961af0e41920
-                      features:
-                        href: https://api.example.org/v3/spaces/885735b5-aea4-4cf5-8e44-961af0e41920/features
-                      organization:
-                        href: https://api.example.org/v3/organizations/e00705b9-7b42-4561-ae97-2520399d2133
-                      apply_manifest:
-                        href: https://api.example.org/v3/spaces/885735b5-aea4-4cf5-8e44-961af0e41920/actions/apply_manifest
-                        method: POST
-                    metadata:
-                      labels: {}
-                      annotations: {}
-          links:
-            organization:
-              operationId: getOrganization
-              parameters:
-                guid: $response.body#/relationships/organization/data/guid
-              description: Retrieve the organization for this space
-            quota:
-              operationId: getSpaceQuota
-              parameters:
-                guid: $response.body#/relationships/quota/data/guid
-              description: Retrieve the quota associated with this space
+                $ref: '#/components/schemas/Stack'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -219,69 +140,22 @@ paths:
           $ref: '#/components/responses/500'
         '503':
           $ref: '#/components/responses/ServiceUnavailable'
-  /v3/spaces/{guid}:
+  /v3/stacks/{guid}:
     get:
-      summary: Get a space
-      description: This endpoint retrieves the specified space object.
-      operationId: getSpace
+      summary: Get a stack
+      description: Get a stack.
+      operationId: getStack
       tags:
-      - Spaces
+      - Stacks
       parameters:
       - $ref: '#/components/parameters/Guid'
-      - name: include
-        in: query
-        schema:
-          type: array
-          items:
-            type: string
-            enum:
-            - organization
-        description: Optionally include additional related resources in the response
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Space'
-              examples:
-                default:
-                  summary: default
-                  value:
-                    guid: 123e4567-e89b-12d3-a456-426614174000
-                    created_at: '2017-02-01T01:33:58Z'
-                    updated_at: '2017-02-01T01:33:58Z'
-                    name: my-space
-                    relationships:
-                      organization:
-                        data:
-                          guid: 123e4567-e89b-12d3-a456-426614174000
-                      quota:
-                        data: null
-                    links:
-                      self:
-                        href: https://api.example.org/v3/spaces/885735b5-aea4-4cf5-8e44-961af0e41920
-                      features:
-                        href: https://api.example.org/v3/spaces/885735b5-aea4-4cf5-8e44-961af0e41920/features
-                      organization:
-                        href: https://api.example.org/v3/organizations/e00705b9-7b42-4561-ae97-2520399d2133
-                      apply_manifest:
-                        href: https://api.example.org/v3/spaces/885735b5-aea4-4cf5-8e44-961af0e41920/actions/apply_manifest
-                        method: POST
-                    metadata:
-                      labels: {}
-                      annotations: {}
-          links:
-            organization:
-              operationId: getOrganization
-              parameters:
-                guid: $response.body#/relationships/organization/data/guid
-              description: Retrieve the organization for this space
-            quota:
-              operationId: getSpaceQuota
-              parameters:
-                guid: $response.body#/relationships/quota/data/guid
-              description: Retrieve the quota associated with this space
+                $ref: '#/components/schemas/Stack'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -289,59 +163,38 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
     patch:
-      summary: Update a space
-      operationId: updateSpace
+      summary: Update a stack
+      description: Update a stack.
+      operationId: updateStack
       tags:
-      - Spaces
+      - Stacks
       parameters:
       - $ref: '#/components/parameters/Guid'
       requestBody:
-        $ref: '#/components/requestBodies/SpaceUpdateRequestBody'
+        content:
+          application/json:
+            schema:
+              properties:
+                metadata:
+                  $ref: '#/components/schemas/Metadata'
+            examples:
+              default:
+                summary: default
+                value:
+                  metadata:
+                    labels:
+                      key: value
+                    annotations:
+                      note: detailed information
+                  state: ACTIVE
+                  state_reason: Optional plain text describing the stack state change
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Space'
-              examples:
-                default:
-                  summary: default
-                  value:
-                    guid: 123e4567-e89b-12d3-a456-426614174000
-                    created_at: '2017-02-01T01:33:58Z'
-                    updated_at: '2017-02-01T01:33:58Z'
-                    name: my-space
-                    relationships:
-                      organization:
-                        data:
-                          guid: 123e4567-e89b-12d3-a456-426614174000
-                      quota:
-                        data: null
-                    links:
-                      self:
-                        href: https://api.example.org/v3/spaces/885735b5-aea4-4cf5-8e44-961af0e41920
-                      features:
-                        href: https://api.example.org/v3/spaces/885735b5-aea4-4cf5-8e44-961af0e41920/features
-                      organization:
-                        href: https://api.example.org/v3/organizations/e00705b9-7b42-4561-ae97-2520399d2133
-                      apply_manifest:
-                        href: https://api.example.org/v3/spaces/885735b5-aea4-4cf5-8e44-961af0e41920/actions/apply_manifest
-                        method: POST
-                    metadata:
-                      labels: {}
-                      annotations: {}
-          links:
-            organization:
-              operationId: getOrganization
-              parameters:
-                guid: $response.body#/relationships/organization/data/guid
-              description: Retrieve the organization for this space
-            quota:
-              operationId: getSpaceQuota
-              parameters:
-                guid: $response.body#/relationships/quota/data/guid
-              description: Retrieve the quota associated with this space
+                $ref: '#/components/schemas/Stack'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -359,24 +212,16 @@ paths:
         '503':
           $ref: '#/components/responses/ServiceUnavailable'
     delete:
-      summary: Delete a space
-      description: When a space is deleted, the user roles associated with the space will be deleted.
-      operationId: deleteSpace
+      summary: Delete a stack
+      description: Delete a stack.
+      operationId: deleteStack
       tags:
-      - Spaces
+      - Stacks
       parameters:
       - $ref: '#/components/parameters/Guid'
       responses:
-        '202':
-          description: Accepted
-          headers:
-            location:
-              description: URL of the job to query the asynchronous operation
-              schema:
-                type: string
-                format: uri
-        '400':
-          $ref: '#/components/responses/BadRequest'
+        '204':
+          description: No Content
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -387,442 +232,145 @@ paths:
           $ref: '#/components/responses/UnprocessableEntity'
         '500':
           $ref: '#/components/responses/500'
-  /v3/spaces/{guid}/actions/apply_manifest:
-    post:
-      summary: Apply a manifest to a space
-      description: 'Apply changes specified in a manifest to the named apps and their underlying processes. The apps must reside in the space. These changes are additive and will not modify any unspecified properties or remove any existing environment variables, app features, routes, or services.
-
-
-        Apply manifest will only trigger an immediate update for the “instances” property or routing changes. All other properties require an app restart to take effect.'
-      operationId: applyManifestToSpace
-      tags:
-      - Spaces
-      parameters:
-      - $ref: '#/components/parameters/Guid'
-      requestBody:
-        content:
-          application/x-yaml:
-            schema:
-              type: string
-      responses:
-        '202':
-          description: Accepted
-          headers:
-            Location:
-              description: URL of the job that is applying the manifest
-              schema:
-                type: string
-                format: uri
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '422':
-          $ref: '#/components/responses/UnprocessableEntity'
-  /v3/spaces/{guid}/features:
+  /v3/stacks/{guid}/apps:
     get:
-      summary: List space features
-      description: This endpoint retrieves the list of features for the specified space. Currently, the only feature on spaces is the SSH feature.
-      operationId: listSpaceFeatures
+      summary: List apps on a stack
+      description: Retrieve all apps using a given stack.
+      operationId: listAppsOnStack
       tags:
-      - Spaces
+      - Stacks
       parameters:
       - $ref: '#/components/parameters/Guid'
+      - $ref: '#/components/parameters/Page'
+      - $ref: '#/components/parameters/PerPage'
+      - $ref: '#/components/parameters/OrderBy'
+      - $ref: '#/components/parameters/CreatedAts'
+      - $ref: '#/components/parameters/UpdatedAts'
+      - $ref: '#/components/parameters/LabelSelector'
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SpaceFeature'
+                $ref: '#/components/schemas/AppList'
               examples:
                 default:
                   summary: default
                   value:
+                    pagination:
+                      total_results: 3
+                      total_pages: 2
+                      first:
+                        href: https://api.example.org?page=1&per_page=2
+                      last:
+                        href: https://api.example.org?page=2&per_page=2
+                      next:
+                        href: https://api.example.org?page=2&per_page=2
+                      previous: null
                     resources:
-                    - name: ssh
-                      description: Enable SSHing into apps in the space.
-                      enabled: true
-                    - name: diego_docker
-                      description: Allow Docker image support for the space.
-                      enabled: false
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-  /v3/spaces/{guid}/features/{name}:
-    get:
-      summary: Get a space feature
-      operationId: getSpaceFeature
-      tags:
-      - Spaces
-      parameters:
-      - $ref: '#/components/parameters/Guid'
-      - name: name
-        in: path
-        required: true
-        schema:
-          type: string
-          enum:
-          - ssh
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SpaceFeature'
-              examples:
-                default:
-                  summary: default
-                  value:
-                    name: ssh
-                    description: Enable SSHing into apps in the space.
-                    enabled: true
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-    patch:
-      summary: Update a space feature
-      description: Update a space feature.
-      operationId: updateSpaceFeature
-      tags:
-      - Spaces
-      parameters:
-      - $ref: '#/components/parameters/Guid'
-      - name: name
-        in: path
-        required: true
-        schema:
-          type: string
-          enum:
-          - ssh
-      requestBody:
-        content:
-          application/json:
-            schema:
-              properties:
-                enabled:
-                  type: boolean
-            examples:
-              default:
-                summary: default
-                value:
-                  enabled: true
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SpaceFeature'
-              examples:
-                default:
-                  summary: default
-                  value:
-                    name: ssh
-                    description: Enable SSHing into apps in the space.
-                    enabled: true
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '422':
-          $ref: '#/components/responses/UnprocessableEntity'
-  /v3/spaces/{guid}/manifest_diff:
-    post:
-      summary: Create a manifest diff for a space (experimental)
-      description: 'This endpoint returns a JSON representation of the difference between the provided manifest and the current state of a space.
-
-
-        Currently, this endpoint can only diff version 1 manifests.'
-      operationId: createManifestDiffForSpace
-      tags:
-      - Spaces
-      parameters:
-      - $ref: '#/components/parameters/Guid'
-      requestBody:
-        content:
-          application/x-yaml:
-            schema:
-              type: string
-      responses:
-        '201':
-          description: Accepted
-          headers:
-            Location:
-              description: URL of the job that is creating the manifest diff
-              schema:
-                type: string
-                format: uri
-        '202':
-          description: Accepted
-          headers:
-            Location:
-              description: URL of the job that is creating the manifest diff
-              schema:
-                type: string
-                format: uri
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '422':
-          $ref: '#/components/responses/UnprocessableEntity'
-  /v3/spaces/{guid}/relationships/isolation_segment:
-    get:
-      summary: Get assigned isolation segment
-      operationId: getAssignedIsolationSegmentForSpace
-      tags:
-      - Spaces
-      parameters:
-      - $ref: '#/components/parameters/Guid'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RelationshipToOne'
-              examples:
-                default:
-                  summary: default
-                  value:
-                    data:
-                      guid: 123e4567-e89b-12d3-a456-426614174000
-                    links:
-                      self:
-                        href: https://api.example.org/v3/spaces/885735b5-aea4-4cf5-8e44-961af0e41920/relationships/isolation_segment
-                      related:
-                        href: https://api.example.org/v3/isolation_segments/e4c91047-3b29-4fda-b7f9-04033e5a9c9f
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-    patch:
-      summary: Manage isolation segment
-      description: 'This endpoint assigns an isolation segment to the space. The isolation segment must be entitled to the space’s parent organization.
-
-
-        Apps will not run in the newly assigned isolation segment until they are restarted.'
-      operationId: manageIsolationSegmentForSpace
-      tags:
-      - Spaces
-      parameters:
-      - $ref: '#/components/parameters/Guid'
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/RelationshipToOne'
-            examples:
-              default:
-                summary: default
-                value:
-                  data:
-                    guid: 123e4567-e89b-12d3-a456-426614174000
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RelationshipToOne'
-              examples:
-                default:
-                  summary: default
-                  value:
-                    data:
-                      guid: 123e4567-e89b-12d3-a456-426614174000
-                    links:
-                      self:
-                        href: https://api.example.org/v3/spaces/885735b5-aea4-4cf5-8e44-961af0e41920/relationships/isolation_segment
-                      related:
-                        href: https://api.example.org/v3/isolation_segments/e4c91047-3b29-4fda-b7f9-04033e5a9c9f
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '422':
-          $ref: '#/components/responses/UnprocessableEntity'
-  /v3/spaces/{guid}/routes:
-    delete:
-      summary: Delete unmapped routes for a space
-      description: Deletes all routes in a space that are not mapped to any applications and not bound to any service instances.
-      operationId: deleteUnmappedRoutesForSpace
-      tags:
-      - Spaces
-      parameters:
-      - $ref: '#/components/parameters/Guid'
-      - name: unmapped
-        in: query
-        required: true
-        schema:
-          type: boolean
-          enum:
-          - true
-        description: Filter to only delete unmapped routes
-      responses:
-        '202':
-          description: Accepted
-          headers:
-            Location:
-              description: URL of the job that is deleting unmapped routes
-              schema:
-                type: string
-                format: uri
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '422':
-          $ref: '#/components/responses/UnprocessableEntity'
-  /v3/spaces/{guid}/usage_summary:
-    get:
-      summary: Get usage summary for a space
-      description: This endpoint retrieves the specified space's memory and app instance usage summary.
-      operationId: getUsageSummaryForSpace
-      tags:
-      - Spaces
-      parameters:
-      - $ref: '#/components/parameters/Guid'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  usage_summary:
-                    type: object
-                    properties:
-                      started_instances:
-                        type: integer
-                      memory_in_mb:
-                        type: integer
-                      routes:
-                        type: integer
-                      service_instances:
-                        type: integer
-                      reserved_ports:
-                        type: integer
-                      domains:
-                        type: integer
-                      per_app_tasks:
-                        type: integer
-                      service_keys:
-                        type: integer
-                  links:
-                    type: object
-                    properties:
-                      self:
-                        $ref: '#/components/schemas/Link'
-                        description: The URL to get this usage summary
-                      space:
-                        $ref: '#/components/schemas/Link'
-                        description: The URL to get the space for this usage summary
-              examples:
-                default:
-                  summary: default
-                  value:
-                    usage_summary:
-                      started_instances: 3
-                      memory_in_mb: 3072
-                      routes: 3
-                      service_instances: 2
-                      reserved_ports: 1
-                      domains: 1
-                      per_app_tasks: 0
-                      service_keys: 1
-                    links:
-                      self:
-                        href: https://api.example.org/v3/spaces/f47ac10b-58cc-4372-a567-0e02b2c3d479/usage_summary
-                      organization:
-                        href: https://api.example.org/v3/spaces/f47ac10b-58cc-4372-a567-0e02b2c3d479
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-  /v3/spaces/{guid}/running_security_groups:
-    get:
-      summary: List running security groups for a space
-      description: This endpoint returns security groups that are enabled for running globally or at the space level for the given space.
-      operationId: listRunningSecurityGroupsForSpace
-      tags:
-      - Spaces
-      parameters:
-      - $ref: '#/components/parameters/Guid'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SecurityGroupList'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-  /v3/spaces/{guid}/staging_security_groups:
-    get:
-      summary: List staging security groups for a space
-      description: This endpoint returns security groups that are enabled for staging globally or at the space level for the given space.
-      operationId: listStagingSecurityGroupsForSpace
-      tags:
-      - Spaces
-      parameters:
-      - $ref: '#/components/parameters/Guid'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SecurityGroupList'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-  /v3/spaces/{guid}/users:
-    get:
-      summary: List users for a space
-      description: Retrieve all users with a role in the specified space.
-      operationId: listUsersForSpace
-      tags:
-      - Spaces
-      parameters:
-      - $ref: '#/components/parameters/Guid'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UserList'
+                    - guid: 123e4567-e89b-12d3-a456-426614174000
+                      name: my_app
+                      state: STARTED
+                      created_at: '2016-03-17T21:41:30Z'
+                      updated_at: '2016-03-18T11:32:30Z'
+                      lifecycle:
+                        type: buildpack
+                        data:
+                          buildpacks:
+                          - java_buildpack
+                          stack: cflinuxfs4
+                      relationships:
+                        space:
+                          data:
+                            guid: 123e4567-e89b-12d3-a456-426614174000
+                        current_droplet:
+                          data:
+                            guid: 123e4567-e89b-12d3-a456-426614174000
+                      links:
+                        self:
+                          href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446
+                        space:
+                          href: https://api.example.org/v3/spaces/2f35885d-0c9d-4423-83ad-fd05066f8576
+                        processes:
+                          href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/processes
+                        packages:
+                          href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/packages
+                        environment_variables:
+                          href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/environment_variables
+                        current_droplet:
+                          href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/droplets/current
+                        droplets:
+                          href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/droplets
+                        tasks:
+                          href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/tasks
+                        start:
+                          href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/actions/start
+                          method: POST
+                        stop:
+                          href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/actions/stop
+                          method: POST
+                        revisions:
+                          href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/revisions
+                        deployed_revisions:
+                          href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/revisions/deployed
+                        features:
+                          href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/features
+                      metadata:
+                        labels: {}
+                        annotations: {}
+                    - guid: 123e4567-e89b-12d3-a456-426614174000
+                      name: my_app2
+                      state: STOPPED
+                      created_at: '1970-01-01T00:00:02Z'
+                      updated_at: '2016-06-08T16:41:26Z'
+                      lifecycle:
+                        type: buildpack
+                        data:
+                          buildpacks:
+                          - ruby_buildpack
+                          stack: cflinuxfs4
+                      relationships:
+                        space:
+                          data:
+                            guid: 123e4567-e89b-12d3-a456-426614174000
+                        droplet:
+                          data:
+                            guid: 123e4567-e89b-12d3-a456-426614174000
+                      links:
+                        self:
+                          href: https://api.example.org/02b4ec9b-94c7-4468-9c23-4e906191a0f8
+                        space:
+                          href: https://api.example.org/v3/spaces/2f35885d-0c9d-4423-83ad-fd05066f8576
+                        processes:
+                          href: https://api.example.org/02b4ec9b-94c7-4468-9c23-4e906191a0f8/processes
+                        packages:
+                          href: https://api.example.org/02b4ec9b-94c7-4468-9c23-4e906191a0f8/packages
+                        environment_variables:
+                          href: https://api.example.org/02b4ec9b-94c7-4468-9c23-4e906191a0f8/environment_variables
+                        current_droplet:
+                          href: https://api.example.org/02b4ec9b-94c7-4468-9c23-4e906191a0f8/droplets/current
+                        droplets:
+                          href: https://api.example.org/02b4ec9b-94c7-4468-9c23-4e906191a0f8/droplets
+                        tasks:
+                          href: https://api.example.org/02b4ec9b-94c7-4468-9c23-4e906191a0f8/tasks
+                        start:
+                          href: https://api.example.org/02b4ec9b-94c7-4468-9c23-4e906191a0f8/actions/start
+                          method: POST
+                        stop:
+                          href: https://api.example.org/02b4ec9b-94c7-4468-9c23-4e906191a0f8/actions/stop
+                          method: POST
+                        revisions:
+                          href: https://api.example.org//02b4ec9b-94c7-4468-9c23-4e906191a0f8/revisions
+                        deployed_revisions:
+                          href: https://api.example.org//02b4ec9b-94c7-4468-9c23-4e906191a0f8/revisions/deployed
+                        features:
+                          href: https://api.example.org//02b4ec9b-94c7-4468-9c23-4e906191a0f8/features
+                      metadata:
+                        labels: {}
+                        annotations: {}
+        '400':
+          $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -1016,15 +564,6 @@ components:
           format: date-time
           description: When the last operation was last updated
       description: The last operation object for service instances
-    UserList:
-      type: object
-      properties:
-        pagination:
-          $ref: '#/components/schemas/Pagination'
-        resources:
-          type: array
-          items:
-            $ref: '#/components/schemas/User'
     Link:
       type: object
       properties:
@@ -1057,6 +596,39 @@ components:
       description: 'Some relationships relate a resource to exactly one other resource. For example an app can belong to only one space.
 
         '
+    Stack:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/BaseSchema'
+      - properties:
+          name:
+            type: string
+            description: Name of the stack
+          description:
+            type:
+            - string
+            - 'null'
+            description: Description of the stack
+          build_rootfs_image:
+            type: string
+            description: The filesystem root image for building
+          run_rootfs_image:
+            type: string
+            description: The filesystem root image for running
+          default:
+            type: boolean
+            description: Whether this is the default stack
+          links:
+            type: object
+            properties:
+              self:
+                $ref: '#/components/schemas/Link'
+          metadata:
+            $ref: '#/components/schemas/Metadata'
+        required:
+        - name
+        - description
+        - links
     ManagedServiceInstance:
       type: object
       allOf:
@@ -1390,18 +962,6 @@ components:
         - name
         - relationships
         - links
-    SpaceList:
-      type: object
-      properties:
-        pagination:
-          $ref: '#/components/schemas/Pagination'
-        resources:
-          type: array
-          items:
-            $ref: '#/components/schemas/Space'
-        included:
-          $ref: '#/components/schemas/IncludedResources'
-          description: Additional related resources included in the response when using the include parameter
     Metadata:
       type: object
       properties:
@@ -1532,18 +1092,6 @@ components:
         Metadata is included in the response body of a request to retrieve a resource.
 
         '
-    Errors:
-      type: object
-      properties:
-        errors:
-          type: array
-          items:
-            $ref: '#/components/schemas/Error'
-      description: 'An error response will always return a list of error objects. Errors appear on the job resource for asynchronous operations.
-
-        Clients should use the code and title fields for programmatically handling specific errors. The message in the detail field is subject to change over time.
-
-        '
     User:
       type: object
       properties:
@@ -1579,17 +1127,18 @@ components:
             self:
               $ref: '#/components/schemas/Link'
               description: The URL to get this user
-    SpaceFeature:
+    Errors:
       type: object
       properties:
-        name:
-          type: string
-        description:
-          type:
-          - string
-          - 'null'
-        enabled:
-          type: boolean
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/Error'
+      description: 'An error response will always return a list of error objects. Errors appear on the job resource for asynchronous operations.
+
+        Clients should use the code and title fields for programmatically handling specific errors. The message in the detail field is subject to change over time.
+
+        '
     Error:
       type: object
       properties:
@@ -1602,6 +1151,15 @@ components:
         title:
           type: string
           description: Name of the error
+    StackList:
+      type: object
+      properties:
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+        resources:
+          type: array
+          items:
+            $ref: '#/components/schemas/Stack'
     UserProvidedServiceInstance:
       type: object
       allOf:
@@ -1665,79 +1223,18 @@ components:
           type: string
           format: uuid
           description: The GUID of the resource
-    SecurityGroup:
+    AppList:
       type: object
-      allOf:
-      - $ref: '#/components/schemas/BaseSchema'
-      - properties:
-          name:
-            type: string
-            description: Name of the security group
-          globally_enabled:
-            type: object
-            properties:
-              running:
-                type: boolean
-                description: Whether the security group is globally enabled for running apps
-              staging:
-                type: boolean
-                description: Whether the security group is globally enabled for staging apps
-          rules:
-            type: array
-            items:
-              type: object
-              properties:
-                protocol:
-                  type: string
-                  description: Protocol for the rule
-                destination:
-                  type: string
-                  description: Destination for the rule
-                ports:
-                  type: string
-                  description: Ports for the rule
-                type:
-                  type: integer
-                  description: Type for ICMP rules
-                code:
-                  type: integer
-                  description: Code for ICMP rules
-                description:
-                  type: string
-                  description: Description of the rule
-            description: Rules for the security group
-          running_spaces:
-            type: object
-            properties:
-              data:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Relationship'
-            description: Spaces where this security group is applied to running apps
-          staging_spaces:
-            type: object
-            properties:
-              data:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Relationship'
-            description: Spaces where this security group is applied to staging apps
-          links:
-            type: object
-            properties:
-              self:
-                $ref: '#/components/schemas/Link'
-              running_spaces:
-                $ref: '#/components/schemas/Link'
-              staging_spaces:
-                $ref: '#/components/schemas/Link'
-          metadata:
-            $ref: '#/components/schemas/Metadata'
-        required:
-        - name
-        - globally_enabled
-        - rules
-        - links
+      properties:
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+        resources:
+          type: array
+          items:
+            $ref: '#/components/schemas/App'
+        included:
+          $ref: '#/components/schemas/IncludedResources'
+          description: Additional related resources included in the response when using the include parameter
     BaseSchema:
       type: object
       properties:
@@ -1760,15 +1257,29 @@ components:
         See Resources and Experimental Resources for specific resources.
 
         '
-    SecurityGroupList:
-      type: object
-      properties:
-        pagination:
-          $ref: '#/components/schemas/Pagination'
-        resources:
-          type: array
-          items:
-            $ref: '#/components/schemas/SecurityGroup'
+  requestBodies:
+    StackCreateRequestBody:
+      description: Stack object that needs to be created
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+                description: Name of the stack; must be unique and no longer than 250 characters
+                maxLength: 250
+              description:
+                type:
+                - string
+                - 'null'
+                description: Description of the stack; must no longer than 250 characters
+                maxLength: 250
+              metadata:
+                $ref: '#/components/schemas/Metadata'
+            required:
+            - name
   responses:
     UnprocessableEntity:
       description: Unprocessable Entity
@@ -1806,29 +1317,14 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Errors'
-    TooManyRequests:
-      description: Too Many Requests
+    Forbidden:
+      description: Forbidden
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              errors:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    code:
-                      type: integer
-                      example: 10008
-                    title:
-                      type: string
-                      example: CF-RateLimitExceeded
-                    detail:
-                      type: string
-                      example: Rate limit exceeded
-    Forbidden:
-      description: Forbidden
+            $ref: '#/components/schemas/Errors'
+    ServiceUnavailable:
+      description: Service Unavailable
       content:
         application/json:
           schema:
@@ -1842,12 +1338,6 @@ components:
         text/html:
           schema:
             type: string
-    ServiceUnavailable:
-      description: Service Unavailable
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
   parameters:
     OrderBy:
       name: order_by
@@ -1911,60 +1401,6 @@ components:
         type: string
         format: uuid
       description: The unique identifier for the resource
-  requestBodies:
-    SpaceUpdateRequestBody:
-      description: Space object that needs to be updated
-      required: true
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              name:
-                type: string
-                description: New space name
-              metadata:
-                $ref: '#/components/schemas/Metadata'
-            description: Request schema for updating a space
-          examples:
-            default:
-              summary: default
-              value:
-                name: new-space-name
-    SpaceCreateRequestBody:
-      description: Space object that needs to be created
-      required: true
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              name:
-                type: string
-                description: Name of the space
-              relationships:
-                type: object
-                properties:
-                  organization:
-                    $ref: '#/components/schemas/RelationshipToOne'
-                    description: A relationship to an organization
-                required:
-                - organization
-              metadata:
-                $ref: '#/components/schemas/Metadata'
-            required:
-            - name
-            - relationships
-            description: Request schema for creating a space
-          examples:
-            default:
-              summary: default
-              value:
-                name: my-space
-                relationships:
-                  organization:
-                    data:
-                      guid: 123e4567-e89b-12d3-a456-426614174000
   securitySchemes:
     oauth:
       type: oauth2

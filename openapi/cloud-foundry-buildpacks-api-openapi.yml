@@ -1,6 +1,6 @@
 openapi: 3.2.0
 info:
-  title: Cloud Foundry V3 Builds API
+  title: Cloud Foundry V3 Buildpacks API
   description: '# Welcome to the Experimental Cloud Foundry V3 API Docs!'
   version: latest
   license:
@@ -17,16 +17,16 @@ security:
   - cloud_controller.read
   - cloud_controller.write
 tags:
-- name: Builds
-  description: Builds represent the process of staging an application package.
+- name: Buildpacks
+  description: Buildpacks are used during a build to download external dependencies and transform a package into an executable droplet.
 paths:
-  /v3/builds:
+  /v3/buildpacks:
     get:
-      summary: List builds
-      description: Retrieve all builds.
-      operationId: listBuilds
+      summary: List buildpacks
+      description: Retrieve all buildpacks.
+      operationId: listBuildpacks
       tags:
-      - Builds
+      - Buildpacks
       parameters:
       - $ref: '#/components/parameters/Page'
       - $ref: '#/components/parameters/PerPage'
@@ -34,85 +34,66 @@ paths:
       - $ref: '#/components/parameters/CreatedAts'
       - $ref: '#/components/parameters/UpdatedAts'
       - $ref: '#/components/parameters/LabelSelector'
-      - name: states
+      - name: names
         in: query
         schema:
           type: array
           items:
             type: string
-            enum:
-            - STAGING
-            - STAGED
-            - FAILED
-        description: Comma-delimited list of build states to filter by
-      - name: app_guids
+        description: 'Comma-delimited list of buildpack names to filter by
+
+          '
+      - name: stacks
         in: query
         schema:
           type: array
           items:
             type: string
-        description: Comma-delimited list of app GUIDs to filter by
-      - name: package_guids
-        in: query
-        schema:
-          type: array
-          items:
-            type: string
-        description: Comma-delimited list of package GUIDs to filter by
+        description: 'Comma-delimited list of stacks to filter by
+
+          '
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BuildList'
+                $ref: '#/components/schemas/BuildpackList'
               examples:
                 default:
                   summary: default
                   value:
                     pagination:
-                      total_results: 1
-                      total_pages: 1
+                      total_results: 3
+                      total_pages: 2
                       first:
-                        href: https://api.example.org?states=STAGING&page=1&per_page=2
+                        href: https://api.example.org/v3/buildpacks?page=1&per_page=2
                       last:
-                        href: https://api.example.org?states=STAGING&page=1&per_page=2
-                      next: null
+                        href: https://api.example.org/v3/buildpacks?page=2&per_page=2
+                      next:
+                        href: https://api.example.org/v3/buildpacks?page=2&per_page=2
                       previous: null
                     resources:
                     - guid: 123e4567-e89b-12d3-a456-426614174000
-                      created_at: '2016-03-28T23:39:34Z'
-                      updated_at: '2016-06-08T16:41:26Z'
-                      created_by:
-                        guid: 123e4567-e89b-12d3-a456-426614174000
-                        name: bill
-                        email: bill@example.com
-                      state: STAGING
-                      staging_memory_in_mb: 1024
-                      staging_disk_in_mb: 1024
-                      staging_log_rate_limit_bytes_per_second: 1024
-                      error: null
-                      lifecycle:
-                        type: buildpack
-                        data:
-                          buildpacks:
-                          - ruby_buildpack
-                          stack: cflinuxfs4
-                      package:
-                        guid: 123e4567-e89b-12d3-a456-426614174000
-                      droplet: null
-                      relationships:
-                        app:
-                          data:
-                            guid: 123e4567-e89b-12d3-a456-426614174000
+                      created_at: '2016-03-18T23:26:46Z'
+                      updated_at: '2016-10-17T20:00:42Z'
+                      name: my-buildpack
+                      state: AWAITING_UPLOAD
+                      filename: null
+                      stack: my-stack
+                      position: 1
+                      lifecycle: cnb
+                      enabled: true
+                      locked: false
                       metadata:
                         labels: {}
                         annotations: {}
                       links:
                         self:
-                          href: https://api.example.org/v3/builds/585bc3c1-3743-497d-88b0-403ad6b56d16
-                        app:
-                          href: https://api.example.org/v3/apps/7b34f1cf-7e73-428a-bb5a-8a17a8058396
+                          href: https://api.example.org/v3/buildpacks/fd35633f-5c5c-4e4e-a5a9-0722c970a9d2
+                        upload:
+                          href: https://api.example.org/v3/buildpacks/fd35633f-5c5c-4e4e-a5a9-0722c970a9d2/upload
+                          method: POST
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -130,56 +111,16 @@ paths:
         '503':
           $ref: '#/components/responses/ServiceUnavailable'
     post:
-      summary: Create a build
-      description: Create a build.
-      operationId: createBuild
+      summary: Create a buildpack
+      description: Create a buildpack.
+      operationId: createBuildpack
       tags:
-      - Builds
+      - Buildpacks
       requestBody:
-        description: Build object that needs to be created
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                package:
-                  $ref: '#/components/schemas/Relationship'
-                lifecycle:
-                  $ref: '#/components/schemas/Lifecycle'
-                staging_memory_in_mb:
-                  type: integer
-                  description: Memory in MB allocated for staging of the build
-                staging_disk_in_mb:
-                  type: integer
-                  description: Disk space in MB allocated for staging of the build
-                staging_log_rate_limit_bytes_per_second:
-                  type: integer
-                  description: Log rate limit in bytes per second allocated for staging of the build
-                metadata:
-                  $ref: '#/components/schemas/Metadata'
-              required:
-              - package
-              description: Request schema for creating a build
-            examples:
-              default:
-                summary: default
-                value:
-                  package:
-                    guid: 123e4567-e89b-12d3-a456-426614174000
+        $ref: '#/components/requestBodies/BuildpackCreateRequestBody'
       responses:
         '201':
-          description: Successfully created build
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Build'
-          links:
-            app:
-              operationId: getApp
-              parameters:
-                guid: $response.body#/relationships/app/data/guid
-              description: Retrieve the app for this build
+          $ref: '#/components/responses/BuildpackCreateResponse'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -194,33 +135,20 @@ paths:
           $ref: '#/components/responses/500'
         '503':
           $ref: '#/components/responses/ServiceUnavailable'
-  /v3/builds/{guid}:
+  /v3/buildpacks/{guid}:
     get:
-      summary: Get a build
-      description: Retrieve a build.
-      operationId: getBuild
+      summary: Get a buildpack
+      description: Retrieve a buildpack.
+      operationId: getBuildpack
       tags:
-      - Builds
+      - Buildpacks
       parameters:
       - $ref: '#/components/parameters/Guid'
       responses:
         '200':
-          description: Successfully retrieved build
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Build'
-          links:
-            app:
-              operationId: getApp
-              parameters:
-                guid: $response.body#/relationships/app/data/guid
-              description: Retrieve the app for this build
-            droplet:
-              operationId: getDroplet
-              parameters:
-                guid: $response.body#/droplet/guid
-              description: Retrieve the droplet for this build
+          $ref: '#/components/responses/BuildpackGetResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -228,34 +156,22 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
     patch:
-      summary: Update a build
-      description: Update a build.
-      operationId: updateBuild
+      summary: Update a buildpack
+      description: Update a buildpack.
+      operationId: updateBuildpack
       tags:
-      - Builds
+      - Buildpacks
       parameters:
       - $ref: '#/components/parameters/Guid'
       requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/BuildUpdate'
-            examples:
-              default:
-                summary: default
-                value:
-                  metadata:
-                    labels:
-                      key: value
-                    annotations:
-                      note: detailed information
+        $ref: '#/components/requestBodies/BuildpackUpdateRequestBody'
       responses:
         '200':
-          description: OK
+          description: Successfully updated buildpack
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Build'
+                $ref: '#/components/schemas/Buildpack'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -272,118 +188,85 @@ paths:
           $ref: '#/components/responses/500'
         '503':
           $ref: '#/components/responses/ServiceUnavailable'
-  /v3/apps/{guid}/builds:
-    get:
-      summary: List builds for an app
-      description: Retrieve all builds for an app.
-      operationId: listAppBuilds
+    delete:
+      summary: Delete a buildpack
+      description: Delete a buildpack.
+      operationId: deleteBuildpack
       tags:
-      - Builds
+      - Buildpacks
       parameters:
       - $ref: '#/components/parameters/Guid'
-      - $ref: '#/components/parameters/Page'
-      - $ref: '#/components/parameters/PerPage'
-      - $ref: '#/components/parameters/OrderBy'
-      - name: states
-        in: query
-        schema:
-          type: array
-          items:
-            type: string
-            enum:
-            - STAGING
-            - STAGED
-            - FAILED
-        description: Comma-delimited list of build states to filter by
-      - $ref: '#/components/parameters/LabelSelector'
-      - $ref: '#/components/parameters/CreatedAts'
-      - $ref: '#/components/parameters/UpdatedAts'
       responses:
-        '200':
-          description: OK
-          content:
-            application/json:
+        '202':
+          description: Accepted
+          headers:
+            Location:
+              description: URL of the job that is deleting the buildpack
               schema:
-                $ref: '#/components/schemas/BuildList'
-              examples:
-                default:
-                  summary: default
-                  value:
-                    pagination:
-                      total_results: 1
-                      total_pages: 1
-                      first:
-                        href: https://api.example.org?states=STAGING&page=1&per_page=2
-                      last:
-                        href: https://api.example.org?states=STAGING&page=1&per_page=2
-                      next: null
-                      previous: null
-                    resources:
-                    - guid: 123e4567-e89b-12d3-a456-426614174000
-                      created_at: '2016-03-28T23:39:34Z'
-                      updated_at: '2016-06-08T16:41:26Z'
-                      created_by:
-                        guid: 123e4567-e89b-12d3-a456-426614174000
-                        name: bill
-                        email: bill@example.com
-                      state: STAGING
-                      staging_memory_in_mb: 1024
-                      staging_disk_in_mb: 1024
-                      staging_log_rate_limit_bytes_per_second: 1024
-                      error: null
-                      lifecycle:
-                        type: buildpack
-                        data:
-                          buildpacks:
-                          - ruby_buildpack
-                          stack: cflinuxfs4
-                      package:
-                        guid: 123e4567-e89b-12d3-a456-426614174000
-                      droplet: null
-                      relationships:
-                        app:
-                          data:
-                            guid: 123e4567-e89b-12d3-a456-426614174000
-                      metadata:
-                        labels: {}
-                        annotations: {}
-                      links:
-                        self:
-                          href: https://api.example.org/v3/builds/585bc3c1-3743-497d-88b0-403ad6b56d16
-                        app:
-                          href: https://api.example.org/v3/apps/7b34f1cf-7e73-428a-bb5a-8a17a8058396
+                type: string
+                format: uri
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
-    patch:
-      summary: Update a build
-      description: Update a build.
-      operationId: updateBuildViaApp
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/500'
+  /v3/buildpacks/{guid}/upload:
+    post:
+      summary: Upload buildpack bits
+      description: Upload a zip file containing a Cloud Foundry compatible buildpack. The file must be sent as part of a multi-part form.
+      operationId: uploadBuildpack
       tags:
-      - Builds
+      - Buildpacks
       parameters:
       - $ref: '#/components/parameters/Guid'
       requestBody:
-        description: Build object that needs to be updated
+        description: The buildpack file to be uploaded
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
               type: object
               properties:
-                metadata:
-                  $ref: '#/components/schemas/Metadata'
-              description: Request schema for updating a build
+                bits:
+                  type: string
+                  format: binary
+                resources:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      path:
+                        type: string
+                      size_in_bytes:
+                        type: integer
+                      checksum:
+                        type: object
+                        properties:
+                          value:
+                            type: string
       responses:
         '200':
-          description: Successfully updated build
+          description: Successfully uploaded buildpack
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Build'
+                $ref: '#/components/schemas/Buildpack'
+        '202':
+          description: Upload initiated
+          headers:
+            Location:
+              schema:
+                type: string
+              description: URL of the job tracking the upload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Buildpack'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -394,39 +277,6 @@ paths:
           $ref: '#/components/responses/UnprocessableEntity'
 components:
   schemas:
-    BuildUpdate:
-      type: object
-      properties:
-        state:
-          type: string
-          description: State of the build
-          enum:
-          - STAGING
-          - STAGED
-          - FAILED
-        staging_memory_in_mb:
-          type:
-          - integer
-          - 'null'
-          description: Memory in MB allocated for staging of the build
-        staging_disk_in_mb:
-          type:
-          - integer
-          - 'null'
-          description: Disk space in MB allocated for staging of the build
-        staging_log_rate_limit_bytes_per_second:
-          type: integer
-          description: Log rate limit in bytes per second allocated for staging of the build
-        error:
-          type:
-          - string
-          - 'null'
-          description: A string describing errors during the build process
-        lifecycle:
-          $ref: '#/components/schemas/Lifecycle'
-          description: Provides the lifecycle object to use during staging
-        metadata:
-          $ref: '#/components/schemas/Metadata'
     Pagination:
       type: object
       properties:
@@ -473,7 +323,7 @@ components:
       description: 'Each link is keyed by its type and will include a href for the URL and an optional method for links that cannot be followed using GET.
 
         '
-    BuildList:
+    BuildpackList:
       type: object
       properties:
         pagination:
@@ -481,66 +331,7 @@ components:
         resources:
           type: array
           items:
-            $ref: '#/components/schemas/Build'
-    Relationships:
-      type: object
-      description: 'Relationships represent associations between resources. When relationships are mutable, they can be used to create, read, update, and delete these associations. An app’s relationship to its current droplet is mutable, but an app’s relationship to its space is not.
-
-
-        Relationships do not affect the fundamental properties of a resource, but may affect their behavior and permissions logic. Relationships are tied to the lifecycles of the associated resources and will be removed if either of the associated resources are deleted. For example, if a user is removed from an organization, both the user and the organization persist, but the relationship between them does not.
-
-
-        Not all resources implement every relationship operation demonstrated in the examples below. See the docs for each resource to see how it interacts with its relationships.
-
-
-        Endpoints that return relationship data list this information under the relationships key.
-
-
-        The relationship object
-
-        The relationship object is a key-value pair that uniquely identifies a resource. In practice this is almost always the guid of a resource.
-
-        '
-    Lifecycle:
-      type: object
-      properties:
-        type:
-          type: string
-          description: Type of the lifecycle; valid values are buildpack, cnb, docker
-        data:
-          type: object
-          additionalProperties: true
-          description: Data specific to the lifecycle
-          properties:
-            buildpacks:
-              type: array
-              items:
-                type: string
-              description: List of the names of buildpacks, URLs from which they may be downloaded, or null to auto-detect a suitable buildpack during staging (applicable for buildpack and cnb lifecycles)
-            stack:
-              type:
-              - string
-              - 'null'
-              description: The root filesystem to use with the buildpack, for example cflinuxfs4 (applicable for buildpack lifecycle)
-            credentials:
-              type: object
-              additionalProperties:
-                type: object
-                properties:
-                  username:
-                    type:
-                    - string
-                    - 'null'
-                  password:
-                    type:
-                    - string
-                    - 'null'
-                  token:
-                    type: string
-              description: Credentials used to download the configured buildpacks (applicable for cnb lifecycle)
-      description: 'The lifecycle type defines how the application droplet is created and run. The following lifecycle types are supported: - buildpack: Traditional buildpacks for Cloud Foundry applications. - cnb: Cloud Native Buildpacks that are OCI-compliant. - docker: Run pre-built Docker images.
-
-        '
+            $ref: '#/components/schemas/Buildpack'
     Metadata:
       type: object
       properties:
@@ -683,99 +474,54 @@ components:
         Clients should use the code and title fields for programmatically handling specific errors. The message in the detail field is subject to change over time.
 
         '
-    Build:
+    Buildpack:
       type: object
       allOf:
       - $ref: '#/components/schemas/BaseSchema'
       - properties:
+          name:
+            type: string
+            description: The name of the buildpack; to be used by app buildpack field (only alphanumeric characters)
           state:
             type: string
-            description: State of the build
+            description: The state of the buildpack
             enum:
-            - STAGING
-            - STAGED
-            - FAILED
-          staging_memory_in_mb:
-            type:
-            - integer
-            - 'null'
-            description: Memory in MB allocated for staging of the build
-          staging_disk_in_mb:
-            type:
-            - integer
-            - 'null'
-            description: Disk space in MB allocated for staging of the build
-          staging_log_rate_limit_bytes_per_second:
-            type: integer
-            description: Log rate limit in bytes per second allocated for staging of the build
-          error:
+            - AWAITING_UPLOAD
+            - READY
+          stack:
             type:
             - string
             - 'null'
-            description: A string describing errors during the build process
+            description: The name of the stack that the buildpack uses
           lifecycle:
-            $ref: '#/components/schemas/Lifecycle'
-            description: Provides the lifecycle object to use during staging; this will override the build’s application’s default lifecycle for this build
-          checksum:
-            type: object
-            properties:
-              type:
-                type: string
-                description: Hashing algorithm for checksum; supported algorithms are sha256 and sha1
-              value:
-                type: string
-                description: Checksum of build
+            type: string
+            description: The version of buildpacks the buildpack uses. `buildpack` indicates [Classic Buildpacks](https://docs.cloudfoundry.org/buildpacks/classic.html). `cnb` indicates [Cloud Native Buildpacks](https://docs.cloudfoundry.org/buildpacks/cnb/)
+          position:
+            type: integer
+            description: The order in which the buildpacks are checked during buildpack auto-detection
+          enabled:
+            type: boolean
+            description: Whether or not the buildpack can be used for staging
+          locked:
+            type: boolean
+            description: Whether or not the buildpack is locked to prevent updating the bits
+          filename:
+            type:
+            - string
+            - 'null'
+            description: The filename of the buildpack
           metadata:
             $ref: '#/components/schemas/Metadata'
-          relationships:
-            $ref: '#/components/schemas/Relationships'
-          package:
-            type: object
-            properties:
-              guid:
-                type: string
-                format: uuid
-            description: The package that is the input to the staging process
-          droplet:
-            type:
-            - object
-            - 'null'
-            properties:
-              guid:
-                type: string
-                format: uuid
-            description: A resulting droplet from the staging process; `droplet` will be `null` if staging has not completed
-          created_by:
-            type: object
-            properties:
-              guid:
-                type: string
-                description: The guid of the user that created the build
-              name:
-                type:
-                - string
-                - 'null'
-                description: The name of the user that created the build
-              email:
-                type:
-                - string
-                - 'null'
-                description: The email of the user that created the build
           links:
             type: object
             properties:
               self:
                 $ref: '#/components/schemas/Link'
-                description: The URL to get this build
-              app:
+                description: The URL of the buildpack
+              upload:
                 $ref: '#/components/schemas/Link'
-                description: The URL to get the app for this build
-              droplet:
-                $ref: '#/components/schemas/Link'
-                description: The URL to get the droplet for this build
-      description: 'Builds represent the process of transforming source code into a runnable artifact. Builds can be triggered manually or automatically as part of the app lifecycle. A successful build results in a droplet that can be used to run the app.
-
-        '
+                description: The URL to upload the buildpack
+      description: A buildpack represents a set of scripts used to prepare an application for launch.
     Error:
       type: object
       properties:
@@ -788,13 +534,6 @@ components:
         title:
           type: string
           description: Name of the error
-    Relationship:
-      type: object
-      properties:
-        guid:
-          type: string
-          format: uuid
-          description: The GUID of the resource
     BaseSchema:
       type: object
       properties:
@@ -830,6 +569,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Errors'
+    BuildpackCreateResponse:
+      description: Successfully created buildpack
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Buildpack'
     NotFound:
       description: Not Found
       content:
@@ -854,6 +599,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Errors'
+    BuildpackGetResponse:
+      description: Successfully retrieved buildpack
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Buildpack'
     Forbidden:
       description: Forbidden
       content:
@@ -938,6 +689,82 @@ components:
         type: string
         format: uuid
       description: The unique identifier for the resource
+  requestBodies:
+    BuildpackUpdateRequestBody:
+      description: Buildpack object that needs to be updated
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+                description: The name of the buildpack
+              position:
+                type: integer
+                description: The order in which the buildpacks are checked during buildpack auto-detection
+              enabled:
+                type: boolean
+                description: Whether or not the buildpack will be used for staging
+              locked:
+                type: boolean
+                description: Whether or not the buildpack is locked to prevent updating the bits
+              stack:
+                type: string
+                description: The name of the stack that the buildpack will use
+              metadata:
+                $ref: '#/components/schemas/Metadata'
+            description: Request schema for updating a buildpack
+          examples:
+            default:
+              summary: default
+              value:
+                name: ruby_buildpack
+                position: 42
+                enabled: true
+                locked: false
+                stack: windows64
+    BuildpackCreateRequestBody:
+      description: Buildpack object that needs to be added
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+                description: The name of the buildpack
+              stack:
+                type: string
+                description: The name of the stack that the buildpack will use
+              position:
+                type: integer
+                description: The order in which the buildpacks are checked during buildpack auto-detection
+              lifecycle:
+                type: string
+                description: The version of buildpack the buildpack will use. `buildpack` indicates [Classic Buildpacks](https://docs.cloudfoundry.org/buildpacks/classic.html). `cnb` indicates [Cloud Native Buildpacks](https://docs.cloudfoundry.org/buildpacks/cnb/)
+              enabled:
+                type: boolean
+                description: Whether or not the buildpack will be used for staging
+              locked:
+                type: boolean
+                description: Whether or not the buildpack is locked to prevent updating the bits
+              metadata:
+                $ref: '#/components/schemas/Metadata'
+            required:
+            - name
+            description: Request schema for creating a buildpack
+          examples:
+            default:
+              summary: default
+              value:
+                name: ruby_buildpack
+                position: 42
+                enabled: true
+                locked: false
+                stack: windows64
   securitySchemes:
     oauth:
       type: oauth2

@@ -1,0 +1,800 @@
+openapi: 3.2.0
+info:
+  title: Cloud Foundry V3 Sidecars API
+  description: '# Welcome to the Experimental Cloud Foundry V3 API Docs!'
+  version: latest
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+  contact:
+    name: Cloud Foundry
+    url: https://www.cloudfoundry.org/
+servers:
+- url: https://api.example.local
+  description: Cloud Foundry V3 API server
+security:
+- oauth:
+  - cloud_controller.read
+  - cloud_controller.write
+tags:
+- name: Sidecars
+  description: Sidecars are used to run a process alongside an app.
+paths:
+  /v3/sidecars/{guid}:
+    get:
+      summary: Get a sidecar
+      description: Get a sidecar.
+      operationId: getSidecar
+      tags:
+      - Sidecars
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Sidecar'
+              examples:
+                default:
+                  summary: default
+                  value:
+                    guid: 123e4567-e89b-12d3-a456-426614174000
+                    name: auth-sidecar
+                    command: bundle exec rackup
+                    process_types:
+                    - web
+                    - worker
+                    memory_in_mb: 300
+                    origin: user
+                    relationships:
+                      app:
+                        data:
+                          guid: 123e4567-e89b-12d3-a456-426614174000
+                    created_at: '2017-02-01T01:33:58Z'
+                    updated_at: '2017-02-01T01:33:58Z'
+          links:
+            app:
+              operationId: getApp
+              parameters:
+                guid: $response.body#/relationships/app/data/guid
+              description: Retrieve the app for this sidecar
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/500'
+        '502':
+          $ref: '#/components/responses/BadGateway'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+    patch:
+      summary: Update a sidecar
+      description: Update a sidecar.
+      operationId: updateSidecar
+      tags:
+      - Sidecars
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      requestBody:
+        $ref: '#/components/requestBodies/SidecarUpdateRequestBody'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Sidecar'
+              examples:
+                default:
+                  summary: default
+                  value:
+                    guid: 123e4567-e89b-12d3-a456-426614174000
+                    name: auth-sidecar
+                    command: bundle exec rackup
+                    process_types:
+                    - web
+                    - worker
+                    memory_in_mb: 300
+                    origin: user
+                    relationships:
+                      app:
+                        data:
+                          guid: 123e4567-e89b-12d3-a456-426614174000
+                    created_at: '2017-02-01T01:33:58Z'
+                    updated_at: '2017-02-01T01:33:58Z'
+          links:
+            app:
+              operationId: getApp
+              parameters:
+                guid: $response.body#/relationships/app/data/guid
+              description: Retrieve the app for this sidecar
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/500'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+    delete:
+      summary: Delete a sidecar
+      description: Delete a sidecar.
+      operationId: deleteSidecar
+      tags:
+      - Sidecars
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      responses:
+        '204':
+          description: No Content
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/500'
+  /v3/apps/{guid}/sidecars:
+    get:
+      summary: List sidecars for app
+      description: Retrieves all sidecars associated with a app.
+      operationId: listAppSidecars
+      tags:
+      - Sidecars
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SidecarList'
+              examples:
+                default:
+                  summary: default
+                  value:
+                    pagination:
+                      total_results: 3
+                      total_pages: 2
+                      first:
+                        href: https://api.example.org?page=1&per_page=2
+                      last:
+                        href: https://api.example.org?page=2&per_page=2
+                      next:
+                        href: https://api.example.org?page=2&per_page=2
+                      previous: null
+                    resources:
+                    - guid: 123e4567-e89b-12d3-a456-426614174000
+                      name: auth-sidecar
+                      command: bundle exec rackup
+                      process_types:
+                      - web
+                      - worker
+                      memory_in_mb: 300
+                      origin: user
+                      relationships:
+                        app:
+                          data:
+                            guid: 123e4567-e89b-12d3-a456-426614174000
+                      created_at: '2017-02-01T01:33:58Z'
+                      updated_at: '2017-02-01T01:33:58Z'
+                    - guid: 123e4567-e89b-12d3-a456-426614174000
+                      name: echo-sidecar
+                      command: start-echo-server
+                      process_types:
+                      - web
+                      memory_in_mb: 300
+                      origin: user
+                      relationships:
+                        app:
+                          data:
+                            guid: 123e4567-e89b-12d3-a456-426614174000
+                      created_at: '2017-02-01T01:33:59Z'
+                      updated_at: '2017-02-01T01:33:59Z'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    post:
+      summary: Create a sidecar associated with an app
+      description: Create a sidecar associated with an app.
+      operationId: createSidecar
+      tags:
+      - Sidecars
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      requestBody:
+        $ref: '#/components/requestBodies/SidecarCreate'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Sidecar'
+              examples:
+                default:
+                  summary: default
+                  value:
+                    guid: 123e4567-e89b-12d3-a456-426614174000
+                    name: auth-sidecar
+                    command: bundle exec rackup
+                    process_types:
+                    - web
+                    - worker
+                    memory_in_mb: 300
+                    origin: user
+                    relationships:
+                      app:
+                        data:
+                          guid: 123e4567-e89b-12d3-a456-426614174000
+                    created_at: '2017-02-01T01:33:58Z'
+                    updated_at: '2017-02-01T01:33:58Z'
+          links:
+            app:
+              operationId: getApp
+              parameters:
+                guid: $response.body#/relationships/app/data/guid
+              description: Retrieve the app for this sidecar
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/500'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+  /v3/processes/{guid}/sidecars:
+    get:
+      summary: List sidecars for process
+      description: Retrieves all sidecars associated with a process.
+      operationId: listProcessSidecars
+      tags:
+      - Sidecars
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SidecarList'
+              examples:
+                default:
+                  summary: default
+                  value:
+                    pagination:
+                      total_results: 3
+                      total_pages: 2
+                      first:
+                        href: https://api.example.org?page=1&per_page=2
+                      last:
+                        href: https://api.example.org?page=2&per_page=2
+                      next:
+                        href: https://api.example.org?page=2&per_page=2
+                      previous: null
+                    resources:
+                    - guid: 123e4567-e89b-12d3-a456-426614174000
+                      name: auth-sidecar
+                      command: bundle exec rackup
+                      process_types:
+                      - web
+                      - worker
+                      memory_in_mb: 300
+                      origin: user
+                      relationships:
+                        app:
+                          data:
+                            guid: 123e4567-e89b-12d3-a456-426614174000
+                      created_at: '2017-02-01T01:33:58Z'
+                      updated_at: '2017-02-01T01:33:58Z'
+                    - guid: 123e4567-e89b-12d3-a456-426614174000
+                      name: echo-sidecar
+                      command: start-echo-server
+                      process_types:
+                      - web
+                      memory_in_mb: 300
+                      origin: user
+                      relationships:
+                        app:
+                          data:
+                            guid: 123e4567-e89b-12d3-a456-426614174000
+                      created_at: '2017-02-01T01:33:59Z'
+                      updated_at: '2017-02-01T01:33:59Z'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+components:
+  schemas:
+    Pagination:
+      type: object
+      properties:
+        total_results:
+          type: integer
+          description: The total number of results available
+        total_pages:
+          type: integer
+          description: The total number of pages available
+        first:
+          allOf:
+          - $ref: '#/components/schemas/Link'
+          - description: The first page of results
+        last:
+          allOf:
+          - $ref: '#/components/schemas/Link'
+          - description: The last page of results
+        next:
+          oneOf:
+          - $ref: '#/components/schemas/Link'
+          - type: 'null'
+          description: The next page of results
+        previous:
+          oneOf:
+          - $ref: '#/components/schemas/Link'
+          - type: 'null'
+          description: The previous page of results
+      description: 'Pagination is a technique used to divide a large set of results into smaller, more manageable sets. This allows clients to retrieve results in smaller chunks, reducing the amount of data transferred and improving performance.
+
+        The pagination object is a JSON object that contains information about the pagination state of the results. It includes the total number of results available, the total number of pages available, and links to the first, last, next, and previous pages of results.
+
+        '
+    Link:
+      type: object
+      properties:
+        href:
+          type: string
+          description: The URL of the link
+        method:
+          type: string
+          description: An optional field containing the HTTP method to be used when following the URL
+      required:
+      - href
+      description: 'Each link is keyed by its type and will include a href for the URL and an optional method for links that cannot be followed using GET.
+
+        '
+    SidecarList:
+      type: object
+      properties:
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+        resources:
+          type: array
+          items:
+            $ref: '#/components/schemas/Sidecar'
+    RelationshipToOne:
+      type: object
+      properties:
+        data:
+          type:
+          - object
+          - 'null'
+          $ref: '#/components/schemas/Relationship'
+        links:
+          type: object
+          properties:
+            self:
+              $ref: '#/components/schemas/Link'
+            related:
+              $ref: '#/components/schemas/Link'
+      description: 'Some relationships relate a resource to exactly one other resource. For example an app can belong to only one space.
+
+        '
+    Sidecar:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/BaseSchema'
+      - properties:
+          name:
+            type: string
+            description: Name of the sidecar
+          command:
+            type: string
+            description: Command to run for the sidecar
+          process_types:
+            type: array
+            items:
+              type: string
+            description: Process types that the sidecar applies to
+          memory_in_mb:
+            type:
+            - integer
+            - 'null'
+            description: Memory limit for the sidecar in MB
+          origin:
+            type:
+            - string
+            - 'null'
+            description: Origin of the sidecar
+            enum:
+            - user
+            - buildpack
+          relationships:
+            type: object
+            properties:
+              app:
+                $ref: '#/components/schemas/RelationshipToOne'
+            description: Relationships for the sidecar
+          links:
+            type: object
+            properties:
+              self:
+                $ref: '#/components/schemas/Link'
+              app:
+                $ref: '#/components/schemas/Link'
+          metadata:
+            $ref: '#/components/schemas/Metadata'
+        required:
+        - name
+        - command
+        - process_types
+        - relationships
+    Metadata:
+      type: object
+      properties:
+        labels:
+          type: object
+          additionalProperties:
+            type:
+            - string
+            - 'null'
+          description: 'A set of key-value pairs that describe the resource. Labels are a JSON object that contains information about a resource. They are used to tag resources with metadata that can be used to filter and group resources. Labels are included in the response body of a request to retrieve a resource.
+
+            Labels are user-specified key/value pairs that are attached to API Resources. They are queryable, identifying attributes of a resource, but they do not affect the operation of CloudFoundry.
+
+
+            For example, an app may be assigned a label with key sensitive and possible values true or false.
+
+
+            Users could then find all sensitive apps with a selector for sensitive=true, resulting in a response containing only apps having the label key sensitive with a label value of true.
+
+
+            Labels
+
+            Labels allow users to apply identifying attributes to resources that are meaningful to the user, but not the CloudFoundry system.
+
+
+            Examples may include (but are not limited to):
+
+
+            "production" : "true" or "production" : "false"
+
+            "env" : "dev" or "env" : "test" or "env" : "prod"
+
+            "chargeback-code" : "abc123"
+
+            Label keys
+
+            Label keys are made up of an (optional) prefix, and name. If a prefix is present, it is separated from the name by a /. Prefixes are dns names intended to enable namespacing of label keys.
+
+
+            A label key prefix must adhere to the following restrictions:
+
+
+            Length: 0-253 characters
+
+            Allowed characters: alphanumeric ( [a-z0-9A-Z] ), -, and .
+
+            DNS subdomain format (series of subdomain labels separated by .)
+
+            A label key name must adhere to the following restrictions:
+
+
+            Length: 1-63 characters
+
+            Allowed characters: alphanumeric ( [a-z0-9A-Z] ), -, _, and .
+
+            Must begin and end with an alphanumeric character
+
+            Label values
+
+            Label values must adhere to the following restrictions:
+
+
+            Length: 0-63 characters
+
+            Allowed characters: alphanumeric ( [a-z0-9A-Z] ), -, _, and .
+
+            Must begin and end with an alphanumeric character
+
+            Empty values are allowed
+
+            '
+        annotations:
+          type: object
+          additionalProperties:
+            type:
+            - string
+            - 'null'
+          description: 'A set of key-value pairs that describe the resource. Annotations are a JSON object that contains information about a resource. They are used to tag resources with metadata that can be used to filter and group resources. Annotations are included in the response body of a request to retrieve a resource.
+
+            Annotations are user-specified key-value pairs that are attached to API resources. They do not affect the operation of Cloud Foundry. Annotations cannot be used in filters.
+
+
+            When a service instance is being created, the service broker is sent the annotations of the service instance, and the space and organization in which the service instance resides. When a service instance is being updated, the service broker is sent the annotations of the space and organization in which the service instance resides. When a service binding is being created, the service broker is sent annotations of any associated app, and the space and organization in which the binding resides. Only annotations with a prefix (e.g. company.com/contacts) are sent to service brokers.
+
+
+            Examples may include (but are not limited to):
+
+
+            "contact info": "bob@example.com jane@example.com"
+
+            "library versions": "Spring: 5.1, Redis Client: a184098. yaml parser: 38"
+
+            "git-sha": "d56fe0367554ae5e878e37ed6c5b9a82f5995512"
+
+            Annotation keys
+
+            Annotation keys are made up of an (optional) prefix and name. If a prefix is present, it is separated from the name by a /. Prefixes are DNS names intended to enable namespacing of annotation keys.
+
+
+            An annotation key prefix must adhere to the following restrictions:
+
+
+            Length: 0-253 characters
+
+            Allowed characters: a-z, A-Z, 0-9, -, and .; emojis cannot be used in keys
+
+            DNS subdomain format (series of subdomain annotations separated by .)
+
+            An annotation key name must adhere to the following restrictions:
+
+
+            Length: 1-63 characters
+
+            Allowed characters: a-z, A-Z, 0-9, -, _, and .; emojis cannot be used in keys
+
+            Must begin and end with an alphanumeric character
+
+            Annotation values
+
+            Annotation values must adhere to the following restrictions:
+
+
+            Length: 0-5000 unicode characters
+
+            '
+      description: 'Metadata is a JSON object that contains information about a resource. It includes the GUID of the resource, the time the resource was created, the time the resource was last updated, and links to the resource.
+
+        Metadata is included in the response body of a request to retrieve a resource.
+
+        '
+    Errors:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/Error'
+      description: 'An error response will always return a list of error objects. Errors appear on the job resource for asynchronous operations.
+
+        Clients should use the code and title fields for programmatically handling specific errors. The message in the detail field is subject to change over time.
+
+        '
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: A numeric code for this error
+        detail:
+          type: string
+          description: Detailed description of the error
+        title:
+          type: string
+          description: Name of the error
+    Relationship:
+      type: object
+      properties:
+        guid:
+          type: string
+          format: uuid
+          description: The GUID of the resource
+    BaseSchema:
+      type: object
+      properties:
+        guid:
+          type: string
+          format: uuid
+          description: The unique identifier for the resource
+        created_at:
+          type: string
+          format: date-time
+          description: The ISO8601 compatible date and time when resource was created
+        updated_at:
+          type: string
+          format: date-time
+          description: The ISO8601 compatible date and time when resource was last updated
+      description: 'A resource represents an individual object within the system, such as an app or a service. It is represented as a JSON object.
+
+        A resource consists of several required resource fields and other attributes specific to the resource.
+
+        See Resources and Experimental Resources for specific resources.
+
+        '
+  responses:
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    UnprocessableEntity:
+      description: Unprocessable Entity
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    NotFound:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    BadGateway:
+      description: Bad Gateway
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Conflict:
+      description: Conflict
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    '500':
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    BadRequest:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+        text/html:
+          schema:
+            type: string
+    ServiceUnavailable:
+      description: Service Unavailable
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+  parameters:
+    Guid:
+      name: guid
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: The unique identifier for the resource
+  requestBodies:
+    SidecarUpdateRequestBody:
+      description: Sidecar object that needs to be updated
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+                description: Human-readable name for the sidecar
+              command:
+                type: string
+                description: The command used to start the sidecar
+              process_types:
+                type: array
+                items:
+                  type: string
+                description: A list of process types the sidecar applies to
+              memory_in_mb:
+                type: integer
+                description: Reserved memory for sidecar
+          examples:
+            default:
+              summary: default
+              value:
+                name: auth-sidecar
+                command: bundle exec rackup
+                process_types:
+                - web
+                - worker
+                memory_in_mb: 300
+    SidecarCreate:
+      description: Sidecar to create
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+                description: Name of the sidecar
+              command:
+                type: string
+                description: Command to run for the sidecar
+              process_types:
+                type: array
+                items:
+                  type: string
+                description: Process types that the sidecar applies to
+              memory_in_mb:
+                type: integer
+                description: Memory limit for the sidecar in MB
+          examples:
+            default:
+              summary: default
+              value:
+                name: auth-sidecar
+                command: bundle exec rackup
+                process_types:
+                - web
+                - worker
+                memory_in_mb: 300
+  securitySchemes:
+    oauth:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: https://uaa.cloudfoundry.local/api-oauth/dialog
+          scopes:
+            cloud_controller.admin: This scope provides read and write access to all resources
+            cloud_controller.admin_read_only: This scope provides read only access to all resources
+            cloud_controller.global_auditor: This scope provides read access to all resources
+            cloud_controller.read: Read access to the Cloud Controller
+            cloud_controller.write: Write access to the Cloud Controller
+            cloud_controller.update_build_state: This scope allows its bearer to update the state of a build; currently only used when updating builds
+            cloud_controller_service_permissions.read: This scope provides read only access for service instance permissions
+    bearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Bearer JWT token authentication

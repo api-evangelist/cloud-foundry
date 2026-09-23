@@ -1,6 +1,6 @@
 openapi: 3.2.0
 info:
-  title: Cloud Foundry V3 Builds API
+  title: Cloud Foundry V3 Revisions API
   description: '# Welcome to the Experimental Cloud Foundry V3 API Docs!'
   version: latest
   license:
@@ -17,108 +17,39 @@ security:
   - cloud_controller.read
   - cloud_controller.write
 tags:
-- name: Builds
-  description: Builds represent the process of staging an application package.
+- name: Revisions
+  description: Revisions represent code used by an application at a specific time.
 paths:
-  /v3/builds:
+  /v3/revisions/{guid}:
     get:
-      summary: List builds
-      description: Retrieve all builds.
-      operationId: listBuilds
+      summary: Get a revision
+      description: Retrieve a revision.
+      operationId: getRevision
       tags:
-      - Builds
+      - Revisions
       parameters:
-      - $ref: '#/components/parameters/Page'
-      - $ref: '#/components/parameters/PerPage'
-      - $ref: '#/components/parameters/OrderBy'
-      - $ref: '#/components/parameters/CreatedAts'
-      - $ref: '#/components/parameters/UpdatedAts'
-      - $ref: '#/components/parameters/LabelSelector'
-      - name: states
-        in: query
-        schema:
-          type: array
-          items:
-            type: string
-            enum:
-            - STAGING
-            - STAGED
-            - FAILED
-        description: Comma-delimited list of build states to filter by
-      - name: app_guids
-        in: query
-        schema:
-          type: array
-          items:
-            type: string
-        description: Comma-delimited list of app GUIDs to filter by
-      - name: package_guids
-        in: query
-        schema:
-          type: array
-          items:
-            type: string
-        description: Comma-delimited list of package GUIDs to filter by
+      - $ref: '#/components/parameters/Guid'
       responses:
         '200':
-          description: OK
+          description: Successfully retrieved revision
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BuildList'
-              examples:
-                default:
-                  summary: default
-                  value:
-                    pagination:
-                      total_results: 1
-                      total_pages: 1
-                      first:
-                        href: https://api.example.org?states=STAGING&page=1&per_page=2
-                      last:
-                        href: https://api.example.org?states=STAGING&page=1&per_page=2
-                      next: null
-                      previous: null
-                    resources:
-                    - guid: 123e4567-e89b-12d3-a456-426614174000
-                      created_at: '2016-03-28T23:39:34Z'
-                      updated_at: '2016-06-08T16:41:26Z'
-                      created_by:
-                        guid: 123e4567-e89b-12d3-a456-426614174000
-                        name: bill
-                        email: bill@example.com
-                      state: STAGING
-                      staging_memory_in_mb: 1024
-                      staging_disk_in_mb: 1024
-                      staging_log_rate_limit_bytes_per_second: 1024
-                      error: null
-                      lifecycle:
-                        type: buildpack
-                        data:
-                          buildpacks:
-                          - ruby_buildpack
-                          stack: cflinuxfs4
-                      package:
-                        guid: 123e4567-e89b-12d3-a456-426614174000
-                      droplet: null
-                      relationships:
-                        app:
-                          data:
-                            guid: 123e4567-e89b-12d3-a456-426614174000
-                      metadata:
-                        labels: {}
-                        annotations: {}
-                      links:
-                        self:
-                          href: https://api.example.org/v3/builds/585bc3c1-3743-497d-88b0-403ad6b56d16
-                        app:
-                          href: https://api.example.org/v3/apps/7b34f1cf-7e73-428a-bb5a-8a17a8058396
+                $ref: '#/components/schemas/Revision'
+          links:
+            app:
+              operationId: getApp
+              parameters:
+                guid: $response.body#/relationships/app/data/guid
+              description: Retrieve the app for this revision
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
         '409':
           $ref: '#/components/responses/Conflict'
         '422':
@@ -129,117 +60,25 @@ paths:
           $ref: '#/components/responses/BadGateway'
         '503':
           $ref: '#/components/responses/ServiceUnavailable'
-    post:
-      summary: Create a build
-      description: Create a build.
-      operationId: createBuild
+    patch:
+      summary: Update a revision
+      description: Update a revision.
+      operationId: updateRevision
       tags:
-      - Builds
+      - Revisions
+      parameters:
+      - $ref: '#/components/parameters/Guid'
       requestBody:
-        description: Build object that needs to be created
+        description: Revision object that needs to be updated
         required: true
         content:
           application/json:
             schema:
               type: object
               properties:
-                package:
-                  $ref: '#/components/schemas/Relationship'
-                lifecycle:
-                  $ref: '#/components/schemas/Lifecycle'
-                staging_memory_in_mb:
-                  type: integer
-                  description: Memory in MB allocated for staging of the build
-                staging_disk_in_mb:
-                  type: integer
-                  description: Disk space in MB allocated for staging of the build
-                staging_log_rate_limit_bytes_per_second:
-                  type: integer
-                  description: Log rate limit in bytes per second allocated for staging of the build
                 metadata:
                   $ref: '#/components/schemas/Metadata'
-              required:
-              - package
-              description: Request schema for creating a build
-            examples:
-              default:
-                summary: default
-                value:
-                  package:
-                    guid: 123e4567-e89b-12d3-a456-426614174000
-      responses:
-        '201':
-          description: Successfully created build
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Build'
-          links:
-            app:
-              operationId: getApp
-              parameters:
-                guid: $response.body#/relationships/app/data/guid
-              description: Retrieve the app for this build
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '409':
-          $ref: '#/components/responses/Conflict'
-        '422':
-          $ref: '#/components/responses/UnprocessableEntity'
-        '500':
-          $ref: '#/components/responses/500'
-        '503':
-          $ref: '#/components/responses/ServiceUnavailable'
-  /v3/builds/{guid}:
-    get:
-      summary: Get a build
-      description: Retrieve a build.
-      operationId: getBuild
-      tags:
-      - Builds
-      parameters:
-      - $ref: '#/components/parameters/Guid'
-      responses:
-        '200':
-          description: Successfully retrieved build
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Build'
-          links:
-            app:
-              operationId: getApp
-              parameters:
-                guid: $response.body#/relationships/app/data/guid
-              description: Retrieve the app for this build
-            droplet:
-              operationId: getDroplet
-              parameters:
-                guid: $response.body#/droplet/guid
-              description: Retrieve the droplet for this build
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-    patch:
-      summary: Update a build
-      description: Update a build.
-      operationId: updateBuild
-      tags:
-      - Builds
-      parameters:
-      - $ref: '#/components/parameters/Guid'
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/BuildUpdate'
+              description: Request schema for updating a revision
             examples:
               default:
                 summary: default
@@ -251,11 +90,17 @@ paths:
                       note: detailed information
       responses:
         '200':
-          description: OK
+          description: Successfully updated revision
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Build'
+                $ref: '#/components/schemas/Revision'
+          links:
+            app:
+              operationId: getApp
+              parameters:
+                guid: $response.body#/relationships/app/data/guid
+              description: Retrieve the app for this revision
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -272,39 +117,85 @@ paths:
           $ref: '#/components/responses/500'
         '503':
           $ref: '#/components/responses/ServiceUnavailable'
-  /v3/apps/{guid}/builds:
+  /v3/revisions/{guid}/environment_variables:
     get:
-      summary: List builds for an app
-      description: Retrieve all builds for an app.
-      operationId: listAppBuilds
+      summary: Get environment variables for a revision
+      description: Retrieve the environment variables that are associated with the revision.
+      operationId: getRevisionEnvironmentVariables
       tags:
-      - Builds
+      - Revisions
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      responses:
+        '200':
+          description: Successfully retrieved revision environment variables
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  var:
+                    type: object
+                    description: Environment variables for the revision
+                    additionalProperties:
+                      type: string
+                  links:
+                    type: object
+                    properties:
+                      self:
+                        $ref: '#/components/schemas/Link'
+                      revision:
+                        $ref: '#/components/schemas/Link'
+                      app:
+                        $ref: '#/components/schemas/Link'
+              examples:
+                default:
+                  summary: default
+                  value:
+                    var:
+                      RAILS_ENV: production
+                    links:
+                      self:
+                        href: https://api.example.org/v3/revisions/[guid]/environment_variables
+                      revision:
+                        href: https://api.example.org/v3/revisions/[guid]
+                      app:
+                        href: https://api.example.org/v3/apps/[app_guid]
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /v3/apps/{guid}/revisions:
+    get:
+      summary: List revisions for an app
+      description: Retrieve revisions for an app the user has access to.
+      operationId: listRevisionsForApp
+      tags:
+      - Revisions
       parameters:
       - $ref: '#/components/parameters/Guid'
       - $ref: '#/components/parameters/Page'
       - $ref: '#/components/parameters/PerPage'
       - $ref: '#/components/parameters/OrderBy'
-      - name: states
+      - $ref: '#/components/parameters/LabelSelector'
+      - $ref: '#/components/parameters/CreatedAts'
+      - $ref: '#/components/parameters/UpdatedAts'
+      - name: versions
         in: query
         schema:
           type: array
           items:
             type: string
-            enum:
-            - STAGING
-            - STAGED
-            - FAILED
-        description: Comma-delimited list of build states to filter by
-      - $ref: '#/components/parameters/LabelSelector'
-      - $ref: '#/components/parameters/CreatedAts'
-      - $ref: '#/components/parameters/UpdatedAts'
+        description: Comma-delimited list of revision versions to filter by
       responses:
         '200':
-          description: OK
+          description: Successfully retrieved revisions for app
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BuildList'
+                $ref: '#/components/schemas/RevisionList'
               examples:
                 default:
                   summary: default
@@ -313,120 +204,121 @@ paths:
                       total_results: 1
                       total_pages: 1
                       first:
-                        href: https://api.example.org?states=STAGING&page=1&per_page=2
+                        href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/revisions?page=1&per_page=50
                       last:
-                        href: https://api.example.org?states=STAGING&page=1&per_page=2
+                        href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/revisions?page=1&per_page=50
                       next: null
                       previous: null
                     resources:
                     - guid: 123e4567-e89b-12d3-a456-426614174000
-                      created_at: '2016-03-28T23:39:34Z'
-                      updated_at: '2016-06-08T16:41:26Z'
-                      created_by:
+                      version: 1
+                      droplet:
                         guid: 123e4567-e89b-12d3-a456-426614174000
-                        name: bill
-                        email: bill@example.com
-                      state: STAGING
-                      staging_memory_in_mb: 1024
-                      staging_disk_in_mb: 1024
-                      staging_log_rate_limit_bytes_per_second: 1024
-                      error: null
-                      lifecycle:
-                        type: buildpack
-                        data:
-                          buildpacks:
-                          - ruby_buildpack
-                          stack: cflinuxfs4
-                      package:
-                        guid: 123e4567-e89b-12d3-a456-426614174000
-                      droplet: null
+                      processes:
+                        web:
+                          command: bundle exec rackup
+                      sidecars:
+                      - name: auth-sidecar
+                        command: bundle exec sidecar
+                        process_types:
+                        - web
+                        memory_in_mb: 300
+                      description: Initial revision.
+                      deployable: true
                       relationships:
                         app:
                           data:
                             guid: 123e4567-e89b-12d3-a456-426614174000
+                      created_at: '2017-02-01T01:33:58Z'
+                      updated_at: '2017-02-01T01:33:58Z'
                       metadata:
                         labels: {}
                         annotations: {}
                       links:
                         self:
-                          href: https://api.example.org/v3/builds/585bc3c1-3743-497d-88b0-403ad6b56d16
+                          href: https://api.example.org/v3/revisions/885735b5-aea4-4cf5-8e44-961af0e41920
                         app:
-                          href: https://api.example.org/v3/apps/7b34f1cf-7e73-428a-bb5a-8a17a8058396
+                          href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446
+                        environment_variables:
+                          href: https://api.example.org/v3/revisions/885735b5-aea4-4cf5-8e44-961af0e41920/environment_variables
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
-    patch:
-      summary: Update a build
-      description: Update a build.
-      operationId: updateBuildViaApp
+  /v3/apps/{guid}/revisions/deployed:
+    get:
+      summary: List deployed revisions for an app
+      description: Retrieve deployed revisions for an app the user has access to. Deployed revisions are revisions that are linked to started processes in the app.
+      operationId: listDeployedRevisionsForApp
       tags:
-      - Builds
+      - Revisions
       parameters:
       - $ref: '#/components/parameters/Guid'
-      requestBody:
-        description: Build object that needs to be updated
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                metadata:
-                  $ref: '#/components/schemas/Metadata'
-              description: Request schema for updating a build
+      - $ref: '#/components/parameters/Page'
+      - $ref: '#/components/parameters/PerPage'
+      - $ref: '#/components/parameters/OrderBy'
       responses:
         '200':
-          description: Successfully updated build
+          description: Successfully retrieved deployed revisions for app
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Build'
+                $ref: '#/components/schemas/RevisionList'
+              examples:
+                default:
+                  summary: default
+                  value:
+                    pagination:
+                      total_results: 1
+                      total_pages: 1
+                      first:
+                        href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/revisions?page=1&per_page=50
+                      last:
+                        href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/revisions?page=1&per_page=50
+                      next: null
+                      previous: null
+                    resources:
+                    - guid: 123e4567-e89b-12d3-a456-426614174000
+                      version: 1
+                      droplet:
+                        guid: 123e4567-e89b-12d3-a456-426614174000
+                      processes:
+                        web:
+                          command: bundle exec rackup
+                      sidecars:
+                      - name: auth-sidecar
+                        command: bundle exec sidecar
+                        process_types:
+                        - web
+                        memory_in_mb: 300
+                      description: Initial revision.
+                      deployable: true
+                      relationships:
+                        app:
+                          data:
+                            guid: 123e4567-e89b-12d3-a456-426614174000
+                      created_at: '2017-02-01T01:33:58Z'
+                      updated_at: '2017-02-01T01:33:58Z'
+                      metadata:
+                        labels: {}
+                        annotations: {}
+                      links:
+                        self:
+                          href: https://api.example.org/v3/revisions/885735b5-aea4-4cf5-8e44-961af0e41920
+                        app:
+                          href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446
+                        environment_variables:
+                          href: https://api.example.org/v3/revisions/885735b5-aea4-4cf5-8e44-961af0e41920/environment_variables
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
-        '422':
-          $ref: '#/components/responses/UnprocessableEntity'
 components:
   schemas:
-    BuildUpdate:
-      type: object
-      properties:
-        state:
-          type: string
-          description: State of the build
-          enum:
-          - STAGING
-          - STAGED
-          - FAILED
-        staging_memory_in_mb:
-          type:
-          - integer
-          - 'null'
-          description: Memory in MB allocated for staging of the build
-        staging_disk_in_mb:
-          type:
-          - integer
-          - 'null'
-          description: Disk space in MB allocated for staging of the build
-        staging_log_rate_limit_bytes_per_second:
-          type: integer
-          description: Log rate limit in bytes per second allocated for staging of the build
-        error:
-          type:
-          - string
-          - 'null'
-          description: A string describing errors during the build process
-        lifecycle:
-          $ref: '#/components/schemas/Lifecycle'
-          description: Provides the lifecycle object to use during staging
-        metadata:
-          $ref: '#/components/schemas/Metadata'
     Pagination:
       type: object
       properties:
@@ -473,15 +365,24 @@ components:
       description: 'Each link is keyed by its type and will include a href for the URL and an optional method for links that cannot be followed using GET.
 
         '
-    BuildList:
+    RelationshipToOne:
       type: object
       properties:
-        pagination:
-          $ref: '#/components/schemas/Pagination'
-        resources:
-          type: array
-          items:
-            $ref: '#/components/schemas/Build'
+        data:
+          type:
+          - object
+          - 'null'
+          $ref: '#/components/schemas/Relationship'
+        links:
+          type: object
+          properties:
+            self:
+              $ref: '#/components/schemas/Link'
+            related:
+              $ref: '#/components/schemas/Link'
+      description: 'Some relationships relate a resource to exactly one other resource. For example an app can belong to only one space.
+
+        '
     Relationships:
       type: object
       description: 'Relationships represent associations between resources. When relationships are mutable, they can be used to create, read, update, and delete these associations. An app’s relationship to its current droplet is mutable, but an app’s relationship to its space is not.
@@ -501,46 +402,15 @@ components:
         The relationship object is a key-value pair that uniquely identifies a resource. In practice this is almost always the guid of a resource.
 
         '
-    Lifecycle:
+    RevisionList:
       type: object
       properties:
-        type:
-          type: string
-          description: Type of the lifecycle; valid values are buildpack, cnb, docker
-        data:
-          type: object
-          additionalProperties: true
-          description: Data specific to the lifecycle
-          properties:
-            buildpacks:
-              type: array
-              items:
-                type: string
-              description: List of the names of buildpacks, URLs from which they may be downloaded, or null to auto-detect a suitable buildpack during staging (applicable for buildpack and cnb lifecycles)
-            stack:
-              type:
-              - string
-              - 'null'
-              description: The root filesystem to use with the buildpack, for example cflinuxfs4 (applicable for buildpack lifecycle)
-            credentials:
-              type: object
-              additionalProperties:
-                type: object
-                properties:
-                  username:
-                    type:
-                    - string
-                    - 'null'
-                  password:
-                    type:
-                    - string
-                    - 'null'
-                  token:
-                    type: string
-              description: Credentials used to download the configured buildpacks (applicable for cnb lifecycle)
-      description: 'The lifecycle type defines how the application droplet is created and run. The following lifecycle types are supported: - buildpack: Traditional buildpacks for Cloud Foundry applications. - cnb: Cloud Native Buildpacks that are OCI-compliant. - docker: Run pre-built Docker images.
-
-        '
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+        resources:
+          type: array
+          items:
+            $ref: '#/components/schemas/Revision'
     Metadata:
       type: object
       properties:
@@ -683,99 +553,45 @@ components:
         Clients should use the code and title fields for programmatically handling specific errors. The message in the detail field is subject to change over time.
 
         '
-    Build:
+    Revision:
       type: object
       allOf:
       - $ref: '#/components/schemas/BaseSchema'
       - properties:
-          state:
-            type: string
-            description: State of the build
-            enum:
-            - STAGING
-            - STAGED
-            - FAILED
-          staging_memory_in_mb:
-            type:
-            - integer
-            - 'null'
-            description: Memory in MB allocated for staging of the build
-          staging_disk_in_mb:
-            type:
-            - integer
-            - 'null'
-            description: Disk space in MB allocated for staging of the build
-          staging_log_rate_limit_bytes_per_second:
+          version:
             type: integer
-            description: Log rate limit in bytes per second allocated for staging of the build
-          error:
+            description: Version number of the revision
+          description:
             type:
             - string
             - 'null'
-            description: A string describing errors during the build process
-          lifecycle:
-            $ref: '#/components/schemas/Lifecycle'
-            description: Provides the lifecycle object to use during staging; this will override the build’s application’s default lifecycle for this build
-          checksum:
-            type: object
-            properties:
-              type:
-                type: string
-                description: Hashing algorithm for checksum; supported algorithms are sha256 and sha1
-              value:
-                type: string
-                description: Checksum of build
+            description: Description of the revision, created by the user
+          droplet:
+            $ref: '#/components/schemas/RelationshipToOne'
+          relationships:
+            allOf:
+            - $ref: '#/components/schemas/Relationships'
+            - properties:
+                app:
+                  $ref: '#/components/schemas/RelationshipToOne'
+          enabled:
+            type: boolean
+            description: Whether the revision is enabled or not.
           metadata:
             $ref: '#/components/schemas/Metadata'
-          relationships:
-            $ref: '#/components/schemas/Relationships'
-          package:
-            type: object
-            properties:
-              guid:
-                type: string
-                format: uuid
-            description: The package that is the input to the staging process
-          droplet:
-            type:
-            - object
-            - 'null'
-            properties:
-              guid:
-                type: string
-                format: uuid
-            description: A resulting droplet from the staging process; `droplet` will be `null` if staging has not completed
-          created_by:
-            type: object
-            properties:
-              guid:
-                type: string
-                description: The guid of the user that created the build
-              name:
-                type:
-                - string
-                - 'null'
-                description: The name of the user that created the build
-              email:
-                type:
-                - string
-                - 'null'
-                description: The email of the user that created the build
           links:
             type: object
             properties:
               self:
                 $ref: '#/components/schemas/Link'
-                description: The URL to get this build
+                description: The URL to get this revision
               app:
                 $ref: '#/components/schemas/Link'
-                description: The URL to get the app for this build
-              droplet:
+                description: The URL to get the app for this revision
+              environment_variables:
                 $ref: '#/components/schemas/Link'
-                description: The URL to get the droplet for this build
-      description: 'Builds represent the process of transforming source code into a runnable artifact. Builds can be triggered manually or automatically as part of the app lifecycle. A successful build results in a droplet that can be used to run the app.
-
-        '
+                description: The URL to get the environment variables for this revision
+      description: An App Revision is an immutable snapshot of an app at a particular point in time. Revisions are identified by a sequential version number. The "current" revision for an app is the revision that is currently deployed for all instances of the app.
     Error:
       type: object
       properties:
@@ -817,64 +633,6 @@ components:
         See Resources and Experimental Resources for specific resources.
 
         '
-  responses:
-    Unauthorized:
-      description: Unauthorized
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    UnprocessableEntity:
-      description: Unprocessable Entity
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    NotFound:
-      description: Not Found
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    BadGateway:
-      description: Bad Gateway
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-    Conflict:
-      description: Conflict
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    '500':
-      description: Internal Server Error
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    Forbidden:
-      description: Forbidden
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    BadRequest:
-      description: Bad Request
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-        text/html:
-          schema:
-            type: string
-    ServiceUnavailable:
-      description: Service Unavailable
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
   parameters:
     OrderBy:
       name: order_by
@@ -938,6 +696,64 @@ components:
         type: string
         format: uuid
       description: The unique identifier for the resource
+  responses:
+    UnprocessableEntity:
+      description: Unprocessable Entity
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    BadGateway:
+      description: Bad Gateway
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Conflict:
+      description: Conflict
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    NotFound:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    '500':
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    BadRequest:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+        text/html:
+          schema:
+            type: string
+    ServiceUnavailable:
+      description: Service Unavailable
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
   securitySchemes:
     oauth:
       type: oauth2

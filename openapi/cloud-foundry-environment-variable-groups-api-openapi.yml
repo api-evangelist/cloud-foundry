@@ -1,6 +1,6 @@
 openapi: 3.2.0
 info:
-  title: Cloud Foundry V3 Jobs API
+  title: Cloud Foundry V3 Environment Variable Groups API
   description: '# Welcome to the Experimental Cloud Foundry V3 API Docs!'
   version: latest
   license:
@@ -17,45 +17,43 @@ security:
   - cloud_controller.read
   - cloud_controller.write
 tags:
-- name: Jobs
-  description: Jobs are created by the platform when performing certain asynchronous actions.
+- name: Environment Variable Groups
+  description: 'There are two types of environment variable groups: running and staging.'
 paths:
-  /v3/jobs/{guid}:
+  /v3/environment_variable_groups/{name}:
     get:
-      summary: Get a job
-      description: Retrieve a specific job.
-      operationId: getJob
+      summary: Get an environment variable group
+      description: Retrieve an environment variable group.
+      operationId: getEnvironmentVariableGroup
       tags:
-      - Jobs
+      - Environment Variable Groups
       parameters:
-      - $ref: '#/components/parameters/Guid'
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+          enum:
+          - running
+          - staging
       responses:
         '200':
-          description: Successfully retrieved job
+          description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Job'
+                $ref: '#/components/schemas/EnvironmentVariableGroup'
               examples:
                 default:
                   summary: default
                   value:
-                    guid: 123e4567-e89b-12d3-a456-426614174000
-                    created_at: '2016-10-19T20:25:04Z'
-                    updated_at: '2016-11-08T16:41:26Z'
-                    operation: app.delete
-                    state: FAILED
+                    updated_at: '2016-05-04T17:00:41Z'
+                    name: running
+                    var:
+                      foo: bar
                     links:
                       self:
-                        href: https://api.example.org/v3/jobs/b19ae525-cbd3-4155-b156-dc0c2a431b4c
-                      app:
-                        href: https://api.example.org/v3/apps/7b34f1cf-7e73-428a-bb5a-8a17a8058396
-                    errors:
-                    - code: 10008
-                      title: CF-UnprocessableEntity
-                      detail: something went wrong
-                    warnings:
-                    - detail: warning! warning!
+                        href: https://api.example.org/v3/environment_variable_groups/running
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -72,6 +70,70 @@ paths:
           $ref: '#/components/responses/500'
         '502':
           $ref: '#/components/responses/BadGateway'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+    patch:
+      summary: Update environment variable group
+      description: 'Update the environment variable group. The variables given in the request will be merged with the existing environment variable group. Any requested variables with a value of `null` will be removed from the group. Environment variable names may not start with VCAP_. PORT is not a valid environment variable.
+
+
+        Variables updated in the **running** environment variable group will not take effect until apps are restarted.'
+      operationId: updateEnvironmentVariableGroup
+      tags:
+      - Environment Variable Groups
+      parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+          enum:
+          - running
+          - staging
+      requestBody:
+        description: The environment variables to update
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                var:
+                  type: object
+                  additionalProperties:
+                    type: string
+                  description: Environment variables to inject; keys and values must be strings
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnvironmentVariableGroup'
+              examples:
+                default:
+                  summary: default
+                  value:
+                    var:
+                      RAILS_ENV: production
+                      DEBUG: 'false'
+                    links:
+                      self:
+                        href: https://api.example.org/v3/environment_variable_groups/[name]
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/500'
         '503':
           $ref: '#/components/responses/ServiceUnavailable'
 components:
@@ -133,22 +195,35 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Errors'
-  parameters:
-    Guid:
-      name: guid
-      in: path
-      required: true
-      schema:
-        type: string
-        format: uuid
-      description: The unique identifier for the resource
   schemas:
-    Warning:
+    EnvironmentVariableGroup:
       type: object
       properties:
-        detail:
+        updated_at:
           type: string
-          description: Description of the warning
+          format: date-time
+          description: The time the environment variable group was last updated
+        name:
+          type:
+          - string
+          - 'null'
+          description: The name of the group; can only be "running" or "staging"
+        var:
+          type: object
+          additionalProperties:
+            type:
+            - string
+            - 'null'
+          description: Environment variables to inject; keys and values must be strings
+        links:
+          type: object
+          properties:
+            self:
+              $ref: '#/components/schemas/Link'
+              description: The URL to get this environment variable group
+      description: 'Environment variable groups allow platform operators/admins to manage environment variables across all apps in a Cloud Foundry foundation. Variables in the running environment variable group will be injected into all running app containers. Variables in the staging environment variable group will be injected into the staging container for all apps while they are being staged.
+
+        '
     Error:
       type: object
       properties:
@@ -171,77 +246,6 @@ components:
       description: 'An error response will always return a list of error objects. Errors appear on the job resource for asynchronous operations.
 
         Clients should use the code and title fields for programmatically handling specific errors. The message in the detail field is subject to change over time.
-
-        '
-    Job:
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/BaseSchema'
-      - properties:
-          operation:
-            type: string
-            description: The type of operation the job is performing
-          state:
-            type: string
-            description: The current state of the job
-            enum:
-            - PROCESSING
-            - COMPLETE
-            - FAILED
-            - POLLING
-          errors:
-            type: array
-            description: Any errors encountered during job execution
-            items:
-              $ref: '#/components/schemas/Error'
-          warnings:
-            type: array
-            description: Any warnings encountered during job execution
-            items:
-              $ref: '#/components/schemas/Warning'
-          links:
-            type: object
-            additionalProperties: true
-            properties:
-              self:
-                $ref: '#/components/schemas/Link'
-                description: The URL to get this job
-              manifest:
-                $ref: '#/components/schemas/Link'
-                description: The URL to get the manifest for this job
-              service_brokers:
-                $ref: '#/components/schemas/Link'
-                description: The URL to get the service broker for this job
-              service_credential_binding:
-                $ref: '#/components/schemas/Link'
-                description: The URL to get the service credential binding for this job
-              service_instances:
-                $ref: '#/components/schemas/Link'
-                description: The URL to get the service instance for this job
-              service_route_bindings:
-                $ref: '#/components/schemas/Link'
-                description: The URL to get the service route binding for this job
-      description: Jobs are created by the platform when performing certain asynchronous actions. Asynchronous jobs are commonly used for long-running tasks such as uploading large files, staging applications, or deleting resources.
-    BaseSchema:
-      type: object
-      properties:
-        guid:
-          type: string
-          format: uuid
-          description: The unique identifier for the resource
-        created_at:
-          type: string
-          format: date-time
-          description: The ISO8601 compatible date and time when resource was created
-        updated_at:
-          type: string
-          format: date-time
-          description: The ISO8601 compatible date and time when resource was last updated
-      description: 'A resource represents an individual object within the system, such as an app or a service. It is represented as a JSON object.
-
-        A resource consists of several required resource fields and other attributes specific to the resource.
-
-        See Resources and Experimental Resources for specific resources.
 
         '
     Link:

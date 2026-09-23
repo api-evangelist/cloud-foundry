@@ -1,0 +1,1014 @@
+openapi: 3.2.0
+info:
+  title: Cloud Foundry V3 Security Groups API
+  description: '# Welcome to the Experimental Cloud Foundry V3 API Docs!'
+  version: latest
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+  contact:
+    name: Cloud Foundry
+    url: https://www.cloudfoundry.org/
+servers:
+- url: https://api.example.local
+  description: Cloud Foundry V3 API server
+security:
+- oauth:
+  - cloud_controller.read
+  - cloud_controller.write
+tags:
+- name: Security Groups
+  description: Security groups are used to control access to apps.
+paths:
+  /v3/security_groups:
+    get:
+      summary: List security groups
+      description: List security groups.
+      operationId: listSecurityGroups
+      tags:
+      - Security Groups
+      parameters:
+      - $ref: '#/components/parameters/Page'
+      - $ref: '#/components/parameters/PerPage'
+      - $ref: '#/components/parameters/OrderBy'
+      - $ref: '#/components/parameters/CreatedAts'
+      - $ref: '#/components/parameters/UpdatedAts'
+      - name: guids
+        in: query
+        schema:
+          type: array
+          items:
+            type: string
+        description: Comma-separated list of resource GUIDs to filter by
+      - name: names
+        in: query
+        schema:
+          type: array
+          items:
+            type: string
+        description: Comma-separated list of names to filter by (case insensitive)
+      - name: globally_enabled_running
+        in: query
+        schema:
+          type: boolean
+        description: If true, only include the security groups that are enabled for running
+      - name: globally_enabled_staging
+        in: query
+        schema:
+          type: boolean
+        description: If true, only include the security groups that are enabled for staging
+      - name: running_space_guids
+        in: query
+        schema:
+          type: array
+          items:
+            type: string
+        description: Comma-delimited list of space guids to filter by
+      - name: staging_space_guids
+        in: query
+        schema:
+          type: array
+          items:
+            type: string
+        description: Comma-delimited list of space guids to filter by
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SecurityGroupList'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/500'
+        '502':
+          $ref: '#/components/responses/BadGateway'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+    post:
+      summary: Create a security group
+      description: Create a security group.
+      operationId: createSecurityGroup
+      tags:
+      - Security Groups
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SecurityGroupCreate'
+            examples:
+              default:
+                summary: default
+                value:
+                  name: my-group0
+                  rules:
+                  - protocol: tcp
+                    destination: 10.10.10.0/24
+                    ports: 443,80,8080
+                  - protocol: icmp
+                    destination: 10.10.10.0/24
+                    type: 8
+                    code: 0
+                    description: Allow ping requests to private services
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SecurityGroup'
+              examples:
+                default:
+                  summary: default
+                  value:
+                    guid: 123e4567-e89b-12d3-a456-426614174000
+                    created_at: '2020-02-20T17:42:08Z'
+                    updated_at: '2020-02-20T17:42:08Z'
+                    name: my-group0
+                    globally_enabled:
+                      running: true
+                      staging: false
+                    rules:
+                    - protocol: tcp
+                      destination: 10.10.10.0/24
+                      ports: 443,80,8080
+                    - protocol: icmp
+                      destination: 10.10.10.0/24
+                      type: 8
+                      code: 0
+                      description: Allow ping requests to private services
+                    - protocol: icmpv6
+                      destination: ::/0
+                      type: -1
+                      code: -1
+                      description: Allow all ICMPv6 traffic
+                    - protocol: tcp
+                      destination: 1.1.1.1,2.2.2.2/24,10.0.0.0-10.0.0.255
+                      ports: 80,443,8080
+                      description: Only valid if cc.security_groups.enable_comma_delimited_destinations is true
+                    relationships:
+                      staging_spaces:
+                        data:
+                        - guid: 123e4567-e89b-12d3-a456-426614174000
+                        - guid: 123e4567-e89b-12d3-a456-426614174000
+                      running_spaces:
+                        data: []
+                    links:
+                      self:
+                        href: https://api.example.org/v3/security_groups/b85a788e-671f-4549-814d-e34cdb2f539a
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/500'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+  /v3/security_groups/{guid}:
+    get:
+      summary: Get a security group
+      description: Get a security group.
+      operationId: getSecurityGroup
+      tags:
+      - Security Groups
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SecurityGroup'
+              examples:
+                default:
+                  summary: default
+                  value:
+                    guid: 123e4567-e89b-12d3-a456-426614174000
+                    created_at: '2020-02-20T17:42:08Z'
+                    updated_at: '2020-02-20T17:42:08Z'
+                    name: my-group0
+                    globally_enabled:
+                      running: true
+                      staging: false
+                    rules:
+                    - protocol: tcp
+                      destination: 10.10.10.0/24
+                      ports: 443,80,8080
+                    - protocol: icmp
+                      destination: 10.10.10.0/24
+                      type: 8
+                      code: 0
+                      description: Allow ping requests to private services
+                    - protocol: icmpv6
+                      destination: ::/0
+                      type: -1
+                      code: -1
+                      description: Allow all ICMPv6 traffic
+                    - protocol: tcp
+                      destination: 1.1.1.1,2.2.2.2/24,10.0.0.0-10.0.0.255
+                      ports: 80,443,8080
+                      description: Only valid if cc.security_groups.enable_comma_delimited_destinations is true
+                    relationships:
+                      staging_spaces:
+                        data:
+                        - guid: 123e4567-e89b-12d3-a456-426614174000
+                        - guid: 123e4567-e89b-12d3-a456-426614174000
+                      running_spaces:
+                        data: []
+                    links:
+                      self:
+                        href: https://api.example.org/v3/security_groups/b85a788e-671f-4549-814d-e34cdb2f539a
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      summary: Update a security group
+      description: Update a security group.
+      operationId: updateSecurityGroup
+      tags:
+      - Security Groups
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SecurityGroupUpdate'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SecurityGroup'
+              examples:
+                default:
+                  summary: default
+                  value:
+                    guid: 123e4567-e89b-12d3-a456-426614174000
+                    created_at: '2020-02-20T17:42:08Z'
+                    updated_at: '2020-02-20T17:42:08Z'
+                    name: my-group0
+                    globally_enabled:
+                      running: true
+                      staging: false
+                    rules:
+                    - protocol: tcp
+                      destination: 10.10.10.0/24
+                      ports: 443,80,8080
+                    - protocol: icmp
+                      destination: 10.10.10.0/24
+                      type: 8
+                      code: 0
+                      description: Allow ping requests to private services
+                    - protocol: icmpv6
+                      destination: ::/0
+                      type: -1
+                      code: -1
+                      description: Allow all ICMPv6 traffic
+                    - protocol: tcp
+                      destination: 1.1.1.1,2.2.2.2/24,10.0.0.0-10.0.0.255
+                      ports: 80,443,8080
+                      description: Only valid if cc.security_groups.enable_comma_delimited_destinations is true
+                    relationships:
+                      staging_spaces:
+                        data:
+                        - guid: 123e4567-e89b-12d3-a456-426614174000
+                        - guid: 123e4567-e89b-12d3-a456-426614174000
+                      running_spaces:
+                        data: []
+                    links:
+                      self:
+                        href: https://api.example.org/v3/security_groups/b85a788e-671f-4549-814d-e34cdb2f539a
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/500'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+    delete:
+      summary: Delete a security group
+      description: Delete a security group.
+      operationId: deleteSecurityGroup
+      tags:
+      - Security Groups
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      responses:
+        '202':
+          description: Accepted
+          headers:
+            Location:
+              description: URL of the job that is deleting the security group
+              schema:
+                type: string
+                format: uri
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/500'
+  /v3/security_groups/{guid}/relationships/running_spaces:
+    post:
+      summary: Bind a running security group to spaces
+      description: This endpoint binds one or more spaces to a security group with the running lifecycle. Running app containers within these spaces will inherit the rules specified by this security group. Apps within these spaces must be restarted for these changes to take effect. Unless a security group is globally-enabled, an admin must add it to a space for it to be visible for the org and space managers. Once it's visible, org and space managers can add it to additional spaces.
+      operationId: bindRunningSecurityGroup
+      tags:
+      - Security Groups
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RelationshipToMany'
+            examples:
+              default:
+                summary: default
+                value:
+                  data:
+                  - guid: 123e4567-e89b-12d3-a456-426614174000
+                  - guid: 123e4567-e89b-12d3-a456-426614174000
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RelationshipToMany'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /v3/security_groups/{guid}/relationships/running_spaces/{space_guid}:
+    delete:
+      summary: Unbind a running security group from a space
+      description: This endpoint removes a space from a security group with the running lifecycle. Apps within this space must be restarted for these changes to take effect.
+      operationId: unbindRunningSecurityGroup
+      tags:
+      - Security Groups
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      - $ref: '#/components/parameters/SpaceGuid'
+      responses:
+        '204':
+          description: No Content
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /v3/security_groups/{guid}/relationships/staging_spaces:
+    post:
+      summary: Bind a staging security group to spaces
+      description: This endpoint binds one or more spaces to a security group with the staging lifecycle. Staging app containers within these spaces will inherit the rules specified by this security group. Apps within these spaces must be restaged for these changes to take effect. Unless a security group is globally-enabled, an admin must add it to a space for it to be visible for the org and space managers. Once it's visible, org and space managers can add it to additional spaces.
+      operationId: bindStagingSecurityGroup
+      tags:
+      - Security Groups
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RelationshipToMany'
+            examples:
+              default:
+                summary: default
+                value:
+                  data:
+                  - guid: 123e4567-e89b-12d3-a456-426614174000
+                  - guid: 123e4567-e89b-12d3-a456-426614174000
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RelationshipToMany'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /v3/security_groups/{guid}/relationships/staging_spaces/{space_guid}:
+    delete:
+      summary: Unbind a staging security group from a space
+      description: This endpoint removes a space from a security group with the staging lifecycle. Apps within this space must be restaged for these changes to take effect.
+      operationId: unbindStagingSecurityGroup
+      tags:
+      - Security Groups
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      - $ref: '#/components/parameters/SpaceGuid'
+      responses:
+        '204':
+          description: No Content
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+components:
+  schemas:
+    Pagination:
+      type: object
+      properties:
+        total_results:
+          type: integer
+          description: The total number of results available
+        total_pages:
+          type: integer
+          description: The total number of pages available
+        first:
+          allOf:
+          - $ref: '#/components/schemas/Link'
+          - description: The first page of results
+        last:
+          allOf:
+          - $ref: '#/components/schemas/Link'
+          - description: The last page of results
+        next:
+          oneOf:
+          - $ref: '#/components/schemas/Link'
+          - type: 'null'
+          description: The next page of results
+        previous:
+          oneOf:
+          - $ref: '#/components/schemas/Link'
+          - type: 'null'
+          description: The previous page of results
+      description: 'Pagination is a technique used to divide a large set of results into smaller, more manageable sets. This allows clients to retrieve results in smaller chunks, reducing the amount of data transferred and improving performance.
+
+        The pagination object is a JSON object that contains information about the pagination state of the results. It includes the total number of results available, the total number of pages available, and links to the first, last, next, and previous pages of results.
+
+        '
+    RelationshipToMany:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Relationship'
+        links:
+          type: object
+          properties:
+            self:
+              $ref: '#/components/schemas/Link'
+            related:
+              $ref: '#/components/schemas/Link'
+      description: 'Some relationships relate a resource to several other resources. For example, an isolation segment can be entitled to multiple organizations.
+
+        '
+    Link:
+      type: object
+      properties:
+        href:
+          type: string
+          description: The URL of the link
+        method:
+          type: string
+          description: An optional field containing the HTTP method to be used when following the URL
+      required:
+      - href
+      description: 'Each link is keyed by its type and will include a href for the URL and an optional method for links that cannot be followed using GET.
+
+        '
+    SecurityGroupUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the security group
+        globally_enabled:
+          type: object
+          properties:
+            running:
+              type: boolean
+              description: Whether the security group is globally enabled for running apps
+            staging:
+              type: boolean
+              description: Whether the security group is globally enabled for staging apps
+        rules:
+          type: array
+          items:
+            type: object
+            properties:
+              protocol:
+                type: string
+                description: Protocol for the rule
+              destination:
+                type: string
+                description: Destination for the rule
+              ports:
+                type: string
+                description: Ports for the rule
+              type:
+                type: integer
+                description: Type for ICMP rules
+              code:
+                type: integer
+                description: Code for ICMP rules
+              description:
+                type:
+                - string
+                - 'null'
+                description: Description of the rule
+          description: Rules for the security group
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+    SecurityGroupCreate:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the security group
+        globally_enabled:
+          type: object
+          properties:
+            running:
+              type: boolean
+              description: Whether the security group is globally enabled for running apps
+            staging:
+              type: boolean
+              description: Whether the security group is globally enabled for staging apps
+        rules:
+          type: array
+          items:
+            type: object
+            properties:
+              protocol:
+                type: string
+                description: Protocol for the rule
+              destination:
+                type: string
+                description: Destination for the rule
+              ports:
+                type: string
+                description: Ports for the rule
+              type:
+                type: integer
+                description: Type for ICMP rules
+              code:
+                type: integer
+                description: Code for ICMP rules
+              description:
+                type:
+                - string
+                - 'null'
+                description: Description of the rule
+          description: Rules for the security group
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+      required:
+      - name
+    Metadata:
+      type: object
+      properties:
+        labels:
+          type: object
+          additionalProperties:
+            type:
+            - string
+            - 'null'
+          description: 'A set of key-value pairs that describe the resource. Labels are a JSON object that contains information about a resource. They are used to tag resources with metadata that can be used to filter and group resources. Labels are included in the response body of a request to retrieve a resource.
+
+            Labels are user-specified key/value pairs that are attached to API Resources. They are queryable, identifying attributes of a resource, but they do not affect the operation of CloudFoundry.
+
+
+            For example, an app may be assigned a label with key sensitive and possible values true or false.
+
+
+            Users could then find all sensitive apps with a selector for sensitive=true, resulting in a response containing only apps having the label key sensitive with a label value of true.
+
+
+            Labels
+
+            Labels allow users to apply identifying attributes to resources that are meaningful to the user, but not the CloudFoundry system.
+
+
+            Examples may include (but are not limited to):
+
+
+            "production" : "true" or "production" : "false"
+
+            "env" : "dev" or "env" : "test" or "env" : "prod"
+
+            "chargeback-code" : "abc123"
+
+            Label keys
+
+            Label keys are made up of an (optional) prefix, and name. If a prefix is present, it is separated from the name by a /. Prefixes are dns names intended to enable namespacing of label keys.
+
+
+            A label key prefix must adhere to the following restrictions:
+
+
+            Length: 0-253 characters
+
+            Allowed characters: alphanumeric ( [a-z0-9A-Z] ), -, and .
+
+            DNS subdomain format (series of subdomain labels separated by .)
+
+            A label key name must adhere to the following restrictions:
+
+
+            Length: 1-63 characters
+
+            Allowed characters: alphanumeric ( [a-z0-9A-Z] ), -, _, and .
+
+            Must begin and end with an alphanumeric character
+
+            Label values
+
+            Label values must adhere to the following restrictions:
+
+
+            Length: 0-63 characters
+
+            Allowed characters: alphanumeric ( [a-z0-9A-Z] ), -, _, and .
+
+            Must begin and end with an alphanumeric character
+
+            Empty values are allowed
+
+            '
+        annotations:
+          type: object
+          additionalProperties:
+            type:
+            - string
+            - 'null'
+          description: 'A set of key-value pairs that describe the resource. Annotations are a JSON object that contains information about a resource. They are used to tag resources with metadata that can be used to filter and group resources. Annotations are included in the response body of a request to retrieve a resource.
+
+            Annotations are user-specified key-value pairs that are attached to API resources. They do not affect the operation of Cloud Foundry. Annotations cannot be used in filters.
+
+
+            When a service instance is being created, the service broker is sent the annotations of the service instance, and the space and organization in which the service instance resides. When a service instance is being updated, the service broker is sent the annotations of the space and organization in which the service instance resides. When a service binding is being created, the service broker is sent annotations of any associated app, and the space and organization in which the binding resides. Only annotations with a prefix (e.g. company.com/contacts) are sent to service brokers.
+
+
+            Examples may include (but are not limited to):
+
+
+            "contact info": "bob@example.com jane@example.com"
+
+            "library versions": "Spring: 5.1, Redis Client: a184098. yaml parser: 38"
+
+            "git-sha": "d56fe0367554ae5e878e37ed6c5b9a82f5995512"
+
+            Annotation keys
+
+            Annotation keys are made up of an (optional) prefix and name. If a prefix is present, it is separated from the name by a /. Prefixes are DNS names intended to enable namespacing of annotation keys.
+
+
+            An annotation key prefix must adhere to the following restrictions:
+
+
+            Length: 0-253 characters
+
+            Allowed characters: a-z, A-Z, 0-9, -, and .; emojis cannot be used in keys
+
+            DNS subdomain format (series of subdomain annotations separated by .)
+
+            An annotation key name must adhere to the following restrictions:
+
+
+            Length: 1-63 characters
+
+            Allowed characters: a-z, A-Z, 0-9, -, _, and .; emojis cannot be used in keys
+
+            Must begin and end with an alphanumeric character
+
+            Annotation values
+
+            Annotation values must adhere to the following restrictions:
+
+
+            Length: 0-5000 unicode characters
+
+            '
+      description: 'Metadata is a JSON object that contains information about a resource. It includes the GUID of the resource, the time the resource was created, the time the resource was last updated, and links to the resource.
+
+        Metadata is included in the response body of a request to retrieve a resource.
+
+        '
+    Errors:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/Error'
+      description: 'An error response will always return a list of error objects. Errors appear on the job resource for asynchronous operations.
+
+        Clients should use the code and title fields for programmatically handling specific errors. The message in the detail field is subject to change over time.
+
+        '
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: A numeric code for this error
+        detail:
+          type: string
+          description: Detailed description of the error
+        title:
+          type: string
+          description: Name of the error
+    Relationship:
+      type: object
+      properties:
+        guid:
+          type: string
+          format: uuid
+          description: The GUID of the resource
+    SecurityGroup:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/BaseSchema'
+      - properties:
+          name:
+            type: string
+            description: Name of the security group
+          globally_enabled:
+            type: object
+            properties:
+              running:
+                type: boolean
+                description: Whether the security group is globally enabled for running apps
+              staging:
+                type: boolean
+                description: Whether the security group is globally enabled for staging apps
+          rules:
+            type: array
+            items:
+              type: object
+              properties:
+                protocol:
+                  type: string
+                  description: Protocol for the rule
+                destination:
+                  type: string
+                  description: Destination for the rule
+                ports:
+                  type: string
+                  description: Ports for the rule
+                type:
+                  type: integer
+                  description: Type for ICMP rules
+                code:
+                  type: integer
+                  description: Code for ICMP rules
+                description:
+                  type: string
+                  description: Description of the rule
+            description: Rules for the security group
+          running_spaces:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Relationship'
+            description: Spaces where this security group is applied to running apps
+          staging_spaces:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Relationship'
+            description: Spaces where this security group is applied to staging apps
+          links:
+            type: object
+            properties:
+              self:
+                $ref: '#/components/schemas/Link'
+              running_spaces:
+                $ref: '#/components/schemas/Link'
+              staging_spaces:
+                $ref: '#/components/schemas/Link'
+          metadata:
+            $ref: '#/components/schemas/Metadata'
+        required:
+        - name
+        - globally_enabled
+        - rules
+        - links
+    BaseSchema:
+      type: object
+      properties:
+        guid:
+          type: string
+          format: uuid
+          description: The unique identifier for the resource
+        created_at:
+          type: string
+          format: date-time
+          description: The ISO8601 compatible date and time when resource was created
+        updated_at:
+          type: string
+          format: date-time
+          description: The ISO8601 compatible date and time when resource was last updated
+      description: 'A resource represents an individual object within the system, such as an app or a service. It is represented as a JSON object.
+
+        A resource consists of several required resource fields and other attributes specific to the resource.
+
+        See Resources and Experimental Resources for specific resources.
+
+        '
+    SecurityGroupList:
+      type: object
+      properties:
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+        resources:
+          type: array
+          items:
+            $ref: '#/components/schemas/SecurityGroup'
+  responses:
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    UnprocessableEntity:
+      description: Unprocessable Entity
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    NotFound:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    BadGateway:
+      description: Bad Gateway
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Conflict:
+      description: Conflict
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    '500':
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    BadRequest:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+        text/html:
+          schema:
+            type: string
+    ServiceUnavailable:
+      description: Service Unavailable
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+  parameters:
+    OrderBy:
+      name: order_by
+      in: query
+      required: false
+      schema:
+        type: string
+      description: 'Value to sort by. Defaults to ascending; prepend with `-` to sort descending.
+
+        '
+      example: created_at
+    CreatedAts:
+      name: created_ats
+      in: query
+      required: false
+      schema:
+        type: string
+      description: 'Timestamp to filter by. When filtering on equality, several comma-delimited timestamps may be passed. Also supports filtering with [relational operators](#relational-operators).
+
+        '
+      example: '2021-01-01T00:00:00Z'
+    PerPage:
+      name: per_page
+      in: query
+      required: false
+      schema:
+        type: integer
+      description: Number of results per page, valid values are 1 through 5000
+      example: 50
+    Page:
+      name: page
+      in: query
+      required: false
+      schema:
+        type: integer
+      description: Page to display; valid values are integers >= 1
+      example: 1
+    UpdatedAts:
+      name: updated_ats
+      in: query
+      required: false
+      schema:
+        type: string
+      description: 'Timestamp to filter by. When filtering on equality, several comma-delimited timestamps may be passed. Also supports filtering with [relational operators](#relational-operators).
+
+        '
+      example: '2021-01-01T00:00:00Z'
+    Guid:
+      name: guid
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: The unique identifier for the resource
+    SpaceGuid:
+      name: space_guid
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: The unique identifier for the space
+  securitySchemes:
+    oauth:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: https://uaa.cloudfoundry.local/api-oauth/dialog
+          scopes:
+            cloud_controller.admin: This scope provides read and write access to all resources
+            cloud_controller.admin_read_only: This scope provides read only access to all resources
+            cloud_controller.global_auditor: This scope provides read access to all resources
+            cloud_controller.read: Read access to the Cloud Controller
+            cloud_controller.write: Write access to the Cloud Controller
+            cloud_controller.update_build_state: This scope allows its bearer to update the state of a build; currently only used when updating builds
+            cloud_controller_service_permissions.read: This scope provides read only access for service instance permissions
+    bearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Bearer JWT token authentication

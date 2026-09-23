@@ -1,6 +1,6 @@
 openapi: 3.2.0
 info:
-  title: Cloud Foundry V3 Organizations API
+  title: Cloud Foundry V3 Isolation Segments API
   description: '# Welcome to the Experimental Cloud Foundry V3 API Docs!'
   version: latest
   license:
@@ -17,16 +17,16 @@ security:
   - cloud_controller.read
   - cloud_controller.write
 tags:
-- name: Organizations
-  description: An org is a development account that an individual or multiple collaborators can own and use.
+- name: Isolation Segments
+  description: Isolation Segments provide dedicated pools of resources to which apps can be deployed to isolate workloads.
 paths:
-  /v3/organizations:
+  /v3/isolation_segments:
     get:
-      summary: List organizations
-      description: Retrieve all organizations the user has access to.
-      operationId: listOrganizations
+      summary: List isolation segments
+      description: Retrieves all isolation segments to which the user has access. For admin, this is all the isolation segments in the system. For anyone else, this is the isolation segments in the allowed list for any organization to which the user belongs.
+      operationId: listIsolationSegments
       tags:
-      - Organizations
+      - Isolation Segments
       parameters:
       - $ref: '#/components/parameters/Page'
       - $ref: '#/components/parameters/PerPage'
@@ -34,20 +34,451 @@ paths:
       - $ref: '#/components/parameters/CreatedAts'
       - $ref: '#/components/parameters/UpdatedAts'
       - $ref: '#/components/parameters/LabelSelector'
-      - name: names
-        in: query
-        schema:
-          type: array
-          items:
-            type: string
-        description: Comma-delimited list of organization names to filter by
       - name: guids
         in: query
         schema:
           type: array
           items:
             type: string
-        description: Comma-delimited list of organization guids to filter by
+        description: Comma-delimited list of isolation segment guids to filter by.
+      - name: names
+        in: query
+        schema:
+          type: array
+          items:
+            type: string
+        description: Comma-delimited list of isolation segment names to filter by.
+      - name: organization_guids
+        in: query
+        schema:
+          type: array
+          items:
+            type: string
+        description: Comma-delimited list of organization guids to filter by.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IsolationSegmentList'
+              examples:
+                default:
+                  summary: default
+                  value:
+                    pagination:
+                      total_results: 11
+                      total_pages: 3
+                      first:
+                        href: https://api.example.org/v3/isolation_segments?page=1&per_page=5
+                      last:
+                        href: https://api.example.org/v3/isolation_segments?page=3&per_page=5
+                      next:
+                        href: https://api.example.org/v3/isolation_segments?page=2&per_page=5
+                      previous: null
+                    resources:
+                    - guid: 123e4567-e89b-12d3-a456-426614174000
+                      name: an_isolation_segment
+                      created_at: '2016-10-19T20:25:04Z'
+                      updated_at: '2016-11-08T16:41:26Z'
+                      links:
+                        self:
+                          href: https://api.example.org/v3/isolation_segments/b19f6525-cbd3-4155-b156-dc0c2a431b4c
+                        organizations:
+                          href: https://api.example.org/v3/isolation_segments/b19f6525-cbd3-4155-b156-dc0c2a431b4c/organizations
+                      metadata:
+                        annotations: {}
+                        labels: {}
+                    - guid: 123e4567-e89b-12d3-a456-426614174000
+                      name: an_isolation_segment1
+                      created_at: '2016-10-19T20:29:19Z'
+                      updated_at: '2016-11-08T16:41:26Z'
+                      links:
+                        self:
+                          href: https://api.example.org/v3/isolation_segments/68d54d31-9b3a-463b-ba94-e8e4c32edbac
+                        organizations:
+                          href: https://api.example.org/v3/isolation_segments/68d54d31-9b3a-463b-ba94-e8e4c32edbac/organizations
+                      metadata:
+                        annotations: {}
+                        labels: {}
+                    - guid: 123e4567-e89b-12d3-a456-426614174000
+                      name: an_isolation_segment2
+                      created_at: '2016-10-19T20:29:22Z'
+                      updated_at: '2016-11-08T16:41:26Z'
+                      links:
+                        self:
+                          href: https://api.example.org/v3/isolation_segments/ecdc67c3-a71e-43ff-bddf-048930b8cd03
+                        organizations:
+                          href: https://api.example.org/v3/isolation_segments/ecdc67c3-a71e-43ff-bddf-048930b8cd03/organizations
+                      metadata:
+                        annotations: {}
+                        labels: {}
+                    - guid: 123e4567-e89b-12d3-a456-426614174000
+                      name: an_isolation_segment3
+                      created_at: '2016-10-19T20:29:27Z'
+                      updated_at: '2016-11-08T16:41:26Z'
+                      links:
+                        self:
+                          href: https://api.example.org/v3/isolation_segments/424c89e4-4353-46b7-9bf4-f90bd9bacac0
+                        organizations:
+                          href: https://api.example.org/v3/isolation_segments/424c89e4-4353-46b7-9bf4-f90bd9bacac0/organizations
+                      metadata:
+                        annotations: {}
+                        labels: {}
+                    - guid: 123e4567-e89b-12d3-a456-426614174000
+                      name: an_isolation_segment4
+                      created_at: '2016-10-19T20:29:33Z'
+                      updated_at: '2016-11-08T16:41:26Z'
+                      links:
+                        self:
+                          href: https://api.example.org/v3/isolation_segments/0a79fcec-a648-4eb8-a6c3-2b5be39047c7
+                        organizations:
+                          href: https://api.example.org/v3/isolation_segments/0a79fcec-a648-4eb8-a6c3-2b5be39047c7/organizations
+                      metadata:
+                        annotations: {}
+                        labels: {}
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/500'
+        '502':
+          $ref: '#/components/responses/BadGateway'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+    post:
+      summary: Create an isolation segment
+      description: Create an isolation segment.
+      operationId: createIsolationSegment
+      tags:
+      - Isolation Segments
+      requestBody:
+        $ref: '#/components/requestBodies/IsolationSegmentCreate'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IsolationSegment'
+              examples:
+                default:
+                  summary: default
+                  value:
+                    guid: 123e4567-e89b-12d3-a456-426614174000
+                    name: an_isolation_segment
+                    created_at: '2016-10-19T20:25:04Z'
+                    updated_at: '2016-11-08T16:41:26Z'
+                    links:
+                      self:
+                        href: https://api.example.org/v3/isolation_segments/b19f6525-cbd3-4155-b156-dc0c2a431b4c
+                      organizations:
+                        href: https://api.example.org/v3/isolation_segments/b19f6525-cbd3-4155-b156-dc0c2a431b4c/organizations
+                    metadata:
+                      annotations: {}
+                      labels: {}
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/500'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+  /v3/isolation_segments/{guid}:
+    get:
+      summary: Get an isolation segment
+      description: Retrieve an isolation segment to which the user has access. For admin, this is any isolation segment in the system. For anyone else, this is an isolation segment in the allowed list for any organization to which the user belongs.
+      operationId: getIsolationSegment
+      tags:
+      - Isolation Segments
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IsolationSegment'
+              examples:
+                default:
+                  summary: default
+                  value:
+                    guid: 123e4567-e89b-12d3-a456-426614174000
+                    name: an_isolation_segment
+                    created_at: '2016-10-19T20:25:04Z'
+                    updated_at: '2016-11-08T16:41:26Z'
+                    links:
+                      self:
+                        href: https://api.example.org/v3/isolation_segments/b19f6525-cbd3-4155-b156-dc0c2a431b4c
+                      organizations:
+                        href: https://api.example.org/v3/isolation_segments/b19f6525-cbd3-4155-b156-dc0c2a431b4c/organizations
+                    metadata:
+                      annotations: {}
+                      labels: {}
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      summary: Update an isolation segment
+      description: Update an isolation segment.
+      operationId: updateIsolationSegment
+      tags:
+      - Isolation Segments
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      requestBody:
+        description: Isolation segment to update
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: The name of the isolation segment
+                metadata:
+                  $ref: '#/components/schemas/Metadata'
+            examples:
+              default:
+                summary: default
+                value:
+                  name: my_isolation_segment
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IsolationSegment'
+              examples:
+                default:
+                  summary: default
+                  value:
+                    guid: 123e4567-e89b-12d3-a456-426614174000
+                    name: <%= name %>
+                    created_at: '2016-10-19T20:25:04Z'
+                    updated_at: '2016-11-08T16:41:26Z'
+                    links:
+                      self:
+                        href: https://api.example.org/v3/isolation_segments/b19f6525-cbd3-4155-b156-dc0c2a431b4c
+                      organizations:
+                        href: https://api.example.org/v3/isolation_segments/b19f6525-cbd3-4155-b156-dc0c2a431b4c/organizations
+                    metadata:
+                      annotations: {}
+                      labels: {}
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/500'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+    delete:
+      summary: Delete an isolation segment
+      description: An isolation segment cannot be deleted if it is entitled to any organization.
+      operationId: deleteIsolationSegment
+      tags:
+      - Isolation Segments
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      responses:
+        '204':
+          description: No Content
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/500'
+  /v3/isolation_segments/{guid}/relationships/organizations:
+    post:
+      summary: Entitle organizations for isolation segment
+      description: This endpoint entitles the specified organizations for the isolation segment. In the case where the specified isolation segment is the system-wide shared segment, and if an organization is not already entitled for any other isolation segment, then the shared isolation segment automatically gets assigned as the default for that organization.
+      operationId: entitleOrganizationsForIsolationSegment
+      tags:
+      - Isolation Segments
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      requestBody:
+        description: List of organizations to entitle
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RelationshipToMany'
+            examples:
+              default:
+                summary: default
+                value:
+                  data:
+                  - guid: 123e4567-e89b-12d3-a456-426614174000
+                  - guid: 123e4567-e89b-12d3-a456-426614174000
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RelationshipToMany'
+              examples:
+                default:
+                  summary: default
+                  value:
+                    data:
+                    - guid: 123e4567-e89b-12d3-a456-426614174000
+                    - guid: 123e4567-e89b-12d3-a456-426614174000
+                    links:
+                      self:
+                        href: https://api.example.org/v3/isolation_segments/bdeg4371-cbd3-4155-b156-dc0c2a431b4c/relationships/organizations
+                      related:
+                        href: https://api.example.org/v3/isolation_segments/bdeg4371-cbd3-4155-b156-dc0c2a431b4c/organizations
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+    get:
+      summary: List organizations relationship
+      description: This endpoint lists the organizations entitled for the isolation segment. For an Admin, this will list all entitled organizations in the system. For any other user, this will list only the entitled organizations to which the user belongs.
+      operationId: listOrganizationsForIsolationSegment
+      tags:
+      - Isolation Segments
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      - $ref: '#/components/parameters/Page'
+      - $ref: '#/components/parameters/PerPage'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RelationshipToMany'
+              examples:
+                default:
+                  summary: default
+                  value:
+                    data:
+                    - guid: 123e4567-e89b-12d3-a456-426614174000
+                    - guid: 123e4567-e89b-12d3-a456-426614174000
+                    links:
+                      self:
+                        href: https://api.example.org/v3/isolation_segments/bdeg4371-cbd3-4155-b156-dc0c2a431b4c/relationships/organizations
+                      related:
+                        href: https://api.example.org/v3/isolation_segments/bdeg4371-cbd3-4155-b156-dc0c2a431b4c/organizations
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /v3/isolation_segments/{guid}/relationships/organizations/{org_guid}:
+    delete:
+      summary: Revoke entitlement to isolation segment for an organization
+      description: This endpoint revokes the entitlement for the specified organization to the isolation segment. If the isolation segment is assigned to a space within an organization, the entitlement cannot be revoked. If the isolation segment is the organization’s default, the entitlement cannot be revoked.
+      operationId: revokeIsolationSegmentForOrganization
+      tags:
+      - Isolation Segments
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      - name: org_guid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: The GUID of the organization to revoke entitlement from.
+      responses:
+        '204':
+          description: No Content
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /v3/isolation_segments/{guid}/relationships/spaces:
+    get:
+      summary: List spaces relationship
+      description: This endpoint lists the spaces to which the isolation segment is assigned. For an Admin, this will list all associated spaces in the system. For an org manager, this will list only those associated spaces belonging to orgs for which the user is a manager. For any other user, this will list only those associated spaces to which the user has access.
+      operationId: listSpacesForIsolationSegment
+      tags:
+      - Isolation Segments
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      - $ref: '#/components/parameters/Page'
+      - $ref: '#/components/parameters/PerPage'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RelationshipToMany'
+              examples:
+                default:
+                  summary: default
+                  value:
+                    data:
+                    - guid: 123e4567-e89b-12d3-a456-426614174000
+                    - guid: 123e4567-e89b-12d3-a456-426614174000
+                    links:
+                      self:
+                        href: https://api.example.org/v3/isolation_segments/bdeg4371-cbd3-4155-b156-dc0c2a431b4c/relationships/spaces
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /v3/isolation_segments/{guid}/organizations:
+    get:
+      summary: List organizations for isolation segment
+      description: This endpoint lists the organizations entitled for the isolation segment. For an Admin, this will list all entitled organizations in the system. For any other user, this will list only the entitled organizations to which the user belongs.
+      operationId: listOrganizationsForIsolationSegmentShort
+      tags:
+      - Isolation Segments
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      - $ref: '#/components/parameters/Page'
+      - $ref: '#/components/parameters/PerPage'
       responses:
         '200':
           description: OK
@@ -63,9 +494,9 @@ paths:
                       total_results: 2
                       total_pages: 1
                       first:
-                        href: https://api.example.org/v3/organizations?page=1&per_page=50
+                        href: https://api.example.org/v3/isolation_segments/933b4c58-120b-499a-b85d-4b6fc9e2903b/organizations?page=1&per_page=50
                       last:
-                        href: https://api.example.org/v3/organizations?page=1&per_page=50
+                        href: https://api.example.org/v3/isolation_segments/933b4c58-120b-499a-b85d-4b6fc9e2903b/organizations?page=1&per_page=50
                       next: null
                       previous: null
                     resources:
@@ -74,10 +505,6 @@ paths:
                       updated_at: '2017-02-01T01:33:58Z'
                       name: org1
                       suspended: false
-                      relationships:
-                        quota:
-                          data:
-                            guid: 123e4567-e89b-12d3-a456-426614174000
                       links:
                         self:
                           href: https://api.example.org/v3/organizations/885735b5-aea4-4cf5-8e44-961af0e41920
@@ -87,6 +514,10 @@ paths:
                           href: https://api.example.org/v3/organizations/885735b5-aea4-4cf5-8e44-961af0e41920/domains/default
                         quota:
                           href: https://api.example.org/v3/organization_quotas/b7887f5c-34bb-40c5-9778-577572e4fb2d
+                      relationships:
+                        quota:
+                          data:
+                            guid: 123e4567-e89b-12d3-a456-426614174000
                       metadata:
                         labels: {}
                         annotations: {}
@@ -111,454 +542,12 @@ paths:
                       metadata:
                         labels: {}
                         annotations: {}
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '409':
-          $ref: '#/components/responses/Conflict'
-        '422':
-          $ref: '#/components/responses/UnprocessableEntity'
-        '500':
-          $ref: '#/components/responses/500'
-        '502':
-          $ref: '#/components/responses/BadGateway'
-        '503':
-          $ref: '#/components/responses/ServiceUnavailable'
-    post:
-      summary: Create an organization
-      description: Create an organization.
-      operationId: createOrganization
-      tags:
-      - Organizations
-      requestBody:
-        $ref: '#/components/requestBodies/OrganizationCreateRequestBody'
-      responses:
-        '201':
-          description: Created
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Organization'
-              examples:
-                default:
-                  summary: default
-                  value:
-                    guid: 123e4567-e89b-12d3-a456-426614174000
-                    created_at: '2017-02-01T01:33:58Z'
-                    updated_at: '2017-02-01T01:33:58Z'
-                    name: my-organization
-                    suspended: false
-                    relationships:
-                      quota:
-                        data:
-                          guid: 123e4567-e89b-12d3-a456-426614174000
-                    links:
-                      self:
-                        href: https://api.example.org/v3/organizations/24637893-3b77-489d-bb79-8466f0d88b52
-                      domains:
-                        href: https://api.example.org/v3/organizations/24637893-3b77-489d-bb79-8466f0d88b52/domains
-                      default_domain:
-                        href: https://api.example.org/v3/organizations/24637893-3b77-489d-bb79-8466f0d88b52/domains/default
-                      quota:
-                        href: https://api.example.org/v3/organization_quotas/b7887f5c-34bb-40c5-9778-577572e4fb2d
-                    metadata:
-                      labels: {}
-                      annotations: {}
-          links:
-            quota:
-              operationId: getOrganizationQuota
-              parameters:
-                guid: $response.body#/relationships/quota/data/guid
-              description: Retrieve the quota associated with this organization
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '409':
-          $ref: '#/components/responses/Conflict'
-        '422':
-          $ref: '#/components/responses/UnprocessableEntity'
-        '500':
-          $ref: '#/components/responses/500'
-        '503':
-          $ref: '#/components/responses/ServiceUnavailable'
-  /v3/organizations/{guid}:
-    get:
-      summary: Get an organization
-      description: This endpoint retrieves the specified organization object.
-      operationId: getOrganization
-      tags:
-      - Organizations
-      parameters:
-      - $ref: '#/components/parameters/Guid'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Organization'
-              examples:
-                default:
-                  summary: default
-                  value:
-                    guid: 123e4567-e89b-12d3-a456-426614174000
-                    created_at: '2017-02-01T01:33:58Z'
-                    updated_at: '2017-02-01T01:33:58Z'
-                    name: my-organization
-                    suspended: false
-                    relationships:
-                      quota:
-                        data:
-                          guid: 123e4567-e89b-12d3-a456-426614174000
-                    links:
-                      self:
-                        href: https://api.example.org/v3/organizations/24637893-3b77-489d-bb79-8466f0d88b52
-                      domains:
-                        href: https://api.example.org/v3/organizations/24637893-3b77-489d-bb79-8466f0d88b52/domains
-                      default_domain:
-                        href: https://api.example.org/v3/organizations/24637893-3b77-489d-bb79-8466f0d88b52/domains/default
-                      quota:
-                        href: https://api.example.org/v3/organization_quotas/b7887f5c-34bb-40c5-9778-577572e4fb2d
-                    metadata:
-                      labels: {}
-                      annotations: {}
-          links:
-            quota:
-              operationId: getOrganizationQuota
-              parameters:
-                guid: $response.body#/relationships/quota/data/guid
-                description: Retrieve the quota associated with this organization
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
-    patch:
-      summary: Update an organization
-      description: Update an organization.
-      operationId: updateOrganization
-      tags:
-      - Organizations
-      parameters:
-      - $ref: '#/components/parameters/Guid'
-      requestBody:
-        $ref: '#/components/requestBodies/OrganizationUpdateRequestBody'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Organization'
-              examples:
-                default:
-                  summary: default
-                  value:
-                    guid: 123e4567-e89b-12d3-a456-426614174000
-                    created_at: '2017-02-01T01:33:58Z'
-                    updated_at: '2017-02-01T01:33:58Z'
-                    name: my-organization
-                    suspended: false
-                    relationships:
-                      quota:
-                        data:
-                          guid: 123e4567-e89b-12d3-a456-426614174000
-                    links:
-                      self:
-                        href: https://api.example.org/v3/organizations/24637893-3b77-489d-bb79-8466f0d88b52
-                      domains:
-                        href: https://api.example.org/v3/organizations/24637893-3b77-489d-bb79-8466f0d88b52/domains
-                      default_domain:
-                        href: https://api.example.org/v3/organizations/24637893-3b77-489d-bb79-8466f0d88b52/domains/default
-                      quota:
-                        href: https://api.example.org/v3/organization_quotas/b7887f5c-34bb-40c5-9778-577572e4fb2d
-                    metadata:
-                      labels: {}
-                      annotations: {}
-          links:
-            quota:
-              operationId: getOrganizationQuota
-              parameters:
-                guid: $response.body#/relationships/quota/data/guid
-              description: Retrieve the quota associated with this organization
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '409':
-          $ref: '#/components/responses/Conflict'
-        '422':
-          $ref: '#/components/responses/UnprocessableEntity'
-        '500':
-          $ref: '#/components/responses/500'
-        '503':
-          $ref: '#/components/responses/ServiceUnavailable'
-    delete:
-      summary: Delete an organization
-      description: When an organization is deleted, user roles associated with the organization will also be deleted.
-      operationId: deleteOrganization
-      tags:
-      - Organizations
-      parameters:
-      - $ref: '#/components/parameters/Guid'
-      responses:
-        '202':
-          description: Accepted
-          headers:
-            location:
-              description: URL of the job to query the asynchronous operation
-              schema:
-                type: string
-                format: uri
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '422':
-          $ref: '#/components/responses/UnprocessableEntity'
-        '500':
-          $ref: '#/components/responses/500'
-  /v3/organizations/{guid}/domains/default:
-    get:
-      summary: Get default domain
-      description: Retrieve the default domain for a given organization.
-      operationId: getDefaultDomainForOrganization
-      tags:
-      - Organizations
-      parameters:
-      - $ref: '#/components/parameters/Guid'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Domain'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-  /v3/organizations/{guid}/usage_summary:
-    get:
-      summary: Get usage summary
-      description: This endpoint retrieves the specified organization object's memory and app instance usage summary.
-      operationId: getUsageSummaryForOrganization
-      tags:
-      - Organizations
-      parameters:
-      - $ref: '#/components/parameters/Guid'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  usage_summary:
-                    type: object
-                    properties:
-                      started_instances:
-                        type: integer
-                      memory_in_mb:
-                        type: integer
-                      routes:
-                        type: integer
-                      service_instances:
-                        type: integer
-                      reserved_ports:
-                        type: integer
-                      domains:
-                        type: integer
-                      per_app_tasks:
-                        type: integer
-                      service_keys:
-                        type: integer
-                  links:
-                    type: object
-                    properties:
-                      self:
-                        $ref: '#/components/schemas/Link'
-                        description: The URL to get this usage summary
-                      organization:
-                        $ref: '#/components/schemas/Link'
-                        description: The URL to get the organization for this usage summary
-              examples:
-                default:
-                  summary: default
-                  value:
-                    usage_summary:
-                      started_instances: 3
-                      memory_in_mb: 50
-                      routes: 4
-                      service_instances: 2
-                      reserved_ports: 1
-                      domains: 4
-                      per_app_tasks: 2
-                      service_keys: 1
-                    links:
-                      self:
-                        href: https://api.example.org/v3/organizations/d4c91047-7b29-4fda-b7f9-04033e5c9c9f/usage_summary
-                      organization:
-                        href: https://api.example.org/v3/organizations/d4c91047-7b29-4fda-b7f9-04033e5c9c9f
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-  /v3/organizations/{guid}/users:
-    get:
-      summary: List users for an organization
-      description: Retrieve all users with a role in the specified organization.
-      operationId: listUsersForOrganization
-      tags:
-      - Organizations
-      parameters:
-      - $ref: '#/components/parameters/Guid'
-      - $ref: '#/components/parameters/Page'
-      - $ref: '#/components/parameters/PerPage'
-      - $ref: '#/components/parameters/OrderBy'
-      - name: guids
-        in: query
-        schema:
-          type: array
-          items:
-            type: string
-        description: Comma-delimited list of user guids to filter by
-      - name: usernames
-        in: query
-        schema:
-          type: array
-          items:
-            type: string
-        description: Comma-delimited list of usernames to filter by
-      - name: origins
-        in: query
-        schema:
-          type: array
-          items:
-            type: string
-        description: Comma-delimited list of user origins to filter by
-      - name: partial_usernames
-        in: query
-        schema:
-          type: array
-          items:
-            type: string
-        description: Comma-delimited list of partial usernames to filter by
-      - $ref: '#/components/parameters/LabelSelector'
-      - $ref: '#/components/parameters/CreatedAts'
-      - $ref: '#/components/parameters/UpdatedAts'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UserList'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-  /v3/organizations/{guid}/relationships/default_isolation_segment:
-    get:
-      summary: Get default isolation segment
-      description: Retrieve the default isolation segment for a given organization.
-      operationId: getDefaultIsolationSegmentForOrganization
-      tags:
-      - Organizations
-      parameters:
-      - $ref: '#/components/parameters/Guid'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RelationshipToOne'
-              examples:
-                default:
-                  summary: default
-                  value:
-                    data:
-                      guid: 123e4567-e89b-12d3-a456-426614174000
-                    links:
-                      self:
-                        href: https://api.example.org/v3/organizations/d4c91047-7b29-4fda-b7f9-04033e5c9c9f/relationships/default_isolation_segment
-                      related:
-                        href: https://api.example.org/v3/isolation_segments/9d8e007c-ce52-4ea7-8a57-f2825d2c6b39
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-    patch:
-      summary: Assign default isolation segment
-      description: 'Set the default isolation segment for a given organization. Only isolation segments that are entitled to the organization are eligible to be the default isolation segment.
-
-
-        Apps will not run in the new default isolation segment until they are restarted.'
-      operationId: assignDefaultIsolationSegmentForOrganization
-      tags:
-      - Organizations
-      parameters:
-      - $ref: '#/components/parameters/Guid'
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/RelationshipToOne'
-            examples:
-              default:
-                summary: default
-                value:
-                  data:
-                    guid: 123e4567-e89b-12d3-a456-426614174000
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RelationshipToOne'
-              examples:
-                default:
-                  summary: default
-                  value:
-                    data:
-                      guid: 123e4567-e89b-12d3-a456-426614174000
-                    links:
-                      self:
-                        href: https://api.example.org/v3/organizations/d4c91047-7b29-4fda-b7f9-04033e5c9c9f/relationships/default_isolation_segment
-                      related:
-                        href: https://api.example.org/v3/isolation_segments/9d8e007c-ce52-4ea7-8a57-f2825d2c6b39
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '422':
-          $ref: '#/components/responses/UnprocessableEntity'
 components:
   schemas:
     Pagination:
@@ -593,15 +582,43 @@ components:
         The pagination object is a JSON object that contains information about the pagination state of the results. It includes the total number of results available, the total number of pages available, and links to the first, last, next, and previous pages of results.
 
         '
-    UserList:
+    RelationshipToMany:
       type: object
       properties:
-        pagination:
-          $ref: '#/components/schemas/Pagination'
-        resources:
+        data:
           type: array
           items:
-            $ref: '#/components/schemas/User'
+            $ref: '#/components/schemas/Relationship'
+        links:
+          type: object
+          properties:
+            self:
+              $ref: '#/components/schemas/Link'
+            related:
+              $ref: '#/components/schemas/Link'
+      description: 'Some relationships relate a resource to several other resources. For example, an isolation segment can be entitled to multiple organizations.
+
+        '
+    IsolationSegment:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/BaseSchema'
+      - properties:
+          name:
+            type: string
+            description: The name of the isolation segment
+          metadata:
+            $ref: '#/components/schemas/Metadata'
+          links:
+            type: object
+            properties:
+              self:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get this isolation segment
+              organizations:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get the organizations for this isolation segment
+      description: An isolation segment provides a dedicated pool of compute resources for an organization or space.
     Link:
       type: object
       properties:
@@ -634,59 +651,15 @@ components:
       description: 'Some relationships relate a resource to exactly one other resource. For example an app can belong to only one space.
 
         '
-    Domain:
+    IsolationSegmentList:
       type: object
-      allOf:
-      - $ref: '#/components/schemas/BaseSchema'
-      - properties:
-          name:
-            type: string
-            description: The name of the domain; must be between 3 ~ 253 characters and follow [RFC 1035](https://tools.ietf.org/html/rfc1035)
-          internal:
-            type: boolean
-            description: Whether the domain is used for internal (container-to-container) traffic
-          router_group:
-            type:
-            - object
-            - 'null'
-            properties:
-              guid:
-                type: string
-                format: uuid
-            description: The guid of the desired router group to route `tcp` traffic through; if set, the domain will only be available for `tcp` traffic
-          supported_protocols:
-            type: array
-            items:
-              type: string
-              enum:
-              - http
-              - tcp
-            description: Available protocols for routes using the domain, currently `http` and `tcp`
-          relationships:
-            $ref: '#/components/schemas/Relationships'
-          metadata:
-            $ref: '#/components/schemas/Metadata'
-          links:
-            type: object
-            properties:
-              self:
-                $ref: '#/components/schemas/Link'
-                description: The URL to get this domain
-              organization:
-                $ref: '#/components/schemas/Link'
-                description: The URL to get the organization for this domain
-              route_reservations:
-                $ref: '#/components/schemas/Link'
-                description: The URL to get the route reservations for this domain
-              shared_organizations:
-                $ref: '#/components/schemas/Link'
-                description: The URL to get the shared organizations for this domain
-              router_group:
-                $ref: '#/components/schemas/Link'
-                description: The URL to get the router group for this domain
-      description: 'A domain is a fully qualified domain name that is used for application routes. A domain can be scoped to an organization, meaning it can be used to create routes for spaces inside that organization, or be left unscoped to allow all organizations access.
-
-        '
+      properties:
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+        resources:
+          type: array
+          items:
+            $ref: '#/components/schemas/IsolationSegment'
     Organization:
       type: object
       allOf:
@@ -722,25 +695,6 @@ components:
                 $ref: '#/components/schemas/Link'
                 description: The URL to get the default domain for this organization
       description: 'An org is a development account that an individual or multiple collaborators can own and use. All collaborators access an org with user accounts. Collaborators in an org share a resource quota plan, applications, services availability, and custom domains.
-
-        '
-    Relationships:
-      type: object
-      description: 'Relationships represent associations between resources. When relationships are mutable, they can be used to create, read, update, and delete these associations. An app’s relationship to its current droplet is mutable, but an app’s relationship to its space is not.
-
-
-        Relationships do not affect the fundamental properties of a resource, but may affect their behavior and permissions logic. Relationships are tied to the lifecycles of the associated resources and will be removed if either of the associated resources are deleted. For example, if a user is removed from an organization, both the user and the organization persist, but the relationship between them does not.
-
-
-        Not all resources implement every relationship operation demonstrated in the examples below. See the docs for each resource to see how it interacts with its relationships.
-
-
-        Endpoints that return relationship data list this information under the relationships key.
-
-
-        The relationship object
-
-        The relationship object is a key-value pair that uniquely identifies a resource. In practice this is almost always the guid of a resource.
 
         '
     Metadata:
@@ -895,41 +849,6 @@ components:
         Clients should use the code and title fields for programmatically handling specific errors. The message in the detail field is subject to change over time.
 
         '
-    User:
-      type: object
-      properties:
-        guid:
-          type: string
-          description: Unique identifier for the user, matching either a UAA user id or client id. A client id may not be a uuid.
-        created_at:
-          type: string
-          format: date-time
-          description: The ISO8601 compatible date and time when resource was created
-        updated_at:
-          type: string
-          format: date-time
-          description: The ISO8601 compatible date and time when resource was last updated
-        username:
-          type:
-          - string
-          - 'null'
-          description: The username of the user
-        presentation_name:
-          type: string
-          description: The presentation name of the user
-        origin:
-          type:
-          - string
-          - 'null'
-          description: The origin of the user
-        metadata:
-          $ref: '#/components/schemas/Metadata'
-        links:
-          type: object
-          properties:
-            self:
-              $ref: '#/components/schemas/Link'
-              description: The URL to get this user
     Error:
       type: object
       properties:
@@ -971,6 +890,26 @@ components:
         See Resources and Experimental Resources for specific resources.
 
         '
+  requestBodies:
+    IsolationSegmentCreate:
+      description: Isolation segment to create
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+                description: Name of the isolation segment; isolation segment names must be unique across the entire system, and case is ignored when checking for uniqueness
+              metadata:
+                $ref: '#/components/schemas/Metadata'
+            required:
+            - name
+          examples:
+            default:
+              summary: default
+              value:
+                name: my_segment
   responses:
     Unauthorized:
       description: Unauthorized
@@ -1014,12 +953,6 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Errors'
-    ServiceUnavailable:
-      description: Service Unavailable
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
     BadRequest:
       description: Bad Request
       content:
@@ -1029,6 +962,12 @@ components:
         text/html:
           schema:
             type: string
+    ServiceUnavailable:
+      description: Service Unavailable
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
   parameters:
     OrderBy:
       name: order_by
@@ -1092,53 +1031,6 @@ components:
         type: string
         format: uuid
       description: The unique identifier for the resource
-  requestBodies:
-    OrganizationCreateRequestBody:
-      description: Organization object that needs to be created
-      required: true
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              name:
-                type: string
-                description: Organization name
-              suspended:
-                type: boolean
-                description: Whether an organization is suspended or not
-              metadata:
-                $ref: '#/components/schemas/Metadata'
-            required:
-            - name
-            description: Request schema for creating an organization
-          examples:
-            default:
-              summary: default
-              value:
-                name: my-organization
-    OrganizationUpdateRequestBody:
-      description: Organization object that needs to be updated
-      required: true
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              name:
-                type: string
-                description: Organization name
-              suspended:
-                type: boolean
-                description: Whether an organization is suspended or not
-              metadata:
-                $ref: '#/components/schemas/Metadata'
-            description: Request schema for updating an organization
-          examples:
-            default:
-              summary: default
-              value:
-                name: my-organization
   securitySchemes:
     oauth:
       type: oauth2

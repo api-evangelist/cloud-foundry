@@ -93,6 +93,10 @@ www.cloudfoundry.org, docs.cloudfoundry.org, v3-apidocs.cloudfoundry.org, bosh.i
 
 - No MCP server (hosted or stdio). The org contains research notes on MCP, not an implementation.
 - No A2A agent card at /.well-known/agent-card.json or /.well-known/agent.json on any host.
-- No AsyncAPI, no webhooks, no callbacks — the async pattern is 202 + Job polling.
+- No AsyncAPI document and no HTTP webhooks/callbacks. The control-plane async pattern is 202 + Job
+  polling, and change history is POLLED at GET /v3/audit_events. Streaming does exist and is NOT the
+  same thing: the Reverse Log Proxy Gateway serves Server-Sent Events at GET /v2/read (envelope types
+  log/counter/gauge/timer/event, shard_id for consumer groups), Loggregator v2 and Log Cache expose
+  gRPC, and syslog drains push to an endpoint you register. See asyncapi/cloud-foundry-event-surface.yml.
 - No /.well-known/ documents of any kind on any Foundation-controlled host.
 - No status page, and there cannot be one: availability belongs to whoever runs the foundation.

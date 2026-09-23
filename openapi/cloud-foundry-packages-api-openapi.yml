@@ -1,0 +1,1363 @@
+openapi: 3.2.0
+info:
+  title: Cloud Foundry V3 Packages API
+  description: '# Welcome to the Experimental Cloud Foundry V3 API Docs!'
+  version: latest
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+  contact:
+    name: Cloud Foundry
+    url: https://www.cloudfoundry.org/
+servers:
+- url: https://api.example.local
+  description: Cloud Foundry V3 API server
+security:
+- oauth:
+  - cloud_controller.read
+  - cloud_controller.write
+tags:
+- name: Packages
+  description: A package is an application’s ‘source code’; either raw bits for your application or a pointer to these bits.
+paths:
+  /v3/packages:
+    get:
+      summary: List packages
+      description: Retrieve all packages.
+      operationId: listPackages
+      tags:
+      - Packages
+      parameters:
+      - $ref: '#/components/parameters/Page'
+      - $ref: '#/components/parameters/PerPage'
+      - $ref: '#/components/parameters/OrderBy'
+      - $ref: '#/components/parameters/CreatedAts'
+      - $ref: '#/components/parameters/UpdatedAts'
+      - $ref: '#/components/parameters/LabelSelector'
+      - name: guids
+        in: query
+        schema:
+          type: array
+          items:
+            type: string
+        description: Comma-delimited list of package guids to filter by
+      - name: states
+        in: query
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - AWAITING_UPLOAD
+            - PROCESSING_UPLOAD
+            - READY
+            - FAILED
+            - COPYING
+            - EXPIRED
+        description: Comma-delimited list of package states to filter by
+      - name: types
+        in: query
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - bits
+            - docker
+        description: Comma-delimited list of package types to filter by
+      - name: app_guids
+        in: query
+        schema:
+          type: array
+          items:
+            type: string
+        description: Comma-delimited list of app guids to filter by
+      - name: space_guids
+        in: query
+        schema:
+          type: array
+          items:
+            type: string
+        description: Comma-delimited list of space guids to filter by
+      - name: organization_guids
+        in: query
+        schema:
+          type: array
+          items:
+            type: string
+        description: Comma-delimited list of organization guids to filter by
+      responses:
+        '200':
+          description: List of packages
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PackageList'
+              examples:
+                default:
+                  summary: default
+                  value:
+                    pagination:
+                      total_results: 2
+                      total_pages: 1
+                      first:
+                        href: https://api.example.org?types=bits%2Cdocker&page=1&per_page=2
+                      last:
+                        href: https://api.example.org?types=bits%2Cdocker&page=1&per_page=2
+                      next: null
+                      previous: null
+                    resources:
+                    - guid: 123e4567-e89b-12d3-a456-426614174000
+                      type: bits
+                      data:
+                        checksum:
+                          type: sha256
+                          value: null
+                        error: null
+                      state: AWAITING_UPLOAD
+                      created_at: '2015-11-03T00:53:54Z'
+                      updated_at: '2016-06-08T16:41:26Z'
+                      relationships:
+                        app:
+                          data:
+                            guid: 123e4567-e89b-12d3-a456-426614174000
+                      links:
+                        self:
+                          href: https://api.example.org/v3/packages/a57fd932-85db-483a-a27e-b00efbb3b0a4
+                        upload:
+                          href: https://api.example.org/v3/packages/a57fd932-85db-483a-a27e-b00efbb3b0a4/upload
+                          method: POST
+                        download:
+                          href: https://api.example.org/v3/packages/a57fd932-85db-483a-a27e-b00efbb3b0a4/download
+                          method: GET
+                        app:
+                          href: https://api.example.org/v3/apps/fa3558ce-1c4d-46fc-9776-54b9c8021745
+                      metadata:
+                        labels: {}
+                        annotations: {}
+                    - guid: 123e4567-e89b-12d3-a456-426614174000
+                      type: docker
+                      data:
+                        image: registry/image:latest
+                        username: username
+                        password: '***'
+                      state: READY
+                      created_at: '2015-11-03T00:53:54Z'
+                      updated_at: '2016-06-08T16:41:26Z'
+                      relationships:
+                        app:
+                          data:
+                            guid: 123e4567-e89b-12d3-a456-426614174000
+                      links:
+                        self:
+                          href: https://api.example.org/v3/packages/8f1f294d-cef8-4c11-9f0b-3bcdc0bd2691
+                        app:
+                          href: https://api.example.org/v3/apps/fa3558ce-1c4d-46fc-9776-54b9c8021745
+                      metadata:
+                        labels: {}
+                        annotations: {}
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/500'
+        '502':
+          $ref: '#/components/responses/BadGateway'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+    post:
+      summary: Create a package
+      description: Create a package.
+      operationId: createPackage
+      tags:
+      - Packages
+      requestBody:
+        $ref: '#/components/requestBodies/PackageCreateRequestBody'
+      responses:
+        '201':
+          description: Successfully created package
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Package'
+              examples:
+                docker_app:
+                  summary: Docker app
+                  value:
+                    guid: 123e4567-e89b-12d3-a456-426614174000
+                    type: docker
+                    data:
+                      image: registry/image:latest
+                      username: username
+                      password: '***'
+                    state: READY
+                    created_at: '2015-11-03T00:53:54Z'
+                    updated_at: '2016-06-08T16:41:26Z'
+                    relationships:
+                      app:
+                        data:
+                          guid: 123e4567-e89b-12d3-a456-426614174000
+                    links:
+                      self:
+                        href: https://api.example.org/v3/packages/4cb65058-f04f-458f-aca1-5f4e43de6407
+                      app:
+                        href: https://api.example.org/v3/apps/d8b8148d-5798-44de-821a-64b85b15e968
+                    metadata:
+                      labels: {}
+                      annotations: {}
+          links:
+            app:
+              operationId: getApp
+              parameters:
+                guid: $response.body#/relationships/app/data/guid
+              description: Retrieve the app for this package
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/500'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+  /v3/packages/{guid}:
+    get:
+      summary: Get a package
+      description: Retrieve a package.
+      operationId: getPackage
+      tags:
+      - Packages
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      responses:
+        '200':
+          description: Successfully retrieved package
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Package'
+          links:
+            app:
+              operationId: getApp
+              parameters:
+                guid: $response.body#/relationships/app/data/guid
+              description: Retrieve the app for this package
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+    patch:
+      summary: Update a package
+      description: Update a package.
+      operationId: updatePackage
+      tags:
+      - Packages
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      requestBody:
+        description: Package object that needs to be updated
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                metadata:
+                  $ref: '#/components/schemas/Metadata'
+                username:
+                  type: string
+                  description: The username for the image’s registry. Only possible for Docker package.
+                password:
+                  type: string
+                  description: The password for the image’s registry. Only possible for Docker package.
+            examples:
+              default:
+                summary: default
+                value:
+                  metadata:
+                    labels:
+                      key: value
+                    annotations:
+                      note: detailed information
+      responses:
+        '200':
+          description: Successfully updated package
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Package'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/500'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+    delete:
+      summary: Delete a package
+      description: Delete a package.
+      operationId: deletePackage
+      tags:
+      - Packages
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      responses:
+        '202':
+          description: Accepted
+          headers:
+            Location:
+              description: URL of the job that is deleting the package
+              schema:
+                type: string
+                format: uri
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/500'
+  /v3/packages/{guid}/droplets:
+    get:
+      summary: List droplets for a package
+      description: Retrieve a list of droplets belonging to a package.
+      operationId: listPackageDroplets
+      tags:
+      - Packages
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      - $ref: '#/components/parameters/Page'
+      - $ref: '#/components/parameters/PerPage'
+      - $ref: '#/components/parameters/OrderBy'
+      - $ref: '#/components/parameters/LabelSelector'
+      - name: guids
+        in: query
+        schema:
+          type: array
+          items:
+            type: string
+        description: Comma-delimited list of droplet guids to filter by
+      - name: states
+        in: query
+        schema:
+          type: array
+          items:
+            type: string
+        description: Comma-delimited list of droplet states to filter by
+      responses:
+        '200':
+          description: List of droplets for the package
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DropletList'
+              examples:
+                default:
+                  summary: default
+                  value:
+                    pagination:
+                      total_results: 2
+                      total_pages: 1
+                      first:
+                        href: https://api.example.org?page=1&per_page=50
+                      last:
+                        href: https://api.example.org?page=1&per_page=50
+                      next: null
+                      previous: null
+                    resources:
+                    - guid: 123e4567-e89b-12d3-a456-426614174000
+                      state: STAGED
+                      error: null
+                      lifecycle:
+                        type: buildpack
+                        data: {}
+                      image: null
+                      execution_metadata: PRIVATE DATA HIDDEN
+                      process_types:
+                        redacted_message: 123e4567-e89b-12d3-a456-426614174000
+                      checksum:
+                        type: sha256
+                        value: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+                      buildpacks:
+                      - name: ruby_buildpack
+                        detect_output: ruby 1.6.14
+                        version: 1.1.1.
+                        buildpack_name: ruby
+                      stack: cflinuxfs4
+                      created_at: '2016-03-28T23:39:34Z'
+                      updated_at: '2016-03-28T23:39:47Z'
+                      relationships:
+                        app:
+                          data:
+                            guid: 123e4567-e89b-12d3-a456-426614174000
+                      links:
+                        self:
+                          href: https://api.example.org/v3/droplets/585bc3c1-3743-497d-88b0-403ad6b56d16
+                        package:
+                          href: https://api.example.org/v3/packages/8222f76a-9e09-4360-b3aa-1ed329945e92
+                        app:
+                          href: https://api.example.org/v3/apps/7b34f1cf-7e73-428a-bb5a-8a17a8058396
+                        assign_current_droplet:
+                          href: https://api.example.org/v3/apps/7b34f1cf-7e73-428a-bb5a-8a17a8058396/relationships/current_droplet
+                          method: PATCH
+                        download:
+                          href: https://api.example.org/v3/droplets/585bc3c1-3743-497d-88b0-403ad6b56d16/download
+                      metadata:
+                        labels: {}
+                        annotations: {}
+                    - guid: 123e4567-e89b-12d3-a456-426614174000
+                      state: STAGED
+                      error: null
+                      lifecycle:
+                        type: docker
+                        data: {}
+                      execution_metadata: 123e4567-e89b-12d3-a456-426614174000
+                      process_types:
+                        redacted_message: 123e4567-e89b-12d3-a456-426614174000
+                      image: cloudfoundry/diego-docker-app-custom:latest
+                      checksum: null
+                      buildpacks: null
+                      stack: null
+                      created_at: '2016-03-17T00:00:01Z'
+                      updated_at: '2016-03-17T21:41:32Z'
+                      relationships:
+                        app:
+                          data:
+                            guid: 123e4567-e89b-12d3-a456-426614174000
+                      links:
+                        self:
+                          href: https://api.example.org/v3/droplets/fdf3851c-def8-4de1-87f1-6d4543189e22
+                        package:
+                          href: https://api.example.org/v3/packages/c5725684-a02f-4e59-bc67-8f36ae944688
+                        app:
+                          href: https://api.example.org/v3/apps/7b34f1cf-7e73-428a-bb5a-8a17a8058396
+                        assign_current_droplet:
+                          href: https://api.example.org/v3/apps/7b34f1cf-7e73-428a-bb5a-8a17a8058396/relationships/current_droplet
+                          method: PATCH
+                      metadata:
+                        labels: {}
+                        annotations: {}
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /v3/apps/{guid}/packages:
+    get:
+      summary: List packages for an app
+      description: Retrieve packages for an app that the user has access to.
+      operationId: listAppPackages
+      tags:
+      - Packages
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      - name: guids
+        in: query
+        schema:
+          type: array
+          items:
+            type: string
+        description: Comma-delimited list of app GUIDs to filter by
+      - $ref: '#/components/parameters/Page'
+      - $ref: '#/components/parameters/PerPage'
+      - $ref: '#/components/parameters/OrderBy'
+      - name: states
+        in: query
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - AWAITING_UPLOAD
+            - PROCESSING_UPLOAD
+            - READY
+            - FAILED
+            - COPYING
+            - EXPIRED
+        description: Comma-delimited list of package states to filter by
+      - name: types
+        in: query
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - bits
+            - docker
+        description: Comma-delimited list of package types to filter by
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PackageList'
+              examples:
+                default:
+                  summary: default
+                  value:
+                    pagination:
+                      total_results: 1
+                      total_pages: 1
+                      first:
+                        href: https://api.example.org/v3/apps/f2efe391-2b5b-4836-8518-ad93fa9ebf69/packages?states=READY&page=1&per_page=50
+                      last:
+                        href: https://api.example.org/v3/apps/f2efe391-2b5b-4836-8518-ad93fa9ebf69/packages?states=READY&page=1&per_page=50
+                      next: null
+                      previous: null
+                    resources:
+                    - guid: 123e4567-e89b-12d3-a456-426614174000
+                      type: bits
+                      data:
+                        error: null
+                        checksum:
+                          type: sha256
+                          value: null
+                      state: READY
+                      created_at: '2016-03-17T21:41:09Z'
+                      updated_at: '2016-06-08T16:41:26Z'
+                      relationships:
+                        app:
+                          data:
+                            guid: 123e4567-e89b-12d3-a456-426614174000
+                      links:
+                        self:
+                          href: https://api.example.org/v3/packages/752edab0-2147-4f58-9c25-cd72ad8c3561
+                        upload:
+                          href: https://api.example.org/v3/packages/752edab0-2147-4f58-9c25-cd72ad8c3561/upload
+                          method: POST
+                        download:
+                          href: https://api.example.org/v3/packages/752edab0-2147-4f58-9c25-cd72ad8c3561/download
+                          method: GET
+                        app:
+                          href: https://api.example.org/v3/apps/f2efe391-2b5b-4836-8518-ad93fa9ebf69
+                      metadata:
+                        labels: {}
+                        annotations: {}
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /v3/packages/{guid}/upload:
+    post:
+      summary: Upload package bits
+      description: This upload endpoint takes a multi-part form requests for packages of type `bits`. The request requires either a .zip file) uploaded under the `bits` field or a list of resource match objects under the `resources` field. These field may be used together.
+      operationId: uploadPackageBits
+      tags:
+      - Packages
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                bits:
+                  type: string
+                  format: binary
+                resources:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      path:
+                        type: string
+                      size_in_bytes:
+                        type: integer
+                      checksum:
+                        type: object
+                        properties:
+                          value:
+                            type: string
+          application/json:
+            schema:
+              type: object
+              properties:
+                resources:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      path:
+                        type: string
+                      size_in_bytes:
+                        type: integer
+                      checksum:
+                        type: object
+                        properties:
+                          value:
+                            type: string
+      responses:
+        '200':
+          description: Successfully uploaded package bits
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Package'
+        '202':
+          description: Upload initiated
+          headers:
+            Location:
+              schema:
+                type: string
+              description: URL of the job tracking the upload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Package'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /v3/packages/{guid}/download:
+    get:
+      summary: Download package bits
+      description: 'This endpoint downloads the bits of an existing package.
+
+
+        When using a remote blobstore, such as AWS, the response is a redirect to the actual location of the bits. If the client is automatically following redirects, then the OAuth token that was used to communicate with Cloud Controller will be replayed on the new redirect request. Some blobstores may reject the request in that case. Clients may need to follow the redirect without including the OAuth token.'
+      operationId: downloadPackageBits
+      tags:
+      - Packages
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      responses:
+        '302':
+          description: Redirect to download location
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+components:
+  schemas:
+    Pagination:
+      type: object
+      properties:
+        total_results:
+          type: integer
+          description: The total number of results available
+        total_pages:
+          type: integer
+          description: The total number of pages available
+        first:
+          allOf:
+          - $ref: '#/components/schemas/Link'
+          - description: The first page of results
+        last:
+          allOf:
+          - $ref: '#/components/schemas/Link'
+          - description: The last page of results
+        next:
+          oneOf:
+          - $ref: '#/components/schemas/Link'
+          - type: 'null'
+          description: The next page of results
+        previous:
+          oneOf:
+          - $ref: '#/components/schemas/Link'
+          - type: 'null'
+          description: The previous page of results
+      description: 'Pagination is a technique used to divide a large set of results into smaller, more manageable sets. This allows clients to retrieve results in smaller chunks, reducing the amount of data transferred and improving performance.
+
+        The pagination object is a JSON object that contains information about the pagination state of the results. It includes the total number of results available, the total number of pages available, and links to the first, last, next, and previous pages of results.
+
+        '
+    Link:
+      type: object
+      properties:
+        href:
+          type: string
+          description: The URL of the link
+        method:
+          type: string
+          description: An optional field containing the HTTP method to be used when following the URL
+      required:
+      - href
+      description: 'Each link is keyed by its type and will include a href for the URL and an optional method for links that cannot be followed using GET.
+
+        '
+    Droplet:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/BaseSchema'
+      - properties:
+          state:
+            type: string
+            description: State of the droplet; valid states are AWAITING_UPLOAD, PROCESSING_UPLOAD, STAGED, COPYING, FAILED, or EXPIRED
+          error:
+            type:
+            - string
+            - 'null'
+            description: A string describing the last error during the droplet lifecycle
+          lifecycle:
+            $ref: '#/components/schemas/Lifecycle'
+          execution_metadata:
+            type:
+            - string
+            - 'null'
+            description: Serialized JSON data resulting from staging for use when executing a droplet
+          process_types:
+            type: object
+            description: The process types (keys) and associated start commands (values) that will be created when the droplet is executed
+          metadata:
+            $ref: '#/components/schemas/Metadata'
+          links:
+            type: object
+            properties:
+              self:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get this droplet
+              package:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get the package for this droplet
+              app:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get the app for this droplet
+              assign_current_droplet:
+                $ref: '#/components/schemas/Link'
+                description: The URL to assign the droplet to an application
+              download:
+                $ref: '#/components/schemas/Link'
+                description: The URL to download the droplet
+              upload:
+                $ref: '#/components/schemas/Link'
+                description: The URL to upload the droplet
+          checksum:
+            type:
+            - object
+            - 'null'
+            properties:
+              type:
+                type: string
+                description: Hashing algorithm for checksum; supported algorithms are sha256 and sha1
+              value:
+                type: string
+                description: Checksum of the droplet
+          buildpacks:
+            type:
+            - array
+            - 'null'
+            items:
+              type: object
+              properties:
+                name:
+                  type:
+                  - string
+                  - 'null'
+                  description: System buildpack name
+                detect_output:
+                  type:
+                  - string
+                  - 'null'
+                  description: Output during buildpack detect process
+                version:
+                  type:
+                  - string
+                  - 'null'
+                  description: Version reported by the buildpack
+                buildpack_name:
+                  type:
+                  - string
+                  - 'null'
+                  description: Name reported by the buildpack
+          stack:
+            type:
+            - string
+            - 'null'
+            description: The root filesystem to use with the buildpack, for example cflinuxfs4
+          image:
+            type:
+            - string
+            - 'null'
+            description: Docker image name for Docker droplets
+      description: A droplet is the result of staging an application package. There are two types (lifecycles) of droplets buildpack and docker. In the case of the buildpacks, the droplet contains the bits produced by the buildpack, typically application code and dependencies.
+    RelationshipToOne:
+      type: object
+      properties:
+        data:
+          type:
+          - object
+          - 'null'
+          $ref: '#/components/schemas/Relationship'
+        links:
+          type: object
+          properties:
+            self:
+              $ref: '#/components/schemas/Link'
+            related:
+              $ref: '#/components/schemas/Link'
+      description: 'Some relationships relate a resource to exactly one other resource. For example an app can belong to only one space.
+
+        '
+    PackageList:
+      type: object
+      properties:
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+        resources:
+          type: array
+          items:
+            $ref: '#/components/schemas/Package'
+    Relationships:
+      type: object
+      description: 'Relationships represent associations between resources. When relationships are mutable, they can be used to create, read, update, and delete these associations. An app’s relationship to its current droplet is mutable, but an app’s relationship to its space is not.
+
+
+        Relationships do not affect the fundamental properties of a resource, but may affect their behavior and permissions logic. Relationships are tied to the lifecycles of the associated resources and will be removed if either of the associated resources are deleted. For example, if a user is removed from an organization, both the user and the organization persist, but the relationship between them does not.
+
+
+        Not all resources implement every relationship operation demonstrated in the examples below. See the docs for each resource to see how it interacts with its relationships.
+
+
+        Endpoints that return relationship data list this information under the relationships key.
+
+
+        The relationship object
+
+        The relationship object is a key-value pair that uniquely identifies a resource. In practice this is almost always the guid of a resource.
+
+        '
+    Lifecycle:
+      type: object
+      properties:
+        type:
+          type: string
+          description: Type of the lifecycle; valid values are buildpack, cnb, docker
+        data:
+          type: object
+          additionalProperties: true
+          description: Data specific to the lifecycle
+          properties:
+            buildpacks:
+              type: array
+              items:
+                type: string
+              description: List of the names of buildpacks, URLs from which they may be downloaded, or null to auto-detect a suitable buildpack during staging (applicable for buildpack and cnb lifecycles)
+            stack:
+              type:
+              - string
+              - 'null'
+              description: The root filesystem to use with the buildpack, for example cflinuxfs4 (applicable for buildpack lifecycle)
+            credentials:
+              type: object
+              additionalProperties:
+                type: object
+                properties:
+                  username:
+                    type:
+                    - string
+                    - 'null'
+                  password:
+                    type:
+                    - string
+                    - 'null'
+                  token:
+                    type: string
+              description: Credentials used to download the configured buildpacks (applicable for cnb lifecycle)
+      description: 'The lifecycle type defines how the application droplet is created and run. The following lifecycle types are supported: - buildpack: Traditional buildpacks for Cloud Foundry applications. - cnb: Cloud Native Buildpacks that are OCI-compliant. - docker: Run pre-built Docker images.
+
+        '
+    Metadata:
+      type: object
+      properties:
+        labels:
+          type: object
+          additionalProperties:
+            type:
+            - string
+            - 'null'
+          description: 'A set of key-value pairs that describe the resource. Labels are a JSON object that contains information about a resource. They are used to tag resources with metadata that can be used to filter and group resources. Labels are included in the response body of a request to retrieve a resource.
+
+            Labels are user-specified key/value pairs that are attached to API Resources. They are queryable, identifying attributes of a resource, but they do not affect the operation of CloudFoundry.
+
+
+            For example, an app may be assigned a label with key sensitive and possible values true or false.
+
+
+            Users could then find all sensitive apps with a selector for sensitive=true, resulting in a response containing only apps having the label key sensitive with a label value of true.
+
+
+            Labels
+
+            Labels allow users to apply identifying attributes to resources that are meaningful to the user, but not the CloudFoundry system.
+
+
+            Examples may include (but are not limited to):
+
+
+            "production" : "true" or "production" : "false"
+
+            "env" : "dev" or "env" : "test" or "env" : "prod"
+
+            "chargeback-code" : "abc123"
+
+            Label keys
+
+            Label keys are made up of an (optional) prefix, and name. If a prefix is present, it is separated from the name by a /. Prefixes are dns names intended to enable namespacing of label keys.
+
+
+            A label key prefix must adhere to the following restrictions:
+
+
+            Length: 0-253 characters
+
+            Allowed characters: alphanumeric ( [a-z0-9A-Z] ), -, and .
+
+            DNS subdomain format (series of subdomain labels separated by .)
+
+            A label key name must adhere to the following restrictions:
+
+
+            Length: 1-63 characters
+
+            Allowed characters: alphanumeric ( [a-z0-9A-Z] ), -, _, and .
+
+            Must begin and end with an alphanumeric character
+
+            Label values
+
+            Label values must adhere to the following restrictions:
+
+
+            Length: 0-63 characters
+
+            Allowed characters: alphanumeric ( [a-z0-9A-Z] ), -, _, and .
+
+            Must begin and end with an alphanumeric character
+
+            Empty values are allowed
+
+            '
+        annotations:
+          type: object
+          additionalProperties:
+            type:
+            - string
+            - 'null'
+          description: 'A set of key-value pairs that describe the resource. Annotations are a JSON object that contains information about a resource. They are used to tag resources with metadata that can be used to filter and group resources. Annotations are included in the response body of a request to retrieve a resource.
+
+            Annotations are user-specified key-value pairs that are attached to API resources. They do not affect the operation of Cloud Foundry. Annotations cannot be used in filters.
+
+
+            When a service instance is being created, the service broker is sent the annotations of the service instance, and the space and organization in which the service instance resides. When a service instance is being updated, the service broker is sent the annotations of the space and organization in which the service instance resides. When a service binding is being created, the service broker is sent annotations of any associated app, and the space and organization in which the binding resides. Only annotations with a prefix (e.g. company.com/contacts) are sent to service brokers.
+
+
+            Examples may include (but are not limited to):
+
+
+            "contact info": "bob@example.com jane@example.com"
+
+            "library versions": "Spring: 5.1, Redis Client: a184098. yaml parser: 38"
+
+            "git-sha": "d56fe0367554ae5e878e37ed6c5b9a82f5995512"
+
+            Annotation keys
+
+            Annotation keys are made up of an (optional) prefix and name. If a prefix is present, it is separated from the name by a /. Prefixes are DNS names intended to enable namespacing of annotation keys.
+
+
+            An annotation key prefix must adhere to the following restrictions:
+
+
+            Length: 0-253 characters
+
+            Allowed characters: a-z, A-Z, 0-9, -, and .; emojis cannot be used in keys
+
+            DNS subdomain format (series of subdomain annotations separated by .)
+
+            An annotation key name must adhere to the following restrictions:
+
+
+            Length: 1-63 characters
+
+            Allowed characters: a-z, A-Z, 0-9, -, _, and .; emojis cannot be used in keys
+
+            Must begin and end with an alphanumeric character
+
+            Annotation values
+
+            Annotation values must adhere to the following restrictions:
+
+
+            Length: 0-5000 unicode characters
+
+            '
+      description: 'Metadata is a JSON object that contains information about a resource. It includes the GUID of the resource, the time the resource was created, the time the resource was last updated, and links to the resource.
+
+        Metadata is included in the response body of a request to retrieve a resource.
+
+        '
+    Errors:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/Error'
+      description: 'An error response will always return a list of error objects. Errors appear on the job resource for asynchronous operations.
+
+        Clients should use the code and title fields for programmatically handling specific errors. The message in the detail field is subject to change over time.
+
+        '
+    Package:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/BaseSchema'
+      - properties:
+          type:
+            type: string
+            description: Type of the package; valid values are bits or docker
+            enum:
+            - bits
+            - docker
+          data:
+            type: object
+            description: Data for package type
+            properties:
+              error:
+                type:
+                - string
+                - 'null'
+                description: If an error occurs this field will contain the error message
+              checksum:
+                type: object
+                properties:
+                  type:
+                    type: string
+                    description: The checksum type, for example sha256
+                  value:
+                    type:
+                    - string
+                    - 'null'
+                    description: The checksum value; this will be populated after bits are uploaded
+              image:
+                type: string
+                description: The registry address of the image
+              username:
+                type:
+                - string
+                - 'null'
+                description: The username for the image's registry
+              password:
+                type:
+                - string
+                - 'null'
+                description: The password for the image's registry
+          state:
+            type: string
+            description: State of the package; valid states are AWAITING_UPLOAD, PROCESSING_UPLOAD, READY, FAILED, COPYING, or EXPIRED
+            enum:
+            - AWAITING_UPLOAD
+            - PROCESSING_UPLOAD
+            - READY
+            - FAILED
+            - COPYING
+            - EXPIRED
+          relationships:
+            $ref: '#/components/schemas/Relationships'
+          metadata:
+            $ref: '#/components/schemas/Metadata'
+          links:
+            type: object
+            properties:
+              self:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get this package
+              upload:
+                $ref: '#/components/schemas/Link'
+                description: The URL to upload the package bits
+              download:
+                $ref: '#/components/schemas/Link'
+                description: The URL to download the package bits
+              app:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get the app for this package
+      description: A package represents an application"s "source code" - either raw bits or a pointer to these bits. Packages are used to create builds, which result in a droplet that can be deployed.
+    DropletList:
+      type: object
+      properties:
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+        resources:
+          type: array
+          items:
+            $ref: '#/components/schemas/Droplet'
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: A numeric code for this error
+        detail:
+          type: string
+          description: Detailed description of the error
+        title:
+          type: string
+          description: Name of the error
+    Relationship:
+      type: object
+      properties:
+        guid:
+          type: string
+          format: uuid
+          description: The GUID of the resource
+    BaseSchema:
+      type: object
+      properties:
+        guid:
+          type: string
+          format: uuid
+          description: The unique identifier for the resource
+        created_at:
+          type: string
+          format: date-time
+          description: The ISO8601 compatible date and time when resource was created
+        updated_at:
+          type: string
+          format: date-time
+          description: The ISO8601 compatible date and time when resource was last updated
+      description: 'A resource represents an individual object within the system, such as an app or a service. It is represented as a JSON object.
+
+        A resource consists of several required resource fields and other attributes specific to the resource.
+
+        See Resources and Experimental Resources for specific resources.
+
+        '
+  requestBodies:
+    PackageCreateRequestBody:
+      description: Package object that needs to be created or copied. When copying (source_guid query parameter is provided), only relationships.app is required. When creating a new package, type and relationships.app are required.
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              type:
+                type: string
+                description: Type of the package; valid values are bits or docker. Required when creating a new package (when source_guid is not provided). Not required when copying a package (when source_guid is provided).
+                enum:
+                - bits
+                - docker
+              data:
+                type: object
+                description: Data for package type
+                properties:
+                  image:
+                    type: string
+                    description: The registry address of the image (for docker packages)
+                  username:
+                    type: string
+                    description: The username for the image's registry (for docker packages)
+                  password:
+                    type: string
+                    description: The password for the image's registry (for docker packages)
+              relationships:
+                type: object
+                properties:
+                  app:
+                    $ref: '#/components/schemas/RelationshipToOne'
+                    description: A relationship to an app
+                required:
+                - app
+              metadata:
+                $ref: '#/components/schemas/Metadata'
+            required:
+            - relationships
+            description: Request schema for creating a package
+          examples:
+            buildpack_app:
+              summary: buildpack app
+              value:
+                type: bits
+                relationships:
+                  app:
+                    data:
+                      guid: 123e4567-e89b-12d3-a456-426614174000
+            docker_app:
+              summary: Docker app
+              value:
+                type: docker
+                relationships:
+                  app:
+                    data:
+                      guid: 123e4567-e89b-12d3-a456-426614174000
+                data:
+                  image: registry/image:latest
+                  username: username
+                  password: password
+  responses:
+    UnprocessableEntity:
+      description: Unprocessable Entity
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    NotFound:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    BadGateway:
+      description: Bad Gateway
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Conflict:
+      description: Conflict
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    '500':
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    BadRequest:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+        text/html:
+          schema:
+            type: string
+    ServiceUnavailable:
+      description: Service Unavailable
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+  parameters:
+    OrderBy:
+      name: order_by
+      in: query
+      required: false
+      schema:
+        type: string
+      description: 'Value to sort by. Defaults to ascending; prepend with `-` to sort descending.
+
+        '
+      example: created_at
+    CreatedAts:
+      name: created_ats
+      in: query
+      required: false
+      schema:
+        type: string
+      description: 'Timestamp to filter by. When filtering on equality, several comma-delimited timestamps may be passed. Also supports filtering with [relational operators](#relational-operators).
+
+        '
+      example: '2021-01-01T00:00:00Z'
+    PerPage:
+      name: per_page
+      in: query
+      required: false
+      schema:
+        type: integer
+      description: Number of results per page, valid values are 1 through 5000
+      example: 50
+    LabelSelector:
+      name: label_selector
+      in: query
+      description: A query string containing a list of [label selector](#labels-and-selectors) requirements
+      required: false
+      schema:
+        type: string
+      example: environment=production
+    Page:
+      name: page
+      in: query
+      required: false
+      schema:
+        type: integer
+      description: Page to display; valid values are integers >= 1
+      example: 1
+    UpdatedAts:
+      name: updated_ats
+      in: query
+      required: false
+      schema:
+        type: string
+      description: 'Timestamp to filter by. When filtering on equality, several comma-delimited timestamps may be passed. Also supports filtering with [relational operators](#relational-operators).
+
+        '
+      example: '2021-01-01T00:00:00Z'
+    Guid:
+      name: guid
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: The unique identifier for the resource
+  securitySchemes:
+    oauth:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: https://uaa.cloudfoundry.local/api-oauth/dialog
+          scopes:
+            cloud_controller.admin: This scope provides read and write access to all resources
+            cloud_controller.admin_read_only: This scope provides read only access to all resources
+            cloud_controller.global_auditor: This scope provides read access to all resources
+            cloud_controller.read: Read access to the Cloud Controller
+            cloud_controller.write: Write access to the Cloud Controller
+            cloud_controller.update_build_state: This scope allows its bearer to update the state of a build; currently only used when updating builds
+            cloud_controller_service_permissions.read: This scope provides read only access for service instance permissions
+    bearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Bearer JWT token authentication

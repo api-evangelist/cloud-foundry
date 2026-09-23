@@ -1,0 +1,285 @@
+openapi: 3.2.0
+info:
+  title: Cloud Foundry V3 Root API
+  description: '# Welcome to the Experimental Cloud Foundry V3 API Docs!'
+  version: latest
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+  contact:
+    name: Cloud Foundry
+    url: https://www.cloudfoundry.org/
+servers:
+- url: https://api.example.local
+  description: Cloud Foundry V3 API server
+security:
+- oauth:
+  - cloud_controller.read
+  - cloud_controller.write
+tags:
+- name: Root
+  description: Root API endpoints that provide entry points and API information.
+paths:
+  /:
+    get:
+      summary: Global API Root
+      description: This endpoint returns links to the APIs available on a given Cloud Foundry deployment.
+      operationId: getApiRoot
+      tags:
+      - Root
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  links:
+                    type: object
+                    description: Links to related resources
+                    properties:
+                      self:
+                        allOf:
+                        - $ref: '#/components/schemas/IndexLink'
+                        - description: Link to the current endpoint
+                      cloud_controller_v2:
+                        allOf:
+                        - $ref: '#/components/schemas/IndexLink'
+                        - description: Link to the Cloud Controller V2 API
+                      cloud_controller_v3:
+                        allOf:
+                        - $ref: '#/components/schemas/IndexLink'
+                        - description: Link to the Cloud Controller V3 API
+                      network_policy_v1:
+                        allOf:
+                        - $ref: '#/components/schemas/IndexLink'
+                        - description: Link to the Network Policy V1 API
+                      uaa:
+                        allOf:
+                        - $ref: '#/components/schemas/IndexLink'
+                        - description: Link to the UAA API
+                      logging:
+                        allOf:
+                        - $ref: '#/components/schemas/IndexLink'
+                        - description: Link to the Logging API
+                      log_cache:
+                        allOf:
+                        - $ref: '#/components/schemas/IndexLink'
+                        - description: Link to the Log Cache API
+                      log_stream:
+                        allOf:
+                        - $ref: '#/components/schemas/IndexLink'
+                        - description: Link to the Log Stream API
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/500'
+  /v3:
+    get:
+      summary: Get V3 API root
+      description: Returns the V3 API root endpoint information.
+      operationId: getV3ApiRoot
+      tags:
+      - Root
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  links:
+                    type: object
+                    description: Links to related resources
+                    properties:
+                      self:
+                        allOf:
+                        - $ref: '#/components/schemas/Link'
+                        - description: Link to the current endpoint
+                      apps:
+                        allOf:
+                        - $ref: '#/components/schemas/Link'
+                        - description: Link to the apps endpoint
+                      builds:
+                        allOf:
+                        - $ref: '#/components/schemas/Link'
+                        - description: Link to the builds endpoint
+                      deployments:
+                        allOf:
+                        - $ref: '#/components/schemas/Link'
+                        - description: Link to the deployments endpoint
+                      domains:
+                        allOf:
+                        - $ref: '#/components/schemas/Link'
+                        - description: Link to the domains endpoint
+                      droplets:
+                        allOf:
+                        - $ref: '#/components/schemas/Link'
+                        - description: Link to the droplets endpoint
+                      feature_flags:
+                        allOf:
+                        - $ref: '#/components/schemas/Link'
+                        - description: Link to the feature flags endpoint
+                      info:
+                        allOf:
+                        - $ref: '#/components/schemas/Link'
+                        - description: Link to the info endpoint
+                      isolation_segments:
+                        allOf:
+                        - $ref: '#/components/schemas/Link'
+                        - description: Link to the isolation segments endpoint
+                      organizations:
+                        allOf:
+                        - $ref: '#/components/schemas/Link'
+                        - description: Link to the organizations endpoint
+                      packages:
+                        allOf:
+                        - $ref: '#/components/schemas/Link'
+                        - description: Link to the packages endpoint
+                      processes:
+                        allOf:
+                        - $ref: '#/components/schemas/Link'
+                        - description: Link to the processes endpoint
+                      roles:
+                        allOf:
+                        - $ref: '#/components/schemas/Link'
+                        - description: Link to the roles endpoint
+                      routes:
+                        allOf:
+                        - $ref: '#/components/schemas/Link'
+                        - description: Link to the routes endpoint
+                      security_groups:
+                        allOf:
+                        - $ref: '#/components/schemas/Link'
+                        - description: Link to the security groups endpoint
+                      service_brokers:
+                        allOf:
+                        - $ref: '#/components/schemas/Link'
+                        - description: Link to the service brokers endpoint
+                      service_instances:
+                        allOf:
+                        - $ref: '#/components/schemas/Link'
+                        - description: Link to the service instances endpoint
+                      service_offerings:
+                        allOf:
+                        - $ref: '#/components/schemas/Link'
+                        - description: Link to the service offerings endpoint
+                      service_plans:
+                        allOf:
+                        - $ref: '#/components/schemas/Link'
+                        - description: Link to the service plans endpoint
+                      spaces:
+                        allOf:
+                        - $ref: '#/components/schemas/Link'
+                        - description: Link to the spaces endpoint
+                      stacks:
+                        allOf:
+                        - $ref: '#/components/schemas/Link'
+                        - description: Link to the stacks endpoint
+                      tasks:
+                        allOf:
+                        - $ref: '#/components/schemas/Link'
+                        - description: Link to the tasks endpoint
+                      users:
+                        allOf:
+                        - $ref: '#/components/schemas/Link'
+                        - description: Link to the users endpoint
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/500'
+components:
+  schemas:
+    Errors:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/Error'
+      description: 'An error response will always return a list of error objects. Errors appear on the job resource for asynchronous operations.
+
+        Clients should use the code and title fields for programmatically handling specific errors. The message in the detail field is subject to change over time.
+
+        '
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: A numeric code for this error
+        detail:
+          type: string
+          description: Detailed description of the error
+        title:
+          type: string
+          description: Name of the error
+    IndexLink:
+      allOf:
+      - $ref: '#/components/schemas/Link'
+      - type: object
+        properties:
+          meta:
+            type: object
+            description: Contains metadata about the link
+            properties:
+              version:
+                type: string
+                description: The version of the API
+              host_key_fingerprint:
+                type: string
+                description: The host key fingerprint of the link
+              oauth_client:
+                type: string
+                description: The oauth client for the link
+      description: 'Each link is keyed by its type and will include a href for the URL and an optional method for links that cannot be followed using GET. Can include a meta object with metadata about the link.
+
+        '
+    Link:
+      type: object
+      properties:
+        href:
+          type: string
+          description: The URL of the link
+        method:
+          type: string
+          description: An optional field containing the HTTP method to be used when following the URL
+      required:
+      - href
+      description: 'Each link is keyed by its type and will include a href for the URL and an optional method for links that cannot be followed using GET.
+
+        '
+  responses:
+    NotFound:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    '500':
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+  securitySchemes:
+    oauth:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: https://uaa.cloudfoundry.local/api-oauth/dialog
+          scopes:
+            cloud_controller.admin: This scope provides read and write access to all resources
+            cloud_controller.admin_read_only: This scope provides read only access to all resources
+            cloud_controller.global_auditor: This scope provides read access to all resources
+            cloud_controller.read: Read access to the Cloud Controller
+            cloud_controller.write: Write access to the Cloud Controller
+            cloud_controller.update_build_state: This scope allows its bearer to update the state of a build; currently only used when updating builds
+            cloud_controller_service_permissions.read: This scope provides read only access for service instance permissions
+    bearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Bearer JWT token authentication

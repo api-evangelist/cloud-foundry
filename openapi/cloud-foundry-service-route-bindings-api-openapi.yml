@@ -1,6 +1,6 @@
 openapi: 3.2.0
 info:
-  title: Cloud Foundry V3 Spaces API
+  title: Cloud Foundry V3 Service Route Bindings API
   description: '# Welcome to the Experimental Cloud Foundry V3 API Docs!'
   version: latest
   license:
@@ -17,44 +17,51 @@ security:
   - cloud_controller.read
   - cloud_controller.write
 tags:
-- name: Spaces
-  description: Spaces are used to group apps and services.
+- name: Service Route Bindings
+  description: Service route bindings are used to bind a route to a service instance.
 paths:
-  /v3/spaces:
+  /v3/service_route_bindings:
     get:
-      summary: List spaces
-      description: Retrieve all spaces the user has access to.
-      operationId: listSpaces
+      summary: List service route bindings
+      description: This endpoint retrieves the service route bindings the user has access to.
+      operationId: listServiceRouteBindings
       tags:
-      - Spaces
+      - Service Route Bindings
       parameters:
       - $ref: '#/components/parameters/Page'
       - $ref: '#/components/parameters/PerPage'
       - $ref: '#/components/parameters/OrderBy'
-      - $ref: '#/components/parameters/CreatedAts'
-      - $ref: '#/components/parameters/UpdatedAts'
-      - $ref: '#/components/parameters/LabelSelector'
-      - name: names
+      - name: route_guids
         in: query
         schema:
           type: array
           items:
             type: string
-        description: Comma-delimited list of space names to filter by
+        description: Comma-delimited list of route guids to filter by
+      - name: service_instance_guids
+        in: query
+        schema:
+          type: array
+          items:
+            type: string
+        description: Comma-delimited list of service instance guids to filter by
+      - name: service_instance_names
+        in: query
+        schema:
+          type: array
+          items:
+            type: string
+        description: Comma-delimited list of service instance names to filter by
+      - $ref: '#/components/parameters/LabelSelector'
       - name: guids
         in: query
         schema:
           type: array
           items:
             type: string
-        description: Comma-delimited list of space guids to filter by
-      - name: organization_guids
-        in: query
-        schema:
-          type: array
-          items:
-            type: string
-        description: Comma-delimited list of organization guids to filter by
+        description: Comma-delimited list of service route binding guids to filter by
+      - $ref: '#/components/parameters/CreatedAts'
+      - $ref: '#/components/parameters/UpdatedAts'
       - name: include
         in: query
         schema:
@@ -62,78 +69,16 @@ paths:
           items:
             type: string
             enum:
-            - organization
-        description: Optionally include a list of unique related resources in the response
+            - route
+            - service_instance
+        description: 'Optionally include a list of unique related resources in the response. Valid values are: `route`, `service_instance`'
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SpaceList'
-              examples:
-                default:
-                  summary: default
-                  value:
-                    pagination:
-                      total_results: 2
-                      total_pages: 1
-                      first:
-                        href: https://api.example.org/v3/spaces?page=1&per_page=50
-                      last:
-                        href: https://api.example.org/v3/spaces?page=1&per_page=50
-                      next: null
-                      previous: null
-                    resources:
-                    - guid: 123e4567-e89b-12d3-a456-426614174000
-                      created_at: '2017-02-01T01:33:58Z'
-                      updated_at: '2017-02-01T01:33:58Z'
-                      name: space1
-                      relationships:
-                        organization:
-                          data:
-                            guid: 123e4567-e89b-12d3-a456-426614174000
-                        quota:
-                          data: null
-                      links:
-                        self:
-                          href: https://api.example.org/v3/spaces/885735b5-aea4-4cf5-8e44-961af0e41920
-                        features:
-                          href: https://api.example.org/v3/spaces/885735b5-aea4-4cf5-8e44-961af0e41920/features
-                        organization:
-                          href: https://api.example.org/v3/organizations/e00705b9-7b42-4561-ae97-2520399d2133
-                        apply_manifest:
-                          href: https://api.example.org/v3/spaces/885735b5-aea4-4cf5-8e44-961af0e41920/actions/apply_manifest
-                          method: POST
-                      metadata:
-                        labels: {}
-                        annotations: {}
-                    - guid: 123e4567-e89b-12d3-a456-426614174000
-                      created_at: '2017-02-02T00:14:30Z'
-                      updated_at: '2017-02-02T00:14:30Z'
-                      name: space2
-                      relationships:
-                        organization:
-                          data:
-                            guid: 123e4567-e89b-12d3-a456-426614174000
-                        quota:
-                          data:
-                            guid: 123e4567-e89b-12d3-a456-426614174000
-                      links:
-                        self:
-                          href: https://api.example.org/v3/spaces/d4c91047-7b29-4fda-b7f9-04033e5c9c9f
-                        features:
-                          href: https://api.example.org/v3/spaces/d4c91047-7b29-4fda-b7f9-04033e5c9c9f/features
-                        organization:
-                          href: https://api.example.org/v3/organizations/b4ce91bd-31df-4b7d-8fd4-21a6b533276b
-                        quota:
-                          href: https://api.example.org/v3/space_quotas/6da62599-4890-4a08-8b6f-180a4f47e46b
-                        apply_manifest:
-                          href: https://api.example.org/v3/spaces/d4c91047-7b29-4fda-b7f9-04033e5c9c9/actions/apply_manifest
-                          method: POST
-                      metadata:
-                        labels: {}
-                        annotations: {}
+                $ref: '#/components/schemas/ServiceRouteBindingList'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -144,8 +89,6 @@ paths:
           $ref: '#/components/responses/Conflict'
         '422':
           $ref: '#/components/responses/UnprocessableEntity'
-        '429':
-          $ref: '#/components/responses/TooManyRequests'
         '500':
           $ref: '#/components/responses/500'
         '502':
@@ -153,58 +96,102 @@ paths:
         '503':
           $ref: '#/components/responses/ServiceUnavailable'
     post:
-      summary: Create a space
-      description: Create a space.
-      operationId: createSpace
+      summary: Create a service route binding
+      description: 'This endpoint creates a new route service binding. The service instance and the route must be in the same space.
+
+
+        To bind a route to a user-provided service instance, the service instance must have the `route_service_url` property set.
+
+
+        To bind a route to a managed service instance, the service offering must be bindable, and the service offering must have `route_forwarding` set in the `requires` property.'
+      operationId: createServiceRouteBinding
       tags:
-      - Spaces
+      - Service Route Bindings
       requestBody:
-        $ref: '#/components/requestBodies/SpaceCreateRequestBody'
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ServiceRouteBindingCreate'
+            examples:
+              default:
+                summary: default
+                value:
+                  metadata:
+                    annotations:
+                      foo: bar
+                    labels:
+                      baz: qux
+                  relationships:
+                    route:
+                      data:
+                        guid: 123e4567-e89b-12d3-a456-426614174000
+                    service_instance:
+                      data:
+                        guid: 123e4567-e89b-12d3-a456-426614174000
+                  parameters:
+                    key1: value1
+                    key2: value2
       responses:
         '201':
           description: Created
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Space'
+                $ref: '#/components/schemas/ServiceRouteBinding'
               examples:
                 default:
                   summary: default
                   value:
                     guid: 123e4567-e89b-12d3-a456-426614174000
-                    created_at: '2017-02-01T01:33:58Z'
-                    updated_at: '2017-02-01T01:33:58Z'
-                    name: my-space
+                    created_at: '2015-11-13T17:02:56Z'
+                    updated_at: '2016-06-08T16:41:26Z'
+                    route_service_url: https://route-service-url.io
+                    last_operation:
+                      type: create
+                      state: succeeded
+                      description: Operation succeeded
+                      updated_at: '2020-03-10T15:49:32Z'
+                      created_at: '2020-03-10T15:49:29Z'
+                    metadata:
+                      annotations:
+                        foo: bar
+                      labels:
+                        baz: qux
                     relationships:
-                      organization:
+                      service_instance:
                         data:
                           guid: 123e4567-e89b-12d3-a456-426614174000
-                      quota:
-                        data: null
+                      route:
+                        data:
+                          guid: 123e4567-e89b-12d3-a456-426614174000
                     links:
                       self:
-                        href: https://api.example.org/v3/spaces/885735b5-aea4-4cf5-8e44-961af0e41920
-                      features:
-                        href: https://api.example.org/v3/spaces/885735b5-aea4-4cf5-8e44-961af0e41920/features
-                      organization:
-                        href: https://api.example.org/v3/organizations/e00705b9-7b42-4561-ae97-2520399d2133
-                      apply_manifest:
-                        href: https://api.example.org/v3/spaces/885735b5-aea4-4cf5-8e44-961af0e41920/actions/apply_manifest
-                        method: POST
-                    metadata:
-                      labels: {}
-                      annotations: {}
+                        href: https://api.example.org/v3/service_route_bindings/dde5ad2a-d8f4-44dc-a56f-0452d744f1c3
+                      service_instance:
+                        href: https://api.example.org/v3/service_instances/8bfe4c1b-9e18-45b1-83be-124163f31f9e
+                      route:
+                        href: https://api.example.org/v3/routes/74f7c078-0934-470f-9883-4fddss5b8f13
+                      parameters:
+                        href: https://api.example.org/v3/service_route_bindings/b3536566-63e2-428f-8f87-a1b99864ada6/parameters
           links:
-            organization:
-              operationId: getOrganization
+            route:
+              operationId: getRoute
               parameters:
-                guid: $response.body#/relationships/organization/data/guid
-              description: Retrieve the organization for this space
-            quota:
-              operationId: getSpaceQuota
+                guid: $response.body#/relationships/route/data/guid
+              description: Retrieve the route for this service route binding
+            service_instance:
+              operationId: getServiceInstance
               parameters:
-                guid: $response.body#/relationships/quota/data/guid
-              description: Retrieve the quota associated with this space
+                guid: $response.body#/relationships/service_instance/data/guid
+              description: Retrieve the service instance for this service route binding
+        '202':
+          description: Accepted
+          headers:
+            Location:
+              description: URL of the job that is creating the service route binding
+              schema:
+                type: string
+                format: uri
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -219,13 +206,13 @@ paths:
           $ref: '#/components/responses/500'
         '503':
           $ref: '#/components/responses/ServiceUnavailable'
-  /v3/spaces/{guid}:
+  /v3/service_route_bindings/{guid}:
     get:
-      summary: Get a space
-      description: This endpoint retrieves the specified space object.
-      operationId: getSpace
+      summary: Get a service route binding
+      description: This endpoint retrieves the service route binding by GUID.
+      operationId: getServiceRouteBinding
       tags:
-      - Spaces
+      - Service Route Bindings
       parameters:
       - $ref: '#/components/parameters/Guid'
       - name: include
@@ -235,53 +222,62 @@ paths:
           items:
             type: string
             enum:
-            - organization
-        description: Optionally include additional related resources in the response
+            - route
+            - service_instance
+        description: Optionally include a list of unique related resources in the response
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Space'
+                $ref: '#/components/schemas/ServiceRouteBinding'
               examples:
                 default:
                   summary: default
                   value:
                     guid: 123e4567-e89b-12d3-a456-426614174000
-                    created_at: '2017-02-01T01:33:58Z'
-                    updated_at: '2017-02-01T01:33:58Z'
-                    name: my-space
+                    created_at: '2015-11-13T17:02:56Z'
+                    updated_at: '2016-06-08T16:41:26Z'
+                    route_service_url: https://route-service-url.io
+                    last_operation:
+                      type: create
+                      state: succeeded
+                      description: Operation succeeded
+                      updated_at: '2020-03-10T15:49:32Z'
+                      created_at: '2020-03-10T15:49:29Z'
+                    metadata:
+                      annotations:
+                        foo: bar
+                      labels:
+                        baz: qux
                     relationships:
-                      organization:
+                      service_instance:
                         data:
                           guid: 123e4567-e89b-12d3-a456-426614174000
-                      quota:
-                        data: null
+                      route:
+                        data:
+                          guid: 123e4567-e89b-12d3-a456-426614174000
                     links:
                       self:
-                        href: https://api.example.org/v3/spaces/885735b5-aea4-4cf5-8e44-961af0e41920
-                      features:
-                        href: https://api.example.org/v3/spaces/885735b5-aea4-4cf5-8e44-961af0e41920/features
-                      organization:
-                        href: https://api.example.org/v3/organizations/e00705b9-7b42-4561-ae97-2520399d2133
-                      apply_manifest:
-                        href: https://api.example.org/v3/spaces/885735b5-aea4-4cf5-8e44-961af0e41920/actions/apply_manifest
-                        method: POST
-                    metadata:
-                      labels: {}
-                      annotations: {}
+                        href: https://api.example.org/v3/service_route_bindings/dde5ad2a-d8f4-44dc-a56f-0452d744f1c3
+                      service_instance:
+                        href: https://api.example.org/v3/service_instances/8bfe4c1b-9e18-45b1-83be-124163f31f9e
+                      route:
+                        href: https://api.example.org/v3/routes/74f7c078-0934-470f-9883-4fddss5b8f13
+                      parameters:
+                        href: https://api.example.org/v3/service_route_bindings/b3536566-63e2-428f-8f87-a1b99864ada6/parameters
           links:
-            organization:
-              operationId: getOrganization
+            route:
+              operationId: getRoute
               parameters:
-                guid: $response.body#/relationships/organization/data/guid
-              description: Retrieve the organization for this space
-            quota:
-              operationId: getSpaceQuota
+                guid: $response.body#/relationships/route/data/guid
+              description: Retrieve the route for this service route binding
+            service_instance:
+              operationId: getServiceInstance
               parameters:
-                guid: $response.body#/relationships/quota/data/guid
-              description: Retrieve the quota associated with this space
+                guid: $response.body#/relationships/service_instance/data/guid
+              description: Retrieve the service instance for this service route binding
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -289,59 +285,71 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
     patch:
-      summary: Update a space
-      operationId: updateSpace
+      summary: Update a service route binding
+      description: This endpoint updates a service route binding with labels and annotations.
+      operationId: updateServiceRouteBinding
       tags:
-      - Spaces
+      - Service Route Bindings
       parameters:
       - $ref: '#/components/parameters/Guid'
       requestBody:
-        $ref: '#/components/requestBodies/SpaceUpdateRequestBody'
+        content:
+          application/json:
+            schema:
+              properties:
+                metadata:
+                  $ref: '#/components/schemas/Metadata'
+            examples:
+              default:
+                summary: default
+                value:
+                  metadata:
+                    labels:
+                      key: value
+                    annotations:
+                      note: detailed information
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Space'
+                $ref: '#/components/schemas/ServiceRouteBinding'
               examples:
                 default:
                   summary: default
                   value:
                     guid: 123e4567-e89b-12d3-a456-426614174000
-                    created_at: '2017-02-01T01:33:58Z'
-                    updated_at: '2017-02-01T01:33:58Z'
-                    name: my-space
+                    created_at: '2015-11-13T17:02:56Z'
+                    updated_at: '2016-06-08T16:41:26Z'
+                    route_service_url: https://route-service-url.io
+                    last_operation:
+                      type: create
+                      state: succeeded
+                      description: Operation succeeded
+                      updated_at: '2020-03-10T15:49:32Z'
+                      created_at: '2020-03-10T15:49:29Z'
+                    metadata:
+                      annotations:
+                        foo: bar
+                      labels:
+                        baz: qux
                     relationships:
-                      organization:
+                      service_instance:
                         data:
                           guid: 123e4567-e89b-12d3-a456-426614174000
-                      quota:
-                        data: null
+                      route:
+                        data:
+                          guid: 123e4567-e89b-12d3-a456-426614174000
                     links:
                       self:
-                        href: https://api.example.org/v3/spaces/885735b5-aea4-4cf5-8e44-961af0e41920
-                      features:
-                        href: https://api.example.org/v3/spaces/885735b5-aea4-4cf5-8e44-961af0e41920/features
-                      organization:
-                        href: https://api.example.org/v3/organizations/e00705b9-7b42-4561-ae97-2520399d2133
-                      apply_manifest:
-                        href: https://api.example.org/v3/spaces/885735b5-aea4-4cf5-8e44-961af0e41920/actions/apply_manifest
-                        method: POST
-                    metadata:
-                      labels: {}
-                      annotations: {}
-          links:
-            organization:
-              operationId: getOrganization
-              parameters:
-                guid: $response.body#/relationships/organization/data/guid
-              description: Retrieve the organization for this space
-            quota:
-              operationId: getSpaceQuota
-              parameters:
-                guid: $response.body#/relationships/quota/data/guid
-              description: Retrieve the quota associated with this space
+                        href: https://api.example.org/v3/service_route_bindings/dde5ad2a-d8f4-44dc-a56f-0452d744f1c3
+                      service_instance:
+                        href: https://api.example.org/v3/service_instances/8bfe4c1b-9e18-45b1-83be-124163f31f9e
+                      route:
+                        href: https://api.example.org/v3/routes/74f7c078-0934-470f-9883-4fddss5b8f13
+                      parameters:
+                        href: https://api.example.org/v3/service_route_bindings/b3536566-63e2-428f-8f87-a1b99864ada6/parameters
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -359,24 +367,24 @@ paths:
         '503':
           $ref: '#/components/responses/ServiceUnavailable'
     delete:
-      summary: Delete a space
-      description: When a space is deleted, the user roles associated with the space will be deleted.
-      operationId: deleteSpace
+      summary: Delete a service route binding
+      description: This endpoint deletes a service route binding. When deleting route bindings originating from user provided service instances, the delete operation does not require interactions with service brokers, therefore the API will respond synchronously to the delete request. Consequently, deleting route bindings from managed service instances responds with a job which can be used to track the progress of the delete operation.
+      operationId: deleteServiceRouteBinding
       tags:
-      - Spaces
+      - Service Route Bindings
       parameters:
       - $ref: '#/components/parameters/Guid'
       responses:
         '202':
           description: Accepted
           headers:
-            location:
-              description: URL of the job to query the asynchronous operation
+            Location:
+              description: URL of the job that is deleting the service route binding
               schema:
                 type: string
                 format: uri
-        '400':
-          $ref: '#/components/responses/BadRequest'
+        '204':
+          description: No Content
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -387,320 +395,13 @@ paths:
           $ref: '#/components/responses/UnprocessableEntity'
         '500':
           $ref: '#/components/responses/500'
-  /v3/spaces/{guid}/actions/apply_manifest:
-    post:
-      summary: Apply a manifest to a space
-      description: 'Apply changes specified in a manifest to the named apps and their underlying processes. The apps must reside in the space. These changes are additive and will not modify any unspecified properties or remove any existing environment variables, app features, routes, or services.
-
-
-        Apply manifest will only trigger an immediate update for the “instances” property or routing changes. All other properties require an app restart to take effect.'
-      operationId: applyManifestToSpace
-      tags:
-      - Spaces
-      parameters:
-      - $ref: '#/components/parameters/Guid'
-      requestBody:
-        content:
-          application/x-yaml:
-            schema:
-              type: string
-      responses:
-        '202':
-          description: Accepted
-          headers:
-            Location:
-              description: URL of the job that is applying the manifest
-              schema:
-                type: string
-                format: uri
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '422':
-          $ref: '#/components/responses/UnprocessableEntity'
-  /v3/spaces/{guid}/features:
+  /v3/service_route_bindings/{guid}/parameters:
     get:
-      summary: List space features
-      description: This endpoint retrieves the list of features for the specified space. Currently, the only feature on spaces is the SSH feature.
-      operationId: listSpaceFeatures
+      summary: Get parameters for a route binding
+      description: Queries the Service Broker for the parameters associated with this service route binding. The broker catalog must have enabled the `bindings_retrievable` feature for the Service Offering. Check the Service Offering object for the value of this feature flag. This endpoint is not available for User-Provided Service Instances.
+      operationId: getServiceRouteBindingParameters
       tags:
-      - Spaces
-      parameters:
-      - $ref: '#/components/parameters/Guid'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SpaceFeature'
-              examples:
-                default:
-                  summary: default
-                  value:
-                    resources:
-                    - name: ssh
-                      description: Enable SSHing into apps in the space.
-                      enabled: true
-                    - name: diego_docker
-                      description: Allow Docker image support for the space.
-                      enabled: false
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-  /v3/spaces/{guid}/features/{name}:
-    get:
-      summary: Get a space feature
-      operationId: getSpaceFeature
-      tags:
-      - Spaces
-      parameters:
-      - $ref: '#/components/parameters/Guid'
-      - name: name
-        in: path
-        required: true
-        schema:
-          type: string
-          enum:
-          - ssh
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SpaceFeature'
-              examples:
-                default:
-                  summary: default
-                  value:
-                    name: ssh
-                    description: Enable SSHing into apps in the space.
-                    enabled: true
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-    patch:
-      summary: Update a space feature
-      description: Update a space feature.
-      operationId: updateSpaceFeature
-      tags:
-      - Spaces
-      parameters:
-      - $ref: '#/components/parameters/Guid'
-      - name: name
-        in: path
-        required: true
-        schema:
-          type: string
-          enum:
-          - ssh
-      requestBody:
-        content:
-          application/json:
-            schema:
-              properties:
-                enabled:
-                  type: boolean
-            examples:
-              default:
-                summary: default
-                value:
-                  enabled: true
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SpaceFeature'
-              examples:
-                default:
-                  summary: default
-                  value:
-                    name: ssh
-                    description: Enable SSHing into apps in the space.
-                    enabled: true
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '422':
-          $ref: '#/components/responses/UnprocessableEntity'
-  /v3/spaces/{guid}/manifest_diff:
-    post:
-      summary: Create a manifest diff for a space (experimental)
-      description: 'This endpoint returns a JSON representation of the difference between the provided manifest and the current state of a space.
-
-
-        Currently, this endpoint can only diff version 1 manifests.'
-      operationId: createManifestDiffForSpace
-      tags:
-      - Spaces
-      parameters:
-      - $ref: '#/components/parameters/Guid'
-      requestBody:
-        content:
-          application/x-yaml:
-            schema:
-              type: string
-      responses:
-        '201':
-          description: Accepted
-          headers:
-            Location:
-              description: URL of the job that is creating the manifest diff
-              schema:
-                type: string
-                format: uri
-        '202':
-          description: Accepted
-          headers:
-            Location:
-              description: URL of the job that is creating the manifest diff
-              schema:
-                type: string
-                format: uri
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '422':
-          $ref: '#/components/responses/UnprocessableEntity'
-  /v3/spaces/{guid}/relationships/isolation_segment:
-    get:
-      summary: Get assigned isolation segment
-      operationId: getAssignedIsolationSegmentForSpace
-      tags:
-      - Spaces
-      parameters:
-      - $ref: '#/components/parameters/Guid'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RelationshipToOne'
-              examples:
-                default:
-                  summary: default
-                  value:
-                    data:
-                      guid: 123e4567-e89b-12d3-a456-426614174000
-                    links:
-                      self:
-                        href: https://api.example.org/v3/spaces/885735b5-aea4-4cf5-8e44-961af0e41920/relationships/isolation_segment
-                      related:
-                        href: https://api.example.org/v3/isolation_segments/e4c91047-3b29-4fda-b7f9-04033e5a9c9f
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-    patch:
-      summary: Manage isolation segment
-      description: 'This endpoint assigns an isolation segment to the space. The isolation segment must be entitled to the space’s parent organization.
-
-
-        Apps will not run in the newly assigned isolation segment until they are restarted.'
-      operationId: manageIsolationSegmentForSpace
-      tags:
-      - Spaces
-      parameters:
-      - $ref: '#/components/parameters/Guid'
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/RelationshipToOne'
-            examples:
-              default:
-                summary: default
-                value:
-                  data:
-                    guid: 123e4567-e89b-12d3-a456-426614174000
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RelationshipToOne'
-              examples:
-                default:
-                  summary: default
-                  value:
-                    data:
-                      guid: 123e4567-e89b-12d3-a456-426614174000
-                    links:
-                      self:
-                        href: https://api.example.org/v3/spaces/885735b5-aea4-4cf5-8e44-961af0e41920/relationships/isolation_segment
-                      related:
-                        href: https://api.example.org/v3/isolation_segments/e4c91047-3b29-4fda-b7f9-04033e5a9c9f
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '422':
-          $ref: '#/components/responses/UnprocessableEntity'
-  /v3/spaces/{guid}/routes:
-    delete:
-      summary: Delete unmapped routes for a space
-      description: Deletes all routes in a space that are not mapped to any applications and not bound to any service instances.
-      operationId: deleteUnmappedRoutesForSpace
-      tags:
-      - Spaces
-      parameters:
-      - $ref: '#/components/parameters/Guid'
-      - name: unmapped
-        in: query
-        required: true
-        schema:
-          type: boolean
-          enum:
-          - true
-        description: Filter to only delete unmapped routes
-      responses:
-        '202':
-          description: Accepted
-          headers:
-            Location:
-              description: URL of the job that is deleting unmapped routes
-              schema:
-                type: string
-                format: uri
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '422':
-          $ref: '#/components/responses/UnprocessableEntity'
-  /v3/spaces/{guid}/usage_summary:
-    get:
-      summary: Get usage summary for a space
-      description: This endpoint retrieves the specified space's memory and app instance usage summary.
-      operationId: getUsageSummaryForSpace
-      tags:
-      - Spaces
+      - Service Route Bindings
       parameters:
       - $ref: '#/components/parameters/Guid'
       responses:
@@ -710,119 +411,12 @@ paths:
             application/json:
               schema:
                 type: object
-                properties:
-                  usage_summary:
-                    type: object
-                    properties:
-                      started_instances:
-                        type: integer
-                      memory_in_mb:
-                        type: integer
-                      routes:
-                        type: integer
-                      service_instances:
-                        type: integer
-                      reserved_ports:
-                        type: integer
-                      domains:
-                        type: integer
-                      per_app_tasks:
-                        type: integer
-                      service_keys:
-                        type: integer
-                  links:
-                    type: object
-                    properties:
-                      self:
-                        $ref: '#/components/schemas/Link'
-                        description: The URL to get this usage summary
-                      space:
-                        $ref: '#/components/schemas/Link'
-                        description: The URL to get the space for this usage summary
               examples:
                 default:
                   summary: default
                   value:
-                    usage_summary:
-                      started_instances: 3
-                      memory_in_mb: 3072
-                      routes: 3
-                      service_instances: 2
-                      reserved_ports: 1
-                      domains: 1
-                      per_app_tasks: 0
-                      service_keys: 1
-                    links:
-                      self:
-                        href: https://api.example.org/v3/spaces/f47ac10b-58cc-4372-a567-0e02b2c3d479/usage_summary
-                      organization:
-                        href: https://api.example.org/v3/spaces/f47ac10b-58cc-4372-a567-0e02b2c3d479
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-  /v3/spaces/{guid}/running_security_groups:
-    get:
-      summary: List running security groups for a space
-      description: This endpoint returns security groups that are enabled for running globally or at the space level for the given space.
-      operationId: listRunningSecurityGroupsForSpace
-      tags:
-      - Spaces
-      parameters:
-      - $ref: '#/components/parameters/Guid'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SecurityGroupList'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-  /v3/spaces/{guid}/staging_security_groups:
-    get:
-      summary: List staging security groups for a space
-      description: This endpoint returns security groups that are enabled for staging globally or at the space level for the given space.
-      operationId: listStagingSecurityGroupsForSpace
-      tags:
-      - Spaces
-      parameters:
-      - $ref: '#/components/parameters/Guid'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SecurityGroupList'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-  /v3/spaces/{guid}/users:
-    get:
-      summary: List users for a space
-      description: Retrieve all users with a role in the specified space.
-      operationId: listUsersForSpace
-      tags:
-      - Spaces
-      parameters:
-      - $ref: '#/components/parameters/Guid'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UserList'
+                    foo: bar
+                    foz: baz
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -1016,15 +610,29 @@ components:
           format: date-time
           description: When the last operation was last updated
       description: The last operation object for service instances
-    UserList:
+    ServiceRouteBindingCreate:
       type: object
       properties:
-        pagination:
-          $ref: '#/components/schemas/Pagination'
-        resources:
-          type: array
-          items:
-            $ref: '#/components/schemas/User'
+        relationships:
+          type: object
+          properties:
+            route:
+              $ref: '#/components/schemas/RelationshipToOne'
+              description: The route to bind
+            service_instance:
+              $ref: '#/components/schemas/RelationshipToOne'
+              description: The service instance to bind
+          required:
+          - route
+          - service_instance
+          description: Relationships for the service route binding
+        parameters:
+          type: object
+          description: A JSON object that is passed to the service broker
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+      required:
+      - relationships
     Link:
       type: object
       properties:
@@ -1250,6 +858,37 @@ components:
         The relationship object is a key-value pair that uniquely identifies a resource. In practice this is almost always the guid of a resource.
 
         '
+    ServiceCredentialBindingLastOperation:
+      type: object
+      properties:
+        type:
+          type: string
+          description: Type of the last operation
+          enum:
+          - create
+          - delete
+        state:
+          type: string
+          description: State of the last operation
+          enum:
+          - initial
+          - in progress
+          - succeeded
+          - failed
+        description:
+          type:
+          - string
+          - 'null'
+          description: A textual explanation associated with this state
+        created_at:
+          type: string
+          format: date-time
+          description: When the last operation was created
+        updated_at:
+          type: string
+          format: date-time
+          description: When the last operation was last updated
+      description: The last operation object for service credential bindings
     Lifecycle:
       type: object
       properties:
@@ -1390,7 +1029,45 @@ components:
         - name
         - relationships
         - links
-    SpaceList:
+    ServiceRouteBinding:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/BaseSchema'
+      - properties:
+          route_service_url:
+            type:
+            - string
+            - 'null'
+            format: uri
+            description: URL for the route service
+          last_operation:
+            $ref: '#/components/schemas/ServiceCredentialBindingLastOperation'
+          relationships:
+            type: object
+            properties:
+              route:
+                $ref: '#/components/schemas/RelationshipToOne'
+              service_instance:
+                $ref: '#/components/schemas/RelationshipToOne'
+            description: Relationships for the service route binding
+          links:
+            type: object
+            properties:
+              self:
+                $ref: '#/components/schemas/Link'
+              route:
+                $ref: '#/components/schemas/Link'
+              service_instance:
+                $ref: '#/components/schemas/Link'
+          metadata:
+            $ref: '#/components/schemas/Metadata'
+          included:
+            $ref: '#/components/schemas/IncludedResources'
+            description: Additional related resources included in the response when using the include parameter
+        required:
+        - relationships
+        - links
+    ServiceRouteBindingList:
       type: object
       properties:
         pagination:
@@ -1398,7 +1075,7 @@ components:
         resources:
           type: array
           items:
-            $ref: '#/components/schemas/Space'
+            $ref: '#/components/schemas/ServiceRouteBinding'
         included:
           $ref: '#/components/schemas/IncludedResources'
           description: Additional related resources included in the response when using the include parameter
@@ -1579,17 +1256,6 @@ components:
             self:
               $ref: '#/components/schemas/Link'
               description: The URL to get this user
-    SpaceFeature:
-      type: object
-      properties:
-        name:
-          type: string
-        description:
-          type:
-          - string
-          - 'null'
-        enabled:
-          type: boolean
     Error:
       type: object
       properties:
@@ -1665,79 +1331,6 @@ components:
           type: string
           format: uuid
           description: The GUID of the resource
-    SecurityGroup:
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/BaseSchema'
-      - properties:
-          name:
-            type: string
-            description: Name of the security group
-          globally_enabled:
-            type: object
-            properties:
-              running:
-                type: boolean
-                description: Whether the security group is globally enabled for running apps
-              staging:
-                type: boolean
-                description: Whether the security group is globally enabled for staging apps
-          rules:
-            type: array
-            items:
-              type: object
-              properties:
-                protocol:
-                  type: string
-                  description: Protocol for the rule
-                destination:
-                  type: string
-                  description: Destination for the rule
-                ports:
-                  type: string
-                  description: Ports for the rule
-                type:
-                  type: integer
-                  description: Type for ICMP rules
-                code:
-                  type: integer
-                  description: Code for ICMP rules
-                description:
-                  type: string
-                  description: Description of the rule
-            description: Rules for the security group
-          running_spaces:
-            type: object
-            properties:
-              data:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Relationship'
-            description: Spaces where this security group is applied to running apps
-          staging_spaces:
-            type: object
-            properties:
-              data:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Relationship'
-            description: Spaces where this security group is applied to staging apps
-          links:
-            type: object
-            properties:
-              self:
-                $ref: '#/components/schemas/Link'
-              running_spaces:
-                $ref: '#/components/schemas/Link'
-              staging_spaces:
-                $ref: '#/components/schemas/Link'
-          metadata:
-            $ref: '#/components/schemas/Metadata'
-        required:
-        - name
-        - globally_enabled
-        - rules
-        - links
     BaseSchema:
       type: object
       properties:
@@ -1760,15 +1353,6 @@ components:
         See Resources and Experimental Resources for specific resources.
 
         '
-    SecurityGroupList:
-      type: object
-      properties:
-        pagination:
-          $ref: '#/components/schemas/Pagination'
-        resources:
-          type: array
-          items:
-            $ref: '#/components/schemas/SecurityGroup'
   responses:
     UnprocessableEntity:
       description: Unprocessable Entity
@@ -1806,27 +1390,6 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Errors'
-    TooManyRequests:
-      description: Too Many Requests
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              errors:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    code:
-                      type: integer
-                      example: 10008
-                    title:
-                      type: string
-                      example: CF-RateLimitExceeded
-                    detail:
-                      type: string
-                      example: Rate limit exceeded
     Forbidden:
       description: Forbidden
       content:
@@ -1911,60 +1474,6 @@ components:
         type: string
         format: uuid
       description: The unique identifier for the resource
-  requestBodies:
-    SpaceUpdateRequestBody:
-      description: Space object that needs to be updated
-      required: true
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              name:
-                type: string
-                description: New space name
-              metadata:
-                $ref: '#/components/schemas/Metadata'
-            description: Request schema for updating a space
-          examples:
-            default:
-              summary: default
-              value:
-                name: new-space-name
-    SpaceCreateRequestBody:
-      description: Space object that needs to be created
-      required: true
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              name:
-                type: string
-                description: Name of the space
-              relationships:
-                type: object
-                properties:
-                  organization:
-                    $ref: '#/components/schemas/RelationshipToOne'
-                    description: A relationship to an organization
-                required:
-                - organization
-              metadata:
-                $ref: '#/components/schemas/Metadata'
-            required:
-            - name
-            - relationships
-            description: Request schema for creating a space
-          examples:
-            default:
-              summary: default
-              value:
-                name: my-space
-                relationships:
-                  organization:
-                    data:
-                      guid: 123e4567-e89b-12d3-a456-426614174000
   securitySchemes:
     oauth:
       type: oauth2

@@ -1,0 +1,133 @@
+generated: '2026-09-05'
+method: searched
+source: >-
+  https://github.com/cloudfoundry/loggregator-release/blob/main/docs/rlp_gateway.md,
+  https://docs.cloudfoundry.org/devguide/deploy-apps/streaming-logs.html,
+  https://docs.cloudfoundry.org/devguide/services/log-management.html,
+  https://docs.cloudfoundry.org/loggregator/architecture.html,
+  grpc/cloud-foundry-loggregator-v2-egress.proto, grpc/cloud-foundry-log-cache-v1-egress.proto,
+  openapi/cloud-foundry-capi-v3-openapi.yaml
+asyncapi_published: false
+webhooks_published: false
+note: >-
+  Cloud Foundry HAS a real, documented, first-party event surface and publishes NO AsyncAPI document
+  describing it, and NO HTTP webhooks. Both facts matter and they are different facts. A search of the
+  cloudfoundry GitHub organization for asyncapi returns zero repositories and zero committed documents, so
+  no AsyncAPI is saved here and NO `type: AsyncAPI` pointer is emitted from this file — the same rule this
+  pipeline applies to /.well-known/ probes and agent cards: the pointer would assert that the Foundation
+  publishes a document it does not publish. NO `type: Webhooks` pointer is emitted either, because Cloud
+  Foundry ships no HTTP callback registration anywhere in the 248-operation Cloud Controller surface. This
+  file records the shape of the surface that DOES exist so a consumer is not left to infer "no events" from
+  "no AsyncAPI".
+discovery:
+  mechanism: >-
+    Every sibling host on a Cloud Foundry foundation is discovered at RUNTIME from the Cloud Controller root
+    endpoint. GET / (operationId getPlatformInfo, openapi/cloud-foundry-capi-v3-openapi.yaml) returns a
+    links object carrying self, cloud_controller_v2, cloud_controller_v3, network_policy_v1, uaa, logging,
+    log_cache and log_stream hrefs. An agent handed only `api.<system-domain>` can therefore resolve the
+    identity server and both log surfaces without being told them — a genuinely strong discovery property,
+    and the reason the templated baseURLs in apis.yml are safe to state.
+  default_host_pattern:
+    source: https://github.com/cloudfoundry/cf-deployment/blob/main/cf-deployment.yml
+    note: >-
+      The Foundation's canonical deployment manifest registers api.((system_domain)), uaa.((system_domain)),
+      log-cache.((system_domain)) and log-stream.((system_domain)). These are DEFAULTS an operator can
+      change, which is exactly why the root-endpoint links above, not the pattern, are the authority.
+delivery_shapes:
+- shape: server-sent-events
+  name: Reverse Log Proxy (RLP) Gateway
+  transport: HTTPS, text/event-stream
+  path: GET /v2/read
+  host: operator-deployed; the gateway address is set by the GATEWAY_ADDR environment variable on the loggregator deployment
+  auth: OAuth 2.0 bearer token verified against the foundation's UAA (LOG_ACCESS* / LOG_ADMIN* configuration)
+  channels_are: envelope TYPES selected by query parameter, not named topics
+  envelope_types:
+  - log
+  - counter
+  - gauge
+  - timer
+  - event
+  parameters:
+  - name: shard_id
+    note: Envelopes are split between clients sharing a shard ID — the consumer-group primitive.
+  - name: source_id
+    note: One or more source IDs (an app GUID, or a platform component name such as `doppler`).
+  - name: counter.name
+    note: Filter counter envelopes by metric name.
+  - name: gauge.name
+    note: Filter gauge envelopes by metric name.
+  - name: deterministic_name
+    note: Enables deterministic routing.
+  errors:
+  - status: 400
+    when: No envelope type is passed in the query string.
+  payload_schema: >-
+    The SSE `data:` frame carries {"batch":[<Envelope>...]} where Envelope is the SAME message defined in
+    grpc/cloud-foundry-loggregator-v2-envelope.proto — so the wire schema for this HTTP stream IS already
+    captured in this repo, as a proto rather than as an AsyncAPI payload.
+  docs: https://github.com/cloudfoundry/loggregator-release/blob/main/docs/rlp_gateway.md
+- shape: grpc-stream
+  name: Loggregator v2 Egress / Ingress
+  transport: gRPC over mutual TLS, inside the deployment
+  contracts:
+  - grpc/cloud-foundry-loggregator-v2-egress.proto
+  - grpc/cloud-foundry-loggregator-v2-ingress.proto
+  - grpc/cloud-foundry-loggregator-v2-envelope.proto
+  note: >-
+    The native subscription API. Nozzles (the Cloud Foundry term for a firehose consumer) attach here. These
+    are real published contracts, saved verbatim, and they are what an AsyncAPI for Cloud Foundry would
+    otherwise have to restate.
+- shape: grpc-query
+  name: Log Cache
+  transport: gRPC, plus a PromQL query surface
+  contracts:
+  - grpc/cloud-foundry-log-cache-v1-egress.proto
+  - grpc/cloud-foundry-log-cache-v1-promql.proto
+  - grpc/cloud-foundry-log-cache-v1-orchestration.proto
+  note: >-
+    A bounded in-memory window over the same envelopes, queryable with PromQL. Read-after-the-fact rather
+    than subscribe — see conformance/cloud-foundry-conformance.yml (promql).
+- shape: push-drain
+  name: Syslog drains
+  transport: syslog:// or https:// endpoint registered by the consumer
+  registration: >-
+    A user-provided service instance carrying a drain URL, bound to an app
+    (`cf create-user-provided-service <name> -l <drain-url>` then `cf bind-service`). Cloud Foundry then
+    DELIVERS to that endpoint — the only push-to-consumer path the platform has.
+  options:
+  - name: drain-data
+    values: [logs, metrics, all]
+    note: >-
+      With `drain-data=metrics` or `all`, container metrics arrive as STATS entries. The docs warn these are
+      metrics rather than a log type, so they cannot be filtered by source type.
+  reliability: >-
+    Best-effort. The docs state plainly that if a client cannot consume quickly enough, the Loggregator
+    buffer may overwrite lines before the client has read them; LGR envelopes report `can't reach syslog
+    drain url` and `dropped log messages due to high rate`. There is no replay, no ack, and no dead-letter.
+  docs: https://docs.cloudfoundry.org/devguide/services/log-management.html
+  note: >-
+    This is the closest thing Cloud Foundry has to a webhook, and it is deliberately NOT recorded as one:
+    the consumer registers a sink for a continuous log/metric stream, not a subscription to typed business
+    events with payload schemas. Calling it a webhook would credit the platform with a surface a buyer
+    evaluating "does this API have webhooks" is not going to find.
+- shape: polled-log
+  name: Cloud Controller audit events
+  transport: HTTPS, ordinary paginated REST
+  operations:
+  - listAuditEvents (GET /v3/audit_events)
+  - getAuditEvent (GET /v3/audit_events/{guid})
+  note: >-
+    The control plane's own change feed — who created, updated or deleted what. It is POLLED: there is no
+    push, no cursor beyond ordinary page-number pagination and created_ats[gt] filtering, and no
+    notification. An agent that needs to react to a change in Cloud Foundry state polls this, or polls the
+    Job returned by the mutation it made (see conventions/cloud-foundry-conventions.yml async_operations).
+absent:
+- what: AsyncAPI document
+  searched:
+  - https://api.github.com/search/repositories?q=asyncapi+org:cloudfoundry
+  result: 0 repositories
+- what: HTTP webhooks / callback registration
+  searched: openapi/cloud-foundry-capi-v3-openapi.yaml (248 operations)
+  result: >-
+    No `webhooks` root object, no callbacks object, and no subscription resource. grep for webhook across
+    the specification returns nothing.

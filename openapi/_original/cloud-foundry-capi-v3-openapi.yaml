@@ -1,3 +1,5 @@
+# x-archived-from: cloud-foundry-capi-v3-openapi.yaml
+# x-archived-on: 2026-09-16
 openapi: 3.1.0
 info:
   title: Cloud Foundry V3 API

@@ -1,6 +1,6 @@
 openapi: 3.2.0
 info:
-  title: Cloud Foundry V3 Organizations API
+  title: Cloud Foundry V3 Domains API
   description: '# Welcome to the Experimental Cloud Foundry V3 API Docs!'
   version: latest
   license:
@@ -17,16 +17,16 @@ security:
   - cloud_controller.read
   - cloud_controller.write
 tags:
-- name: Organizations
-  description: An org is a development account that an individual or multiple collaborators can own and use.
+- name: Domains
+  description: Domains represent a fully qualified domain name that is used for application routes.
 paths:
-  /v3/organizations:
+  /v3/domains:
     get:
-      summary: List organizations
-      description: Retrieve all organizations the user has access to.
-      operationId: listOrganizations
+      summary: List domains
+      description: Retrieve all domains the user has access to.
+      operationId: listDomains
       tags:
-      - Organizations
+      - Domains
       parameters:
       - $ref: '#/components/parameters/Page'
       - $ref: '#/components/parameters/PerPage'
@@ -34,83 +34,73 @@ paths:
       - $ref: '#/components/parameters/CreatedAts'
       - $ref: '#/components/parameters/UpdatedAts'
       - $ref: '#/components/parameters/LabelSelector'
-      - name: names
-        in: query
-        schema:
-          type: array
-          items:
-            type: string
-        description: Comma-delimited list of organization names to filter by
       - name: guids
         in: query
         schema:
           type: array
           items:
             type: string
-        description: Comma-delimited list of organization guids to filter by
+        description: Comma-delimited list of GUIDs to filter by
+      - name: names
+        in: query
+        schema:
+          type: array
+          items:
+            type: string
+        description: Comma-delimited list of domain names to filter by
+      - name: organization_guids
+        in: query
+        schema:
+          type: array
+          items:
+            type: string
+        description: Comma-delimited list of owning organization GUIDs to filter by
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OrganizationList'
+                $ref: '#/components/schemas/DomainList'
               examples:
                 default:
                   summary: default
                   value:
                     pagination:
-                      total_results: 2
-                      total_pages: 1
+                      total_results: 3
+                      total_pages: 2
                       first:
-                        href: https://api.example.org/v3/organizations?page=1&per_page=50
+                        href: https://api.example.org?page=1&per_page=2
                       last:
-                        href: https://api.example.org/v3/organizations?page=1&per_page=50
-                      next: null
+                        href: https://api.example.org?page=2&per_page=2
+                      next:
+                        href: https://api.example.org?page=2&per_page=2
                       previous: null
                     resources:
                     - guid: 123e4567-e89b-12d3-a456-426614174000
-                      created_at: '2017-02-01T01:33:58Z'
-                      updated_at: '2017-02-01T01:33:58Z'
-                      name: org1
-                      suspended: false
-                      relationships:
-                        quota:
-                          data:
-                            guid: 123e4567-e89b-12d3-a456-426614174000
-                      links:
-                        self:
-                          href: https://api.example.org/v3/organizations/885735b5-aea4-4cf5-8e44-961af0e41920
-                        domains:
-                          href: https://api.example.org/v3/organizations/885735b5-aea4-4cf5-8e44-961af0e41920/domains
-                        default_domain:
-                          href: https://api.example.org/v3/organizations/885735b5-aea4-4cf5-8e44-961af0e41920/domains/default
-                        quota:
-                          href: https://api.example.org/v3/organization_quotas/b7887f5c-34bb-40c5-9778-577572e4fb2d
+                      created_at: '2019-03-08T01:06:19Z'
+                      updated_at: '2019-03-08T01:06:19Z'
+                      name: test-domain.com
+                      internal: false
+                      router_group:
+                        guid: 123e4567-e89b-12d3-a456-426614174000
+                      supported_protocols:
+                      - tcp
                       metadata:
                         labels: {}
                         annotations: {}
-                    - guid: 123e4567-e89b-12d3-a456-426614174000
-                      created_at: '2017-02-02T00:14:30Z'
-                      updated_at: '2017-02-02T00:14:30Z'
-                      name: org2
-                      suspended: false
                       relationships:
-                        quota:
-                          data:
-                            guid: 123e4567-e89b-12d3-a456-426614174000
+                        organization:
+                          data: null
+                        shared_organizations:
+                          data: []
                       links:
                         self:
-                          href: https://api.example.org/v3/organizations/d4c91047-7b29-4fda-b7f9-04033e5c9c9f
-                        domains:
-                          href: https://api.example.org/v3/organizations/d4c91047-7b29-4fda-b7f9-04033e5c9c9f/domains
-                        default_domain:
-                          href: https://api.example.org/v3/organizations/d4c91047-7b29-4fda-b7f9-04033e5c9c9f/domains/default
-                        quota:
-                          href: https://api.example.org/v3/organization_quotas/b7887f5c-34bb-40c5-9778-577572e4fb2d
-                      metadata:
-                        labels: {}
-                        annotations: {}
+                          href: https://api.example.org/v3/domains/3a5d3d89-3f89-4f05-8188-8a2b298c79d5
+                        route_reservations:
+                          href: https://api.example.org/v3/domains/3a5d3d89-3f89-4f05-8188-8a2b298c79d5/route_reservations
+                        router_group:
+                          href: https://api.example.org/routing/v1/router_groups/5806148f-cce6-4d86-7fbd-aa269e3f6f3f
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -128,51 +118,26 @@ paths:
         '503':
           $ref: '#/components/responses/ServiceUnavailable'
     post:
-      summary: Create an organization
-      description: Create an organization.
-      operationId: createOrganization
+      summary: Create a domain
+      description: Create a domain.
+      operationId: createDomain
       tags:
-      - Organizations
+      - Domains
       requestBody:
-        $ref: '#/components/requestBodies/OrganizationCreateRequestBody'
+        $ref: '#/components/requestBodies/DomainCreateRequestBody'
       responses:
         '201':
-          description: Created
+          description: Successfully created domain
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Organization'
-              examples:
-                default:
-                  summary: default
-                  value:
-                    guid: 123e4567-e89b-12d3-a456-426614174000
-                    created_at: '2017-02-01T01:33:58Z'
-                    updated_at: '2017-02-01T01:33:58Z'
-                    name: my-organization
-                    suspended: false
-                    relationships:
-                      quota:
-                        data:
-                          guid: 123e4567-e89b-12d3-a456-426614174000
-                    links:
-                      self:
-                        href: https://api.example.org/v3/organizations/24637893-3b77-489d-bb79-8466f0d88b52
-                      domains:
-                        href: https://api.example.org/v3/organizations/24637893-3b77-489d-bb79-8466f0d88b52/domains
-                      default_domain:
-                        href: https://api.example.org/v3/organizations/24637893-3b77-489d-bb79-8466f0d88b52/domains/default
-                      quota:
-                        href: https://api.example.org/v3/organization_quotas/b7887f5c-34bb-40c5-9778-577572e4fb2d
-                    metadata:
-                      labels: {}
-                      annotations: {}
+                $ref: '#/components/schemas/Domain'
           links:
-            quota:
-              operationId: getOrganizationQuota
+            organization:
+              operationId: getOrganization
               parameters:
-                guid: $response.body#/relationships/quota/data/guid
-              description: Retrieve the quota associated with this organization
+                guid: $response.body#/relationships/organization/data/guid
+              description: Retrieve the organization for this domain (private domains only)
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -187,53 +152,28 @@ paths:
           $ref: '#/components/responses/500'
         '503':
           $ref: '#/components/responses/ServiceUnavailable'
-  /v3/organizations/{guid}:
+  /v3/domains/{guid}:
     get:
-      summary: Get an organization
-      description: This endpoint retrieves the specified organization object.
-      operationId: getOrganization
+      summary: Get a domain
+      description: Retrieve a domain.
+      operationId: getDomain
       tags:
-      - Organizations
+      - Domains
       parameters:
       - $ref: '#/components/parameters/Guid'
       responses:
         '200':
-          description: OK
+          description: Successfully retrieved domain
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Organization'
-              examples:
-                default:
-                  summary: default
-                  value:
-                    guid: 123e4567-e89b-12d3-a456-426614174000
-                    created_at: '2017-02-01T01:33:58Z'
-                    updated_at: '2017-02-01T01:33:58Z'
-                    name: my-organization
-                    suspended: false
-                    relationships:
-                      quota:
-                        data:
-                          guid: 123e4567-e89b-12d3-a456-426614174000
-                    links:
-                      self:
-                        href: https://api.example.org/v3/organizations/24637893-3b77-489d-bb79-8466f0d88b52
-                      domains:
-                        href: https://api.example.org/v3/organizations/24637893-3b77-489d-bb79-8466f0d88b52/domains
-                      default_domain:
-                        href: https://api.example.org/v3/organizations/24637893-3b77-489d-bb79-8466f0d88b52/domains/default
-                      quota:
-                        href: https://api.example.org/v3/organization_quotas/b7887f5c-34bb-40c5-9778-577572e4fb2d
-                    metadata:
-                      labels: {}
-                      annotations: {}
+                $ref: '#/components/schemas/Domain'
           links:
-            quota:
-              operationId: getOrganizationQuota
+            organization:
+              operationId: getOrganization
               parameters:
-                guid: $response.body#/relationships/quota/data/guid
-                description: Retrieve the quota associated with this organization
+                guid: $response.body#/relationships/organization/data/guid
+              description: Retrieve the organization for this domain (private domains only)
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -241,53 +181,40 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
     patch:
-      summary: Update an organization
-      description: Update an organization.
-      operationId: updateOrganization
+      summary: Update a domain
+      description: Update a domain.
+      operationId: updateDomain
       tags:
-      - Organizations
+      - Domains
       parameters:
       - $ref: '#/components/parameters/Guid'
       requestBody:
-        $ref: '#/components/requestBodies/OrganizationUpdateRequestBody'
+        description: Domain object that needs to be updated
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                metadata:
+                  $ref: '#/components/schemas/Metadata'
+              description: Request schema for updating a domain
+            examples:
+              default:
+                summary: default
+                value:
+                  metadata:
+                    labels:
+                      key: value
+                    annotations:
+                      note: detailed information
       responses:
         '200':
-          description: OK
+          description: Successfully updated domain
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Organization'
-              examples:
-                default:
-                  summary: default
-                  value:
-                    guid: 123e4567-e89b-12d3-a456-426614174000
-                    created_at: '2017-02-01T01:33:58Z'
-                    updated_at: '2017-02-01T01:33:58Z'
-                    name: my-organization
-                    suspended: false
-                    relationships:
-                      quota:
-                        data:
-                          guid: 123e4567-e89b-12d3-a456-426614174000
-                    links:
-                      self:
-                        href: https://api.example.org/v3/organizations/24637893-3b77-489d-bb79-8466f0d88b52
-                      domains:
-                        href: https://api.example.org/v3/organizations/24637893-3b77-489d-bb79-8466f0d88b52/domains
-                      default_domain:
-                        href: https://api.example.org/v3/organizations/24637893-3b77-489d-bb79-8466f0d88b52/domains/default
-                      quota:
-                        href: https://api.example.org/v3/organization_quotas/b7887f5c-34bb-40c5-9778-577572e4fb2d
-                    metadata:
-                      labels: {}
-                      annotations: {}
-          links:
-            quota:
-              operationId: getOrganizationQuota
-              parameters:
-                guid: $response.body#/relationships/quota/data/guid
-              description: Retrieve the quota associated with this organization
+                $ref: '#/components/schemas/Domain'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -305,19 +232,19 @@ paths:
         '503':
           $ref: '#/components/responses/ServiceUnavailable'
     delete:
-      summary: Delete an organization
-      description: When an organization is deleted, user roles associated with the organization will also be deleted.
-      operationId: deleteOrganization
+      summary: Delete a domain
+      description: Delete a domain.
+      operationId: deleteDomain
       tags:
-      - Organizations
+      - Domains
       parameters:
       - $ref: '#/components/parameters/Guid'
       responses:
         '202':
           description: Accepted
           headers:
-            location:
-              description: URL of the job to query the asynchronous operation
+            Location:
+              description: URL of the job that is deleting the domain
               schema:
                 type: string
                 format: uri
@@ -331,226 +258,58 @@ paths:
           $ref: '#/components/responses/UnprocessableEntity'
         '500':
           $ref: '#/components/responses/500'
-  /v3/organizations/{guid}/domains/default:
-    get:
-      summary: Get default domain
-      description: Retrieve the default domain for a given organization.
-      operationId: getDefaultDomainForOrganization
+  /v3/domains/{guid}/relationships/shared_organizations:
+    post:
+      summary: Share a domain
+      description: This endpoint shares an organization-scoped domain to other organizations specified by a list of organization guids. This will allow any of the other organizations to use the organization-scoped domain.
+      operationId: shareDomain
       tags:
-      - Organizations
-      parameters:
-      - $ref: '#/components/parameters/Guid'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Domain'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-  /v3/organizations/{guid}/usage_summary:
-    get:
-      summary: Get usage summary
-      description: This endpoint retrieves the specified organization object's memory and app instance usage summary.
-      operationId: getUsageSummaryForOrganization
-      tags:
-      - Organizations
-      parameters:
-      - $ref: '#/components/parameters/Guid'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  usage_summary:
-                    type: object
-                    properties:
-                      started_instances:
-                        type: integer
-                      memory_in_mb:
-                        type: integer
-                      routes:
-                        type: integer
-                      service_instances:
-                        type: integer
-                      reserved_ports:
-                        type: integer
-                      domains:
-                        type: integer
-                      per_app_tasks:
-                        type: integer
-                      service_keys:
-                        type: integer
-                  links:
-                    type: object
-                    properties:
-                      self:
-                        $ref: '#/components/schemas/Link'
-                        description: The URL to get this usage summary
-                      organization:
-                        $ref: '#/components/schemas/Link'
-                        description: The URL to get the organization for this usage summary
-              examples:
-                default:
-                  summary: default
-                  value:
-                    usage_summary:
-                      started_instances: 3
-                      memory_in_mb: 50
-                      routes: 4
-                      service_instances: 2
-                      reserved_ports: 1
-                      domains: 4
-                      per_app_tasks: 2
-                      service_keys: 1
-                    links:
-                      self:
-                        href: https://api.example.org/v3/organizations/d4c91047-7b29-4fda-b7f9-04033e5c9c9f/usage_summary
-                      organization:
-                        href: https://api.example.org/v3/organizations/d4c91047-7b29-4fda-b7f9-04033e5c9c9f
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-  /v3/organizations/{guid}/users:
-    get:
-      summary: List users for an organization
-      description: Retrieve all users with a role in the specified organization.
-      operationId: listUsersForOrganization
-      tags:
-      - Organizations
-      parameters:
-      - $ref: '#/components/parameters/Guid'
-      - $ref: '#/components/parameters/Page'
-      - $ref: '#/components/parameters/PerPage'
-      - $ref: '#/components/parameters/OrderBy'
-      - name: guids
-        in: query
-        schema:
-          type: array
-          items:
-            type: string
-        description: Comma-delimited list of user guids to filter by
-      - name: usernames
-        in: query
-        schema:
-          type: array
-          items:
-            type: string
-        description: Comma-delimited list of usernames to filter by
-      - name: origins
-        in: query
-        schema:
-          type: array
-          items:
-            type: string
-        description: Comma-delimited list of user origins to filter by
-      - name: partial_usernames
-        in: query
-        schema:
-          type: array
-          items:
-            type: string
-        description: Comma-delimited list of partial usernames to filter by
-      - $ref: '#/components/parameters/LabelSelector'
-      - $ref: '#/components/parameters/CreatedAts'
-      - $ref: '#/components/parameters/UpdatedAts'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UserList'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-  /v3/organizations/{guid}/relationships/default_isolation_segment:
-    get:
-      summary: Get default isolation segment
-      description: Retrieve the default isolation segment for a given organization.
-      operationId: getDefaultIsolationSegmentForOrganization
-      tags:
-      - Organizations
-      parameters:
-      - $ref: '#/components/parameters/Guid'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RelationshipToOne'
-              examples:
-                default:
-                  summary: default
-                  value:
-                    data:
-                      guid: 123e4567-e89b-12d3-a456-426614174000
-                    links:
-                      self:
-                        href: https://api.example.org/v3/organizations/d4c91047-7b29-4fda-b7f9-04033e5c9c9f/relationships/default_isolation_segment
-                      related:
-                        href: https://api.example.org/v3/isolation_segments/9d8e007c-ce52-4ea7-8a57-f2825d2c6b39
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-    patch:
-      summary: Assign default isolation segment
-      description: 'Set the default isolation segment for a given organization. Only isolation segments that are entitled to the organization are eligible to be the default isolation segment.
-
-
-        Apps will not run in the new default isolation segment until they are restarted.'
-      operationId: assignDefaultIsolationSegmentForOrganization
-      tags:
-      - Organizations
+      - Domains
       parameters:
       - $ref: '#/components/parameters/Guid'
       requestBody:
+        description: List of organizations to share the domain with
+        required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/RelationshipToOne'
+              type: object
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Relationship'
+              description: Organization relationships; each organization will be entitled to manage this isolation segment
             examples:
               default:
                 summary: default
                 value:
                   data:
-                    guid: 123e4567-e89b-12d3-a456-426614174000
+                  - guid: 123e4567-e89b-12d3-a456-426614174000
+                  - guid: 123e4567-e89b-12d3-a456-426614174000
       responses:
         '200':
-          description: OK
+          description: Successfully shared domain
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RelationshipToOne'
+                type: object
+                properties:
+                  data:
+                    type: array
+                  items:
+                    type: object
+                    properties:
+                      guid:
+                        type: string
+                        format: uuid
               examples:
                 default:
                   summary: default
                   value:
                     data:
-                      guid: 123e4567-e89b-12d3-a456-426614174000
-                    links:
-                      self:
-                        href: https://api.example.org/v3/organizations/d4c91047-7b29-4fda-b7f9-04033e5c9c9f/relationships/default_isolation_segment
-                      related:
-                        href: https://api.example.org/v3/isolation_segments/9d8e007c-ce52-4ea7-8a57-f2825d2c6b39
+                    - guid: 123e4567-e89b-12d3-a456-426614174000
+                    - guid: 123e4567-e89b-12d3-a456-426614174000
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -559,6 +318,152 @@ paths:
           $ref: '#/components/responses/NotFound'
         '422':
           $ref: '#/components/responses/UnprocessableEntity'
+  /v3/domains/{guid}/relationships/shared_organizations/{org_guid}:
+    delete:
+      summary: Unshare a domain
+      description: This endpoint removes an organization from the list of organizations an organization-scoped domain is shared with. This prevents the organization from using the organization-scoped domain.
+      operationId: unshareDomain
+      tags:
+      - Domains
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      - name: org_guid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: The GUID of the organization to unshare the domain from
+      responses:
+        '204':
+          description: Successfully unshared domain
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /v3/domains/{guid}/route_reservations:
+    get:
+      summary: Check reserved routes for a domain
+      description: Check if a specific route for a domain exists, regardless of the user’s visibility for the route in case the route belongs to a space the user does not belong to.
+      operationId: checkReservedRoutesForDomain
+      tags:
+      - Domains
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      - name: host
+        in: query
+        schema:
+          type: string
+        description: Hostname to filter by
+      - name: path
+        in: query
+        schema:
+          type: string
+        description: Path to filter by
+      - name: port
+        in: query
+        schema:
+          type: integer
+        description: Port to filter by
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  matching_route:
+                    type: boolean
+              examples:
+                default:
+                  summary: default
+                  value:
+                    matching_route: true
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /v3/organizations/{guid}/domains:
+    get:
+      summary: List domains for an organization
+      description: 'Retrieve all domains available in an organization for the current user. This will return unscoped domains (those without an owning organization), domains that are scoped to the given organization (owned by the given organization), and domains that have been shared with the organization.
+
+
+        To retrieve the default domain for an organization, use the get default domain endpoint.'
+      operationId: listDomainsForOrganization
+      tags:
+      - Domains
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      - $ref: '#/components/parameters/Page'
+      - $ref: '#/components/parameters/PerPage'
+      - $ref: '#/components/parameters/OrderBy'
+      - name: names
+        in: query
+        schema:
+          type: array
+          items:
+            type: string
+        description: Comma-delimited list of domain names to filter by
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DomainList'
+              examples:
+                default:
+                  summary: default
+                  value:
+                    pagination:
+                      total_results: 3
+                      total_pages: 2
+                      first:
+                        href: https://api.example.org?page=1&per_page=2
+                      last:
+                        href: https://api.example.org?page=2&per_page=2
+                      next:
+                        href: https://api.example.org?page=2&per_page=2
+                      previous: null
+                    resources:
+                    - guid: 123e4567-e89b-12d3-a456-426614174000
+                      created_at: '2019-03-08T01:06:19Z'
+                      updated_at: '2019-03-08T01:06:19Z'
+                      name: test-domain.com
+                      internal: false
+                      router_group:
+                        guid: 123e4567-e89b-12d3-a456-426614174000
+                      supported_protocols:
+                      - tcp
+                      metadata:
+                        labels: {}
+                        annotations: {}
+                      relationships:
+                        organization:
+                          data: null
+                        shared_organizations:
+                          data: []
+                      links:
+                        self:
+                          href: https://api.example.org/v3/domains/3a5d3d89-3f89-4f05-8188-8a2b298c79d5
+                        route_reservations:
+                          href: https://api.example.org/v3/domains/3a5d3d89-3f89-4f05-8188-8a2b298c79d5/route_reservations
+                        router_group:
+                          href: https://api.example.org/routing/v1/router_groups/5806148f-cce6-4d86-7fbd-aa269e3f6f3f
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
 components:
   schemas:
     Pagination:
@@ -593,7 +498,7 @@ components:
         The pagination object is a JSON object that contains information about the pagination state of the results. It includes the total number of results available, the total number of pages available, and links to the first, last, next, and previous pages of results.
 
         '
-    UserList:
+    DomainList:
       type: object
       properties:
         pagination:
@@ -601,7 +506,24 @@ components:
         resources:
           type: array
           items:
-            $ref: '#/components/schemas/User'
+            $ref: '#/components/schemas/Domain'
+    RelationshipToMany:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Relationship'
+        links:
+          type: object
+          properties:
+            self:
+              $ref: '#/components/schemas/Link'
+            related:
+              $ref: '#/components/schemas/Link'
+      description: 'Some relationships relate a resource to several other resources. For example, an isolation segment can be entitled to multiple organizations.
+
+        '
     Link:
       type: object
       properties:
@@ -685,43 +607,6 @@ components:
                 $ref: '#/components/schemas/Link'
                 description: The URL to get the router group for this domain
       description: 'A domain is a fully qualified domain name that is used for application routes. A domain can be scoped to an organization, meaning it can be used to create routes for spaces inside that organization, or be left unscoped to allow all organizations access.
-
-        '
-    Organization:
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/BaseSchema'
-      - properties:
-          name:
-            type: string
-            description: Name of the organization
-          suspended:
-            type: boolean
-            description: Whether an organization is suspended or not; non-admins will be blocked from creating, updating, or deleting resources in a suspended organization
-          relationships:
-            type: object
-            properties:
-              quota:
-                $ref: '#/components/schemas/RelationshipToOne'
-            description: The quota applied to the organization
-          metadata:
-            $ref: '#/components/schemas/Metadata'
-          links:
-            type: object
-            properties:
-              self:
-                $ref: '#/components/schemas/Link'
-                description: The URL to get this organization
-              domains:
-                $ref: '#/components/schemas/Link'
-                description: The URL to get the domains for this organization
-              quota:
-                $ref: '#/components/schemas/Link'
-                description: The URL to get the quota for this organization
-              default_domain:
-                $ref: '#/components/schemas/Link'
-                description: The URL to get the default domain for this organization
-      description: 'An org is a development account that an individual or multiple collaborators can own and use. All collaborators access an org with user accounts. Collaborators in an org share a resource quota plan, applications, services availability, and custom domains.
 
         '
     Relationships:
@@ -873,16 +758,6 @@ components:
         Metadata is included in the response body of a request to retrieve a resource.
 
         '
-    OrganizationList:
-      type: object
-      properties:
-        pagination:
-          $ref: '#/components/schemas/Pagination'
-        resources:
-          type: array
-          items:
-            $ref: '#/components/schemas/Organization'
-      description: A paginated list of organizations
     Errors:
       type: object
       properties:
@@ -895,41 +770,6 @@ components:
         Clients should use the code and title fields for programmatically handling specific errors. The message in the detail field is subject to change over time.
 
         '
-    User:
-      type: object
-      properties:
-        guid:
-          type: string
-          description: Unique identifier for the user, matching either a UAA user id or client id. A client id may not be a uuid.
-        created_at:
-          type: string
-          format: date-time
-          description: The ISO8601 compatible date and time when resource was created
-        updated_at:
-          type: string
-          format: date-time
-          description: The ISO8601 compatible date and time when resource was last updated
-        username:
-          type:
-          - string
-          - 'null'
-          description: The username of the user
-        presentation_name:
-          type: string
-          description: The presentation name of the user
-        origin:
-          type:
-          - string
-          - 'null'
-          description: The origin of the user
-        metadata:
-          $ref: '#/components/schemas/Metadata'
-        links:
-          type: object
-          properties:
-            self:
-              $ref: '#/components/schemas/Link'
-              description: The URL to get this user
     Error:
       type: object
       properties:
@@ -1014,12 +854,6 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Errors'
-    ServiceUnavailable:
-      description: Service Unavailable
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
     BadRequest:
       description: Bad Request
       content:
@@ -1029,6 +863,12 @@ components:
         text/html:
           schema:
             type: string
+    ServiceUnavailable:
+      description: Service Unavailable
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
   parameters:
     OrderBy:
       name: order_by
@@ -1093,52 +933,46 @@ components:
         format: uuid
       description: The unique identifier for the resource
   requestBodies:
-    OrganizationCreateRequestBody:
-      description: Organization object that needs to be created
+    DomainCreateRequestBody:
+      description: Domain object that needs to be created
       required: true
       content:
         application/json:
           schema:
             type: object
-            properties:
-              name:
-                type: string
-                description: Organization name
-              suspended:
-                type: boolean
-                description: Whether an organization is suspended or not
-              metadata:
-                $ref: '#/components/schemas/Metadata'
             required:
             - name
-            description: Request schema for creating an organization
-          examples:
-            default:
-              summary: default
-              value:
-                name: my-organization
-    OrganizationUpdateRequestBody:
-      description: Organization object that needs to be updated
-      required: true
-      content:
-        application/json:
-          schema:
-            type: object
             properties:
               name:
                 type: string
-                description: Organization name
-              suspended:
+                description: Name of the domain
+              internal:
                 type: boolean
-                description: Whether an organization is suspended or not
+                description: Whether the domain is used for internal (container-to-container) traffic
+              router_group:
+                type: object
+                properties:
+                  guid:
+                    type: string
+                    format: uuid
+                description: 'The desired router group guid.  _note: creates a `tcp` domain; cannot be used when `internal` is set to `true` or domain is scoped to an org_'
+              relationships:
+                type: object
+                properties:
+                  organization:
+                    $ref: '#/components/schemas/RelationshipToOne'
+                    description: A relationship to the organization the domain will be scoped to;  _note cannot be used when `internal` is set to `true` or domain is associated with a router group_
+                  shared_organizations:
+                    $ref: '#/components/schemas/RelationshipToMany'
+                    description: A relationship to organizations the domain will be shared with  _Note cannot be used without an organization relationship_
               metadata:
                 $ref: '#/components/schemas/Metadata'
-            description: Request schema for updating an organization
           examples:
             default:
               summary: default
               value:
-                name: my-organization
+                name: example.com
+                internal: false
   securitySchemes:
     oauth:
       type: oauth2

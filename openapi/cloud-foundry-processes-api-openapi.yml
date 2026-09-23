@@ -1,0 +1,1249 @@
+openapi: 3.2.0
+info:
+  title: Cloud Foundry V3 Processes API
+  description: '# Welcome to the Experimental Cloud Foundry V3 API Docs!'
+  version: latest
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+  contact:
+    name: Cloud Foundry
+    url: https://www.cloudfoundry.org/
+servers:
+- url: https://api.example.local
+  description: Cloud Foundry V3 API server
+security:
+- oauth:
+  - cloud_controller.read
+  - cloud_controller.write
+tags:
+- name: Processes
+  description: Processes define the runnable units of an app.
+paths:
+  /v3/processes:
+    get:
+      summary: List processes
+      description: Retrieve all processes.
+      operationId: listProcesses
+      tags:
+      - Processes
+      parameters:
+      - $ref: '#/components/parameters/Page'
+      - $ref: '#/components/parameters/PerPage'
+      - $ref: '#/components/parameters/OrderBy'
+      - $ref: '#/components/parameters/CreatedAts'
+      - $ref: '#/components/parameters/UpdatedAts'
+      - $ref: '#/components/parameters/LabelSelector'
+      - name: guids
+        in: query
+        schema:
+          type: array
+          items:
+            type: string
+        description: Comma-delimited list of process guids to filter by
+      - name: types
+        in: query
+        schema:
+          type: array
+          items:
+            type: string
+        description: Comma-delimited list of process types to filter by
+      - name: app_guids
+        in: query
+        schema:
+          type: array
+          items:
+            type: string
+        description: Comma-delimited list of app guids to filter by
+      - name: space_guids
+        in: query
+        schema:
+          type: array
+          items:
+            type: string
+        description: Comma-delimited list of space guids to filter by
+      - name: organization_guids
+        in: query
+        schema:
+          type: array
+          items:
+            type: string
+        description: Comma-delimited list of organization guids to filter by
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProcessList'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/500'
+        '502':
+          $ref: '#/components/responses/BadGateway'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+  /v3/processes/{guid}:
+    get:
+      summary: Get a process
+      description: Get a process.
+      operationId: getProcess
+      tags:
+      - Processes
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Process'
+              examples:
+                default:
+                  summary: default
+                  value:
+                    guid: 123e4567-e89b-12d3-a456-426614174000
+                    type: web
+                    command: rackup
+                    user: vcap
+                    instances: 5
+                    memory_in_mb: 256
+                    disk_in_mb: 1024
+                    log_rate_limit_in_bytes_per_second: 1024
+                    health_check:
+                      type: port
+                      data:
+                        timeout: null
+                    readiness_health_check:
+                      type: process
+                      data:
+                        invocation_timeout: null
+                    process_instances:
+                    - index: 0
+                      state: RUNNING
+                      since: 123456789
+                    - index: 1
+                      state: STARTING
+                      since: 123
+                    - index: 2
+                      state: DOWN
+                      since: 456
+                    relationships:
+                      app:
+                        data:
+                          guid: 123e4567-e89b-12d3-a456-426614174000
+                      revision:
+                        data:
+                          guid: 123e4567-e89b-12d3-a456-426614174000
+                    metadata:
+                      labels: {}
+                      annotations: {}
+                    created_at: '2016-03-23T18:48:22Z'
+                    updated_at: '2016-03-23T18:48:42Z'
+                    version: e9df685c-0464-4aa7-b5f0-8ed843077c13
+                    links:
+                      self:
+                        href: https://api.example.org/v3/processes/6a901b7c-9417-4dc1-8189-d3234aa0ab82
+                      scale:
+                        href: https://api.example.org/v3/processes/6a901b7c-9417-4dc1-8189-d3234aa0ab82/actions/scale
+                        method: POST
+                      app:
+                        href: https://api.example.org/v3/apps/ccc25a0f-c8f4-4b39-9f1b-de9f328d0ee5
+                      space:
+                        href: https://api.example.org/v3/spaces/2f35885d-0c9d-4423-83ad-fd05066f8576
+                      stats:
+                        href: https://api.example.org/v3/processes/6a901b7c-9417-4dc1-8189-d3234aa0ab82/stats
+                      process_instances:
+                        href: https://api.example.org/v3/processes/6a901b7c-9417-4dc1-8189-d3234aa0ab82/process_instances
+          links:
+            app:
+              operationId: getApp
+              parameters:
+                guid: $response.body#/relationships/app/data/guid
+              description: Retrieve the app for this process
+            revision:
+              operationId: getRevision
+              parameters:
+                guid: $response.body#/relationships/revision/data/guid
+              description: Retrieve the revision for this process
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      summary: Update a process
+      description: Update a process.
+      operationId: updateProcess
+      tags:
+      - Processes
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      requestBody:
+        $ref: '#/components/requestBodies/ProcessUpdateRequestBody'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Process'
+          links:
+            app:
+              operationId: getApp
+              parameters:
+                guid: $response.body#/relationships/app/data/guid
+              description: Retrieve the app for this process
+            revision:
+              operationId: getRevision
+              parameters:
+                guid: $response.body#/relationships/revision/data/guid
+              description: Retrieve the revision for this process
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/500'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+  /v3/processes/{guid}/process_instances:
+    get:
+      summary: List instances for a process
+      description: Retrieve the instances for a process. Unlike the stats endpoint, this returns a simplified view with only the index, state, and uptime of each instance.
+      operationId: listProcessInstances
+      tags:
+      - Processes
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  resources:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        index:
+                          type: integer
+                        state:
+                          type: string
+                          enum:
+                          - RUNNING
+                          - CRASHED
+                          - STARTING
+                          - DOWN
+                        since:
+                          type: number
+                          format: double
+                  links:
+                    type: object
+                    properties:
+                      self:
+                        $ref: '#/components/schemas/Link'
+                      process:
+                        $ref: '#/components/schemas/Link'
+              examples:
+                default:
+                  summary: default
+                  value:
+                    resources:
+                    - index: 0
+                      state: RUNNING
+                      since: 123456789
+                    - index: 1
+                      state: STARTING
+                      since: 123
+                    - index: 2
+                      state: DOWN
+                      since: 456
+                    links:
+                      self:
+                        href: https://api.example.org/v3/processes/6a901b7c-9417-4dc1-8189-d3234aa0ab82/process_instances
+                      process:
+                        href: https://api.example.org/v3/processes/6a901b7c-9417-4dc1-8189-d3234aa0ab82
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /v3/processes/{guid}/stats:
+    get:
+      summary: Get stats for a process
+      description: Get stats for a process.
+      operationId: getProcessStats
+      tags:
+      - Processes
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProcessStats'
+              examples:
+                default:
+                  summary: default
+                  value:
+                    resources:
+                    - type: web
+                      index: 0
+                      instance_guid: 123e4567-e89b-12d3-a456-426614174000
+                      state: RUNNING
+                      routable: true
+                      usage:
+                        time: '2016-03-23T23:17:30.476314154Z'
+                        cpu: 0.00038711029163348665
+                        cpu_entitlement: 0.01117396940977856
+                        mem: 19177472
+                        disk: 69705728
+                        log_rate: 0
+                      host: 10.244.16.10
+                      instance_internal_ip: 10.255.93.167
+                      instance_ports:
+                      - external: 64546
+                        internal: 8080
+                        external_tls_proxy_port: 61002
+                        internal_tls_proxy_port: 61003
+                      uptime: 9042
+                      mem_quota: 268435456
+                      disk_quota: 1073741824
+                      fds_quota: 16384
+                      isolation_segment: example_iso_segment
+                      log_rate_limit: null
+                      details: null
+                    - type: web
+                      index: 1
+                      state: STARTING
+                      routable: false
+                      usage:
+                        cpu: 0
+                        cpu_entitlement: 0
+                        disk: 0
+                        log_rate: 0
+                        mem: 0
+                        time: '2016-03-23T21:34:04+00:00'
+                      disk_quota: null
+                      fds_quota: 16384
+                      host: ''
+                      instance_internal_ip: ''
+                      instance_ports: null
+                      isolation_segment: null
+                      log_rate_limit: null
+                      mem_quota: null
+                      uptime: 0
+                      details: null
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+  /v3/processes/{guid}/actions/scale:
+    post:
+      summary: Scale a process
+      description: Scale a process.
+      operationId: scaleProcess
+      tags:
+      - Processes
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                instances:
+                  type:
+                  - integer
+                  - 'null'
+                  description: The number of instances to run
+                memory_in_mb:
+                  type:
+                  - integer
+                  - 'null'
+                  description: The memory in MB allocated per instance
+                disk_in_mb:
+                  type:
+                  - integer
+                  - 'null'
+                  description: The disk in MB allocated per instance
+                log_rate_limit_in_bytes_per_second:
+                  type:
+                  - integer
+                  - 'null'
+                  description: The log rate limit in bytes per second per instance
+            examples:
+              default:
+                summary: default
+                value:
+                  instances: 5
+                  memory_in_mb: 256
+                  disk_in_mb: 1024
+                  log_rate_limit_in_bytes_per_second: 1024
+      responses:
+        '202':
+          description: Accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Process'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/500'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+  /v3/processes/{guid}/instances/{index}:
+    delete:
+      summary: Terminate a process instance
+      description: 'Terminate an instance of a specific process. Health management will eventually restart the instance.
+
+
+        This allows a user to stop a single misbehaving instance of a process.'
+      operationId: terminateProcessInstance
+      tags:
+      - Processes
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      - name: index
+        in: path
+        required: true
+        schema:
+          type: integer
+      responses:
+        '204':
+          description: No Content
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/500'
+  /v3/apps/{guid}/processes:
+    get:
+      summary: List processes for an app
+      description: Retrieves all processes belonging to an app.
+      operationId: listAppProcesses
+      tags:
+      - Processes
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      - $ref: '#/components/parameters/Page'
+      - $ref: '#/components/parameters/PerPage'
+      - $ref: '#/components/parameters/OrderBy'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProcessList'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /v3/apps/{guid}/processes/{type}:
+    get:
+      summary: Get a process for an app
+      description: Get a specific process for an app.
+      operationId: getProcessForApp
+      tags:
+      - Processes
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      - name: type
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Process'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      summary: Update a process for an app
+      description: Update a specific process for an app.
+      operationId: updateProcessForApp
+      tags:
+      - Processes
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      - name: type
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        $ref: '#/components/requestBodies/ProcessUpdateRequestBody'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Process'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /v3/apps/{guid}/processes/{type}/stats:
+    get:
+      summary: Get stats for a process for an app
+      description: Get stats for a specific process for an app.
+      operationId: getProcessStatsForApp
+      tags:
+      - Processes
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      - name: type
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProcessStats'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+  /v3/apps/{guid}/processes/{type}/actions/scale:
+    post:
+      summary: Scale a process for an app
+      description: Scale a specific process for an app.
+      operationId: scaleProcessForApp
+      tags:
+      - Processes
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      - name: type
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                instances:
+                  type:
+                  - integer
+                  - 'null'
+                  description: The number of instances to run
+                memory_in_mb:
+                  type:
+                  - integer
+                  - 'null'
+                  description: The memory in MB allocated per instance
+                disk_in_mb:
+                  type:
+                  - integer
+                  - 'null'
+                  description: The disk in MB allocated per instance
+                log_rate_limit_in_bytes_per_second:
+                  type:
+                  - integer
+                  - 'null'
+                  description: The log rate limit in bytes per second per instance
+      responses:
+        '202':
+          description: Accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Process'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /v3/apps/{guid}/processes/{type}/instances/{index}:
+    delete:
+      summary: Terminate a process instance for an app
+      description: Terminate a specific process instance for an app.
+      operationId: terminateProcessInstanceForApp
+      tags:
+      - Processes
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      - name: type
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: index
+        in: path
+        required: true
+        schema:
+          type: integer
+      responses:
+        '204':
+          description: No Content
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+components:
+  schemas:
+    HealthCheck:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+          - port
+          - process
+          - http
+          description: The type of health check to perform; valid values are http, port, and process; default is port
+        data:
+          type: object
+          properties:
+            timeout:
+              type:
+              - integer
+              - 'null'
+              description: The duration in seconds that health checks can fail before the process is restarted
+            invocation_timeout:
+              type:
+              - integer
+              - 'null'
+              description: The timeout in seconds for individual health check requests for http and port health checks
+            interval:
+              type:
+              - integer
+              - 'null'
+              description: The interval in seconds between health check requests
+            endpoint:
+              type: string
+              description: The endpoint called to determine if the app is healthy; this key is only present for http health checks
+      description: Health check configuration for a process
+    ProcessStats:
+      type: object
+      properties:
+        resources:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+              index:
+                type: integer
+              state:
+                type: string
+                enum:
+                - RUNNING
+                - CRASHED
+                - STARTING
+                - DOWN
+                - STOPPING
+              host:
+                type: string
+              uptime:
+                type: integer
+              mem_quota:
+                type:
+                - integer
+                - 'null'
+              disk_quota:
+                type:
+                - integer
+                - 'null'
+              log_rate_limit:
+                type:
+                - integer
+                - 'null'
+              usage:
+                type: object
+                properties:
+                  time:
+                    type: string
+                    format: date-time
+                  cpu:
+                    type: number
+                  mem:
+                    type: integer
+                  disk:
+                    type: integer
+                  log_rate:
+                    type: integer
+      description: Statistics for a process
+    Pagination:
+      type: object
+      properties:
+        total_results:
+          type: integer
+          description: The total number of results available
+        total_pages:
+          type: integer
+          description: The total number of pages available
+        first:
+          allOf:
+          - $ref: '#/components/schemas/Link'
+          - description: The first page of results
+        last:
+          allOf:
+          - $ref: '#/components/schemas/Link'
+          - description: The last page of results
+        next:
+          oneOf:
+          - $ref: '#/components/schemas/Link'
+          - type: 'null'
+          description: The next page of results
+        previous:
+          oneOf:
+          - $ref: '#/components/schemas/Link'
+          - type: 'null'
+          description: The previous page of results
+      description: 'Pagination is a technique used to divide a large set of results into smaller, more manageable sets. This allows clients to retrieve results in smaller chunks, reducing the amount of data transferred and improving performance.
+
+        The pagination object is a JSON object that contains information about the pagination state of the results. It includes the total number of results available, the total number of pages available, and links to the first, last, next, and previous pages of results.
+
+        '
+    Link:
+      type: object
+      properties:
+        href:
+          type: string
+          description: The URL of the link
+        method:
+          type: string
+          description: An optional field containing the HTTP method to be used when following the URL
+      required:
+      - href
+      description: 'Each link is keyed by its type and will include a href for the URL and an optional method for links that cannot be followed using GET.
+
+        '
+    RelationshipToOne:
+      type: object
+      properties:
+        data:
+          type:
+          - object
+          - 'null'
+          $ref: '#/components/schemas/Relationship'
+        links:
+          type: object
+          properties:
+            self:
+              $ref: '#/components/schemas/Link'
+            related:
+              $ref: '#/components/schemas/Link'
+      description: 'Some relationships relate a resource to exactly one other resource. For example an app can belong to only one space.
+
+        '
+    ProcessList:
+      allOf:
+      - $ref: '#/components/schemas/Pagination'
+      - type: object
+        properties:
+          resources:
+            type: array
+            items:
+              $ref: '#/components/schemas/Process'
+      description: A list of processes
+    Metadata:
+      type: object
+      properties:
+        labels:
+          type: object
+          additionalProperties:
+            type:
+            - string
+            - 'null'
+          description: 'A set of key-value pairs that describe the resource. Labels are a JSON object that contains information about a resource. They are used to tag resources with metadata that can be used to filter and group resources. Labels are included in the response body of a request to retrieve a resource.
+
+            Labels are user-specified key/value pairs that are attached to API Resources. They are queryable, identifying attributes of a resource, but they do not affect the operation of CloudFoundry.
+
+
+            For example, an app may be assigned a label with key sensitive and possible values true or false.
+
+
+            Users could then find all sensitive apps with a selector for sensitive=true, resulting in a response containing only apps having the label key sensitive with a label value of true.
+
+
+            Labels
+
+            Labels allow users to apply identifying attributes to resources that are meaningful to the user, but not the CloudFoundry system.
+
+
+            Examples may include (but are not limited to):
+
+
+            "production" : "true" or "production" : "false"
+
+            "env" : "dev" or "env" : "test" or "env" : "prod"
+
+            "chargeback-code" : "abc123"
+
+            Label keys
+
+            Label keys are made up of an (optional) prefix, and name. If a prefix is present, it is separated from the name by a /. Prefixes are dns names intended to enable namespacing of label keys.
+
+
+            A label key prefix must adhere to the following restrictions:
+
+
+            Length: 0-253 characters
+
+            Allowed characters: alphanumeric ( [a-z0-9A-Z] ), -, and .
+
+            DNS subdomain format (series of subdomain labels separated by .)
+
+            A label key name must adhere to the following restrictions:
+
+
+            Length: 1-63 characters
+
+            Allowed characters: alphanumeric ( [a-z0-9A-Z] ), -, _, and .
+
+            Must begin and end with an alphanumeric character
+
+            Label values
+
+            Label values must adhere to the following restrictions:
+
+
+            Length: 0-63 characters
+
+            Allowed characters: alphanumeric ( [a-z0-9A-Z] ), -, _, and .
+
+            Must begin and end with an alphanumeric character
+
+            Empty values are allowed
+
+            '
+        annotations:
+          type: object
+          additionalProperties:
+            type:
+            - string
+            - 'null'
+          description: 'A set of key-value pairs that describe the resource. Annotations are a JSON object that contains information about a resource. They are used to tag resources with metadata that can be used to filter and group resources. Annotations are included in the response body of a request to retrieve a resource.
+
+            Annotations are user-specified key-value pairs that are attached to API resources. They do not affect the operation of Cloud Foundry. Annotations cannot be used in filters.
+
+
+            When a service instance is being created, the service broker is sent the annotations of the service instance, and the space and organization in which the service instance resides. When a service instance is being updated, the service broker is sent the annotations of the space and organization in which the service instance resides. When a service binding is being created, the service broker is sent annotations of any associated app, and the space and organization in which the binding resides. Only annotations with a prefix (e.g. company.com/contacts) are sent to service brokers.
+
+
+            Examples may include (but are not limited to):
+
+
+            "contact info": "bob@example.com jane@example.com"
+
+            "library versions": "Spring: 5.1, Redis Client: a184098. yaml parser: 38"
+
+            "git-sha": "d56fe0367554ae5e878e37ed6c5b9a82f5995512"
+
+            Annotation keys
+
+            Annotation keys are made up of an (optional) prefix and name. If a prefix is present, it is separated from the name by a /. Prefixes are DNS names intended to enable namespacing of annotation keys.
+
+
+            An annotation key prefix must adhere to the following restrictions:
+
+
+            Length: 0-253 characters
+
+            Allowed characters: a-z, A-Z, 0-9, -, and .; emojis cannot be used in keys
+
+            DNS subdomain format (series of subdomain annotations separated by .)
+
+            An annotation key name must adhere to the following restrictions:
+
+
+            Length: 1-63 characters
+
+            Allowed characters: a-z, A-Z, 0-9, -, _, and .; emojis cannot be used in keys
+
+            Must begin and end with an alphanumeric character
+
+            Annotation values
+
+            Annotation values must adhere to the following restrictions:
+
+
+            Length: 0-5000 unicode characters
+
+            '
+      description: 'Metadata is a JSON object that contains information about a resource. It includes the GUID of the resource, the time the resource was created, the time the resource was last updated, and links to the resource.
+
+        Metadata is included in the response body of a request to retrieve a resource.
+
+        '
+    Errors:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/Error'
+      description: 'An error response will always return a list of error objects. Errors appear on the job resource for asynchronous operations.
+
+        Clients should use the code and title fields for programmatically handling specific errors. The message in the detail field is subject to change over time.
+
+        '
+    Process:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/BaseSchema'
+      - properties:
+          version:
+            type: string
+            format: uuid
+            description: Random identifier that changes every time the process will be recreated in the runtime
+          type:
+            type: string
+            description: Process type; a unique identifier for processes belonging to an app
+          command:
+            type:
+            - string
+            - 'null'
+            description: The command used to start the process; use null to revert to the buildpack-detected or procfile-provided start command
+          user:
+            type:
+            - string
+            - 'null'
+            description: The user used to run the process; use null to revert to the docker-detected or default 'vcap' user
+          instances:
+            type: integer
+            description: The number of instances to run
+          memory_in_mb:
+            type:
+            - integer
+            - 'null'
+            description: The memory in MB allocated per instance
+          disk_in_mb:
+            type:
+            - integer
+            - 'null'
+            description: The disk in MB allocated per instance
+          log_rate_limit_in_bytes_per_second:
+            type: integer
+            description: The log rate in bytes per second allocated per instance
+          health_check:
+            $ref: '#/components/schemas/HealthCheck'
+          readiness_health_check:
+            $ref: '#/components/schemas/HealthCheck'
+          relationships:
+            type: object
+            properties:
+              app:
+                $ref: '#/components/schemas/RelationshipToOne'
+              revision:
+                oneOf:
+                - $ref: '#/components/schemas/RelationshipToOne'
+                - type: 'null'
+          metadata:
+            $ref: '#/components/schemas/Metadata'
+          links:
+            type: object
+            properties:
+              self:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get this process
+              scale:
+                $ref: '#/components/schemas/Link'
+                description: The URL to scale this process
+              app:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get the app for this process
+              space:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get the space for this process
+              stats:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get the stats for this process
+      description: A process defines the runnable units of an app
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: A numeric code for this error
+        detail:
+          type: string
+          description: Detailed description of the error
+        title:
+          type: string
+          description: Name of the error
+    Relationship:
+      type: object
+      properties:
+        guid:
+          type: string
+          format: uuid
+          description: The GUID of the resource
+    BaseSchema:
+      type: object
+      properties:
+        guid:
+          type: string
+          format: uuid
+          description: The unique identifier for the resource
+        created_at:
+          type: string
+          format: date-time
+          description: The ISO8601 compatible date and time when resource was created
+        updated_at:
+          type: string
+          format: date-time
+          description: The ISO8601 compatible date and time when resource was last updated
+      description: 'A resource represents an individual object within the system, such as an app or a service. It is represented as a JSON object.
+
+        A resource consists of several required resource fields and other attributes specific to the resource.
+
+        See Resources and Experimental Resources for specific resources.
+
+        '
+  responses:
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    UnprocessableEntity:
+      description: Unprocessable Entity
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    NotFound:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    BadGateway:
+      description: Bad Gateway
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Conflict:
+      description: Conflict
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    '500':
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    BadRequest:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+        text/html:
+          schema:
+            type: string
+    ServiceUnavailable:
+      description: Service Unavailable
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+  parameters:
+    OrderBy:
+      name: order_by
+      in: query
+      required: false
+      schema:
+        type: string
+      description: 'Value to sort by. Defaults to ascending; prepend with `-` to sort descending.
+
+        '
+      example: created_at
+    CreatedAts:
+      name: created_ats
+      in: query
+      required: false
+      schema:
+        type: string
+      description: 'Timestamp to filter by. When filtering on equality, several comma-delimited timestamps may be passed. Also supports filtering with [relational operators](#relational-operators).
+
+        '
+      example: '2021-01-01T00:00:00Z'
+    PerPage:
+      name: per_page
+      in: query
+      required: false
+      schema:
+        type: integer
+      description: Number of results per page, valid values are 1 through 5000
+      example: 50
+    LabelSelector:
+      name: label_selector
+      in: query
+      description: A query string containing a list of [label selector](#labels-and-selectors) requirements
+      required: false
+      schema:
+        type: string
+      example: environment=production
+    Page:
+      name: page
+      in: query
+      required: false
+      schema:
+        type: integer
+      description: Page to display; valid values are integers >= 1
+      example: 1
+    UpdatedAts:
+      name: updated_ats
+      in: query
+      required: false
+      schema:
+        type: string
+      description: 'Timestamp to filter by. When filtering on equality, several comma-delimited timestamps may be passed. Also supports filtering with [relational operators](#relational-operators).
+
+        '
+      example: '2021-01-01T00:00:00Z'
+    Guid:
+      name: guid
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: The unique identifier for the resource
+  requestBodies:
+    ProcessUpdateRequestBody:
+      description: Process object that needs to be updated
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              command:
+                type:
+                - string
+                - 'null'
+                description: The command used to start the process; use null to revert to the buildpack-detected or procfile-provided start command
+              health_check:
+                $ref: '#/components/schemas/HealthCheck'
+                description: The health check to perform on the process
+              readiness_health_check:
+                $ref: '#/components/schemas/HealthCheck'
+                description: The readiness health check to perform on the process
+              metadata:
+                $ref: '#/components/schemas/Metadata'
+            description: Request schema for updating a process
+          examples:
+            default:
+              summary: default
+              value:
+                command: rackup
+                metadata:
+                  labels:
+                    key: value
+                  annotations:
+                    note: detailed information
+  securitySchemes:
+    oauth:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: https://uaa.cloudfoundry.local/api-oauth/dialog
+          scopes:
+            cloud_controller.admin: This scope provides read and write access to all resources
+            cloud_controller.admin_read_only: This scope provides read only access to all resources
+            cloud_controller.global_auditor: This scope provides read access to all resources
+            cloud_controller.read: Read access to the Cloud Controller
+            cloud_controller.write: Write access to the Cloud Controller
+            cloud_controller.update_build_state: This scope allows its bearer to update the state of a build; currently only used when updating builds
+            cloud_controller_service_permissions.read: This scope provides read only access for service instance permissions
+    bearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Bearer JWT token authentication

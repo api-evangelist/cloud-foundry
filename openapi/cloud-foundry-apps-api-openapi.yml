@@ -1,185 +1,2627 @@
 openapi: 3.2.0
 info:
-  title: Cloud Foundry Cloud Controller API v3 Apps API
-  description: 'Cloud Foundry Cloud Controller API v3 is the primary control plane of
-
-    Cloud Foundry. It manages apps, packages, droplets, processes, tasks,
-
-    organizations, spaces, service instances, and related resources.
-
-    Requests authenticate with OAuth 2.0 bearer tokens issued by the
-
-    Cloud Foundry UAA server.
-
-    '
-  version: 3.220.0
+  title: Cloud Foundry V3 Apps API
+  description: '# Welcome to the Experimental Cloud Foundry V3 API Docs!'
+  version: latest
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+  contact:
+    name: Cloud Foundry
+    url: https://www.cloudfoundry.org/
 servers:
-- url: https://api.cloudfoundry.org
-  description: Public Cloud Foundry CC API endpoint (replace with your foundation host)
+- url: https://api.example.local
+  description: Cloud Foundry V3 API server
 security:
-- bearerAuth: []
+- oauth:
+  - cloud_controller.read
+  - cloud_controller.write
 tags:
 - name: Apps
+  description: Apps are top-level objects that link together and contain configuration information for your packages, droplets, processes, tasks, and more.
 paths:
   /v3/apps:
     get:
       summary: List apps
+      description: Retrieve all apps the user has access to.
+      operationId: listApps
+      tags:
+      - Apps
       parameters:
       - $ref: '#/components/parameters/Page'
       - $ref: '#/components/parameters/PerPage'
+      - $ref: '#/components/parameters/OrderBy'
+      - $ref: '#/components/parameters/CreatedAts'
+      - $ref: '#/components/parameters/UpdatedAts'
+      - $ref: '#/components/parameters/LabelSelector'
+      - name: guids
+        in: query
+        schema:
+          type: array
+          items:
+            type: string
+        description: Comma-delimited list of app GUIDs to filter by
       - name: names
         in: query
         schema:
-          type: string
+          type: array
+          items:
+            type: string
+        description: Comma-delimited list of app names to filter by
       - name: space_guids
         in: query
         schema:
-          type: string
+          type: array
+          items:
+            type: string
+        description: Comma-delimited list of space GUIDs to filter by
       - name: organization_guids
         in: query
         schema:
-          type: string
-      responses:
-        '200':
-          description: Paginated list of apps
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PaginatedResponse'
-      tags:
-      - Apps
-    post:
-      summary: Create app
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/App'
-      responses:
-        '201':
-          description: App created
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/App'
-      tags:
-      - Apps
-  /v3/apps/{guid}:
-    parameters:
-    - $ref: '#/components/parameters/GuidParam'
-    get:
-      summary: Get app
-      responses:
-        '200':
-          description: App
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/App'
-      tags:
-      - Apps
-    patch:
-      summary: Update app
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/App'
-      responses:
-        '200':
-          description: Updated
-      tags:
-      - Apps
-    delete:
-      summary: Delete app
-      responses:
-        '202':
-          description: Accepted (asynchronous)
-      tags:
-      - Apps
-  /v3/apps/{guid}/actions/start:
-    parameters:
-    - $ref: '#/components/parameters/GuidParam'
-    post:
-      summary: Start app
-      responses:
-        '200':
-          description: Started
-      tags:
-      - Apps
-  /v3/apps/{guid}/actions/stop:
-    parameters:
-    - $ref: '#/components/parameters/GuidParam'
-    post:
-      summary: Stop app
-      responses:
-        '200':
-          description: Stopped
-      tags:
-      - Apps
-components:
-  schemas:
-    PaginatedResponse:
-      type: object
-      properties:
-        pagination:
-          type: object
-          properties:
-            total_results:
-              type: integer
-            total_pages:
-              type: integer
-            first:
-              type: object
-            last:
-              type: object
-            next:
-              type: object
-            previous:
-              type: object
-        resources:
           type: array
           items:
-            type: object
+            type: string
+        description: Comma-delimited list of organization GUIDs to filter by
+      - name: stacks
+        in: query
+        schema:
+          type: array
+          items:
+            type: string
+        description: Comma-delimited list of stack names to filter by
+      - name: lifecycle_type
+        in: query
+        schema:
+          type: string
+          enum:
+          - buildpack
+          - cnb
+          - docker
+        description: Lifecycle type to filter by
+      - name: include
+        in: query
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - space
+            - space.organization
+        description: Optionally include a list of unique related resources in the response
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AppList'
+              examples:
+                default:
+                  summary: default
+                  value:
+                    pagination:
+                      total_results: 3
+                      total_pages: 2
+                      first:
+                        href: https://api.example.org?page=1&per_page=2
+                      last:
+                        href: https://api.example.org?page=2&per_page=2
+                      next:
+                        href: https://api.example.org?page=2&per_page=2
+                      previous: null
+                    resources:
+                    - guid: 123e4567-e89b-12d3-a456-426614174000
+                      name: my_app
+                      state: STARTED
+                      created_at: '2016-03-17T21:41:30Z'
+                      updated_at: '2016-03-18T11:32:30Z'
+                      lifecycle:
+                        type: buildpack
+                        data:
+                          buildpacks:
+                          - java_buildpack
+                          stack: cflinuxfs4
+                      relationships:
+                        space:
+                          data:
+                            guid: 123e4567-e89b-12d3-a456-426614174000
+                        current_droplet:
+                          data:
+                            guid: 123e4567-e89b-12d3-a456-426614174000
+                      links:
+                        self:
+                          href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446
+                        space:
+                          href: https://api.example.org/v3/spaces/2f35885d-0c9d-4423-83ad-fd05066f8576
+                        processes:
+                          href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/processes
+                        packages:
+                          href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/packages
+                        environment_variables:
+                          href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/environment_variables
+                        current_droplet:
+                          href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/droplets/current
+                        droplets:
+                          href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/droplets
+                        tasks:
+                          href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/tasks
+                        start:
+                          href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/actions/start
+                          method: POST
+                        stop:
+                          href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/actions/stop
+                          method: POST
+                        revisions:
+                          href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/revisions
+                        deployed_revisions:
+                          href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/revisions/deployed
+                        features:
+                          href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/features
+                      metadata:
+                        labels: {}
+                        annotations: {}
+                    - guid: 123e4567-e89b-12d3-a456-426614174000
+                      name: my_app2
+                      state: STOPPED
+                      created_at: '1970-01-01T00:00:02Z'
+                      updated_at: '2016-06-08T16:41:26Z'
+                      lifecycle:
+                        type: buildpack
+                        data:
+                          buildpacks:
+                          - ruby_buildpack
+                          stack: cflinuxfs4
+                      relationships:
+                        space:
+                          data:
+                            guid: 123e4567-e89b-12d3-a456-426614174000
+                        droplet:
+                          data:
+                            guid: 123e4567-e89b-12d3-a456-426614174000
+                      links:
+                        self:
+                          href: https://api.example.org/02b4ec9b-94c7-4468-9c23-4e906191a0f8
+                        space:
+                          href: https://api.example.org/v3/spaces/2f35885d-0c9d-4423-83ad-fd05066f8576
+                        processes:
+                          href: https://api.example.org/02b4ec9b-94c7-4468-9c23-4e906191a0f8/processes
+                        packages:
+                          href: https://api.example.org/02b4ec9b-94c7-4468-9c23-4e906191a0f8/packages
+                        environment_variables:
+                          href: https://api.example.org/02b4ec9b-94c7-4468-9c23-4e906191a0f8/environment_variables
+                        current_droplet:
+                          href: https://api.example.org/02b4ec9b-94c7-4468-9c23-4e906191a0f8/droplets/current
+                        droplets:
+                          href: https://api.example.org/02b4ec9b-94c7-4468-9c23-4e906191a0f8/droplets
+                        tasks:
+                          href: https://api.example.org/02b4ec9b-94c7-4468-9c23-4e906191a0f8/tasks
+                        start:
+                          href: https://api.example.org/02b4ec9b-94c7-4468-9c23-4e906191a0f8/actions/start
+                          method: POST
+                        stop:
+                          href: https://api.example.org/02b4ec9b-94c7-4468-9c23-4e906191a0f8/actions/stop
+                          method: POST
+                        revisions:
+                          href: https://api.example.org//02b4ec9b-94c7-4468-9c23-4e906191a0f8/revisions
+                        deployed_revisions:
+                          href: https://api.example.org//02b4ec9b-94c7-4468-9c23-4e906191a0f8/revisions/deployed
+                        features:
+                          href: https://api.example.org//02b4ec9b-94c7-4468-9c23-4e906191a0f8/features
+                      metadata:
+                        labels: {}
+                        annotations: {}
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/500'
+        '502':
+          $ref: '#/components/responses/BadGateway'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+    post:
+      summary: Create an app
+      description: Creates a new app.
+      operationId: createApp
+      tags:
+      - Apps
+      requestBody:
+        $ref: '#/components/requestBodies/AppCreateRequestBody'
+      responses:
+        '201':
+          description: Successfully created app
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/App'
+              examples:
+                default:
+                  summary: default
+                  value:
+                    guid: 123e4567-e89b-12d3-a456-426614174000
+                    name: my_app
+                    state: STOPPED
+                    created_at: '2016-03-17T21:41:30Z'
+                    updated_at: '2016-06-08T16:41:26Z'
+                    lifecycle:
+                      type: buildpack
+                      data:
+                        buildpacks:
+                        - java_buildpack
+                        stack: cflinuxfs4
+                    relationships:
+                      space:
+                        data:
+                          guid: 123e4567-e89b-12d3-a456-426614174000
+                      current_droplet:
+                        data:
+                          guid: 123e4567-e89b-12d3-a456-426614174000
+                    links:
+                      self:
+                        href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446
+                      space:
+                        href: https://api.example.org/v3/spaces/2f35885d-0c9d-4423-83ad-fd05066f8576
+                      processes:
+                        href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/processes
+                      packages:
+                        href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/packages
+                      environment_variables:
+                        href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/environment_variables
+                      current_droplet:
+                        href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/droplets/current
+                      droplets:
+                        href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/droplets
+                      tasks:
+                        href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/tasks
+                      start:
+                        href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/actions/start
+                        method: POST
+                      stop:
+                        href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/actions/stop
+                        method: POST
+                      revisions:
+                        href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/revisions
+                      deployed_revisions:
+                        href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/revisions/deployed
+                      features:
+                        href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/features
+                    metadata:
+                      labels: {}
+                      annotations: {}
+          links:
+            space:
+              operationId: getSpace
+              parameters:
+                guid: $response.body#/relationships/space/data/guid
+              description: Retrieve the space for this app
+            current_droplet:
+              operationId: getDroplet
+              parameters:
+                guid: $response.body#/relationships/current_droplet/data/guid
+              description: Retrieve the current droplet for this app
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          description: Unprocessable Entity
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errors'
+              examples:
+                uniqueness_error:
+                  value:
+                    errors:
+                    - code: 10016
+                      title: CF-UniquenessError
+                      detail: The given app name is already taken in the targeted space
+                feature_disabled:
+                  value:
+                    errors:
+                    - code: 330002
+                      title: CF-FeatureDisabled
+                      detail: Some feature flag must be enabled by the Cloud Foundry admin in order to push the app as is.
+        '500':
+          $ref: '#/components/responses/500'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+  /v3/apps/{guid}:
+    get:
+      summary: Get an app
+      description: Retrieve a specific app.
+      operationId: getApp
+      tags:
+      - Apps
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      - name: include
+        in: query
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - space
+            - space.organization
+        description: Optionally include a list of unique related resources in the response
+      responses:
+        '200':
+          description: Successfully retrieved app
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/App'
+              examples:
+                default:
+                  summary: default
+                  value:
+                    guid: 123e4567-e89b-12d3-a456-426614174000
+                    name: my_app
+                    state: STOPPED
+                    created_at: '2016-03-17T21:41:30Z'
+                    updated_at: '2016-06-08T16:41:26Z'
+                    lifecycle:
+                      type: buildpack
+                      data:
+                        buildpacks:
+                        - java_buildpack
+                        stack: cflinuxfs4
+                    relationships:
+                      space:
+                        data:
+                          guid: 123e4567-e89b-12d3-a456-426614174000
+                      current_droplet:
+                        data:
+                          guid: 123e4567-e89b-12d3-a456-426614174000
+                    links:
+                      self:
+                        href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446
+                      space:
+                        href: https://api.example.org/v3/spaces/2f35885d-0c9d-4423-83ad-fd05066f8576
+                      processes:
+                        href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/processes
+                      packages:
+                        href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/packages
+                      environment_variables:
+                        href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/environment_variables
+                      current_droplet:
+                        href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/droplets/current
+                      droplets:
+                        href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/droplets
+                      tasks:
+                        href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/tasks
+                      start:
+                        href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/actions/start
+                        method: POST
+                      stop:
+                        href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/actions/stop
+                        method: POST
+                      revisions:
+                        href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/revisions
+                      deployed_revisions:
+                        href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/revisions/deployed
+                      features:
+                        href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/features
+                    metadata:
+                      labels: {}
+                      annotations: {}
+          links:
+            space:
+              operationId: getSpace
+              parameters:
+                guid: $response.body#/relationships/space/data/guid
+              description: Retrieve the space for this app
+            current_droplet:
+              operationId: getDroplet
+              parameters:
+                guid: $response.body#/relationships/current_droplet/data/guid
+              description: Retrieve the current droplet for this app
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      summary: Update an app
+      description: Update an app.
+      operationId: updateApp
+      tags:
+      - Apps
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      requestBody:
+        $ref: '#/components/requestBodies/AppUpdateRequestBody'
+      responses:
+        '200':
+          description: Successfully updated app
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/App'
+              examples:
+                default:
+                  summary: default
+                  value:
+                    guid: 123e4567-e89b-12d3-a456-426614174000
+                    name: my_app
+                    state: STARTED
+                    created_at: '2016-03-17T21:41:30Z'
+                    updated_at: '2016-03-18T11:32:30Z'
+                    lifecycle:
+                      type: buildpack
+                      data:
+                        buildpacks:
+                        - java_buildpack
+                        stack: cflinuxfs4
+                    relationships:
+                      space:
+                        data:
+                          guid: 123e4567-e89b-12d3-a456-426614174000
+                      current_droplet:
+                        data:
+                          guid: 123e4567-e89b-12d3-a456-426614174000
+                    links:
+                      self:
+                        href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446
+                      space:
+                        href: https://api.example.org/v3/spaces/2f35885d-0c9d-4423-83ad-fd05066f8576
+                      processes:
+                        href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/processes
+                      packages:
+                        href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/packages
+                      environment_variables:
+                        href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/environment_variables
+                      current_droplet:
+                        href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/droplets/current
+                      droplets:
+                        href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/droplets
+                      tasks:
+                        href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/tasks
+                      start:
+                        href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/actions/start
+                        method: POST
+                      stop:
+                        href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/actions/stop
+                        method: POST
+                      revisions:
+                        href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/revisions
+                      deployed_revisions:
+                        href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/revisions/deployed
+                      features:
+                        href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/features
+                    metadata:
+                      labels: {}
+                      annotations: {}
+          links:
+            space:
+              operationId: getSpace
+              parameters:
+                guid: $response.body#/relationships/space/data/guid
+              description: Retrieve the space for this app
+            current_droplet:
+              operationId: getDroplet
+              parameters:
+                guid: $response.body#/relationships/current_droplet/data/guid
+              description: Retrieve the current droplet for this app
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/500'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+    delete:
+      summary: Delete an app
+      description: Delete an app.
+      operationId: deleteApp
+      tags:
+      - Apps
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      responses:
+        '202':
+          description: Successfully deleted app
+          headers:
+            Location:
+              description: URL of the job that is deleting the app
+              schema:
+                type: string
+                format: uri
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/500'
+  /v3/apps/{guid}/actions/start:
+    post:
+      summary: Start an app
+      description: Start an app.
+      operationId: startApp
+      tags:
+      - Apps
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      responses:
+        '200':
+          description: Successfully started app
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/App'
+              examples:
+                default:
+                  summary: default
+                  value:
+                    guid: 123e4567-e89b-12d3-a456-426614174000
+                    name: my_app
+                    state: STARTED
+                    created_at: '2016-03-17T21:41:30Z'
+                    updated_at: '2016-03-18T11:32:30Z'
+                    lifecycle:
+                      type: buildpack
+                      data:
+                        buildpacks:
+                        - java_buildpack
+                        stack: cflinuxfs4
+                    relationships:
+                      space:
+                        data:
+                          guid: 123e4567-e89b-12d3-a456-426614174000
+                      current_droplet:
+                        data:
+                          guid: 123e4567-e89b-12d3-a456-426614174000
+                    links:
+                      self:
+                        href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446
+                      space:
+                        href: https://api.example.org/v3/spaces/2f35885d-0c9d-4423-83ad-fd05066f8576
+                      processes:
+                        href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/processes
+                      packages:
+                        href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/packages
+                      environment_variables:
+                        href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/environment_variables
+                      current_droplet:
+                        href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/droplets/current
+                      droplets:
+                        href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/droplets
+                      tasks:
+                        href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/tasks
+                      start:
+                        href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/actions/start
+                        method: POST
+                      stop:
+                        href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/actions/stop
+                        method: POST
+                      revisions:
+                        href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/revisions
+                      deployed_revisions:
+                        href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/revisions/deployed
+                      features:
+                        href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/features
+                    metadata:
+                      labels: {}
+                      annotations: {}
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /v3/apps/{guid}/actions/stop:
+    post:
+      summary: Stop an app
+      description: Stop an app.
+      operationId: stopApp
+      tags:
+      - Apps
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      responses:
+        '200':
+          description: Successfully stopped app
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/App'
+              examples:
+                default:
+                  summary: default
+                  value:
+                    guid: 123e4567-e89b-12d3-a456-426614174000
+                    name: my_app
+                    state: STARTED
+                    created_at: '2016-03-17T21:41:30Z'
+                    updated_at: '2016-03-18T11:32:30Z'
+                    lifecycle:
+                      type: buildpack
+                      data:
+                        buildpacks:
+                        - java_buildpack
+                        stack: cflinuxfs4
+                    relationships:
+                      space:
+                        data:
+                          guid: 123e4567-e89b-12d3-a456-426614174000
+                      current_droplet:
+                        data:
+                          guid: 123e4567-e89b-12d3-a456-426614174000
+                    links:
+                      self:
+                        href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446
+                      space:
+                        href: https://api.example.org/v3/spaces/2f35885d-0c9d-4423-83ad-fd05066f8576
+                      processes:
+                        href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/processes
+                      packages:
+                        href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/packages
+                      environment_variables:
+                        href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/environment_variables
+                      current_droplet:
+                        href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/droplets/current
+                      droplets:
+                        href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/droplets
+                      tasks:
+                        href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/tasks
+                      start:
+                        href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/actions/start
+                        method: POST
+                      stop:
+                        href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/actions/stop
+                        method: POST
+                      revisions:
+                        href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/revisions
+                      deployed_revisions:
+                        href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/revisions/deployed
+                      features:
+                        href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/features
+                    metadata:
+                      labels: {}
+                      annotations: {}
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /v3/apps/{guid}/actions/restart:
+    post:
+      summary: Restart an app
+      description: This endpoint will synchronously stop and start an application. Unlike the start and stop actions, this endpoint will error if the app is not successfully stopped in the runtime. For restarting applications without downtime, see the deployments resource.
+      operationId: restartApp
+      tags:
+      - Apps
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      responses:
+        '200':
+          description: Successfully restarted app
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/App'
+              examples:
+                default:
+                  summary: default
+                  value:
+                    guid: 123e4567-e89b-12d3-a456-426614174000
+                    name: my_app
+                    state: STARTED
+                    created_at: '2016-03-17T21:41:30Z'
+                    updated_at: '2016-03-18T11:32:30Z'
+                    lifecycle:
+                      type: buildpack
+                      data:
+                        buildpacks:
+                        - java_buildpack
+                        stack: cflinuxfs4
+                    relationships:
+                      space:
+                        data:
+                          guid: 123e4567-e89b-12d3-a456-426614174000
+                      current_droplet:
+                        data:
+                          guid: 123e4567-e89b-12d3-a456-426614174000
+                    links:
+                      self:
+                        href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446
+                      space:
+                        href: https://api.example.org/v3/spaces/2f35885d-0c9d-4423-83ad-fd05066f8576
+                      processes:
+                        href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/processes
+                      packages:
+                        href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/packages
+                      environment_variables:
+                        href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/environment_variables
+                      current_droplet:
+                        href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/droplets/current
+                      droplets:
+                        href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/droplets
+                      tasks:
+                        href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/tasks
+                      start:
+                        href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/actions/start
+                        method: POST
+                      stop:
+                        href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/actions/stop
+                        method: POST
+                      revisions:
+                        href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/revisions
+                      deployed_revisions:
+                        href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/revisions/deployed
+                      features:
+                        href: https://api.example.org/v3/apps/1cb006ee-fb05-47e1-b541-c34179ddc446/features
+                    metadata:
+                      labels: {}
+                      annotations: {}
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /v3/apps/{guid}/droplets:
+    get:
+      summary: List droplets for an app
+      description: Retrieve all droplets belonging to an app.
+      operationId: listAppDroplets
+      tags:
+      - Apps
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      - $ref: '#/components/parameters/Page'
+      - $ref: '#/components/parameters/PerPage'
+      - $ref: '#/components/parameters/OrderBy'
+      - $ref: '#/components/parameters/LabelSelector'
+      - name: guids
+        in: query
+        schema:
+          type: array
+          items:
+            type: string
+        description: Comma-delimited list of droplet guids to filter by
+      - name: states
+        in: query
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - AWAITING_UPLOAD
+            - PROCESSING_UPLOAD
+            - STAGED
+            - COPYING
+            - FAILED
+            - EXPIRED
+        description: Comma-delimited list of droplet states to filter by
+      responses:
+        '200':
+          description: List of droplets for the app
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DropletList'
+              examples:
+                default:
+                  summary: default
+                  value:
+                    pagination:
+                      total_results: 2
+                      total_pages: 1
+                      first:
+                        href: https://api.example.org?page=1&per_page=50
+                      last:
+                        href: https://api.example.org?page=1&per_page=50
+                      next: null
+                      previous: null
+                    resources:
+                    - guid: 123e4567-e89b-12d3-a456-426614174000
+                      state: STAGED
+                      error: null
+                      lifecycle:
+                        type: buildpack
+                        data: {}
+                      image: null
+                      execution_metadata: PRIVATE DATA HIDDEN
+                      process_types:
+                        redacted_message: 123e4567-e89b-12d3-a456-426614174000
+                      checksum:
+                        type: sha256
+                        value: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+                      buildpacks:
+                      - name: ruby_buildpack
+                        detect_output: ruby 1.6.14
+                        version: 1.1.1.
+                        buildpack_name: ruby
+                      stack: cflinuxfs4
+                      created_at: '2016-03-28T23:39:34Z'
+                      updated_at: '2016-03-28T23:39:47Z'
+                      relationships:
+                        app:
+                          data:
+                            guid: 123e4567-e89b-12d3-a456-426614174000
+                      links:
+                        self:
+                          href: https://api.example.org/v3/droplets/585bc3c1-3743-497d-88b0-403ad6b56d16
+                        package:
+                          href: https://api.example.org/v3/packages/8222f76a-9e09-4360-b3aa-1ed329945e92
+                        app:
+                          href: https://api.example.org/v3/apps/7b34f1cf-7e73-428a-bb5a-8a17a8058396
+                        assign_current_droplet:
+                          href: https://api.example.org/v3/apps/7b34f1cf-7e73-428a-bb5a-8a17a8058396/relationships/current_droplet
+                          method: PATCH
+                        download:
+                          href: https://api.example.org/v3/droplets/585bc3c1-3743-497d-88b0-403ad6b56d16/download
+                      metadata:
+                        labels: {}
+                        annotations: {}
+                    - guid: 123e4567-e89b-12d3-a456-426614174000
+                      state: STAGED
+                      error: null
+                      lifecycle:
+                        type: docker
+                        data: {}
+                      execution_metadata: 123e4567-e89b-12d3-a456-426614174000
+                      process_types:
+                        redacted_message: 123e4567-e89b-12d3-a456-426614174000
+                      image: cloudfoundry/diego-docker-app-custom:latest
+                      checksum: null
+                      buildpacks: null
+                      stack: null
+                      created_at: '2016-03-17T00:00:01Z'
+                      updated_at: '2016-03-17T21:41:32Z'
+                      relationships:
+                        app:
+                          data:
+                            guid: 123e4567-e89b-12d3-a456-426614174000
+                      links:
+                        self:
+                          href: https://api.example.org/v3/droplets/fdf3851c-def8-4de1-87f1-6d4543189e22
+                        package:
+                          href: https://api.example.org/v3/packages/c5725684-a02f-4e59-bc67-8f36ae944688
+                        app:
+                          href: https://api.example.org/v3/apps/7b34f1cf-7e73-428a-bb5a-8a17a8058396
+                        assign_current_droplet:
+                          href: https://api.example.org/v3/apps/7b34f1cf-7e73-428a-bb5a-8a17a8058396/relationships/current_droplet
+                          method: PATCH
+                      metadata:
+                        labels: {}
+                        annotations: {}
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /v3/apps/{guid}/droplets/current:
+    get:
+      summary: Get current droplet
+      description: Get the current droplet for an app.
+      operationId: getCurrentDropletForApp
+      tags:
+      - Apps
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      responses:
+        '200':
+          description: Successfully retrieved droplet
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Droplet'
+              examples:
+                default:
+                  summary: default
+                  value:
+                    guid: 123e4567-e89b-12d3-a456-426614174000
+                    state: STAGED
+                    error: null
+                    lifecycle:
+                      type: buildpack
+                      data: {}
+                    execution_metadata: ''
+                    process_types:
+                      rake: bundle exec rake
+                      web: bundle exec rackup config.ru -p $PORT
+                    checksum:
+                      type: sha256
+                      value: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+                    buildpacks:
+                    - name: ruby_buildpack
+                      detect_output: ruby 1.6.14
+                      version: 1.1.1.
+                      buildpack_name: ruby
+                    stack: cflinuxfs4
+                    image: null
+                    created_at: '2016-03-28T23:39:34Z'
+                    updated_at: '2016-03-28T23:39:47Z'
+                    relationships:
+                      app:
+                        data:
+                          guid: 123e4567-e89b-12d3-a456-426614174000
+                    links:
+                      self:
+                        href: https://api.example.org/v3/droplets/585bc3c1-3743-497d-88b0-403ad6b56d16
+                      package:
+                        href: https://api.example.org/v3/packages/8222f76a-9e09-4360-b3aa-1ed329945e92
+                      app:
+                        href: https://api.example.org/v3/apps/7b34f1cf-7e73-428a-bb5a-8a17a8058396
+                      assign_current_droplet:
+                        href: https://api.example.org/v3/apps/7b34f1cf-7e73-428a-bb5a-8a17a8058396/relationships/current_droplet
+                        method: PATCH
+                      download:
+                        href: https://api.example.org/v3/droplets/585bc3c1-3743-497d-88b0-403ad6b56d16/download
+                    metadata:
+                      labels: {}
+                      annotations: {}
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /v3/apps/{guid}/relationships/current_droplet:
+    get:
+      summary: Get current droplet association for an app
+      description: This endpoint retrieves the current droplet relationship for an app.
+      operationId: getCurrentDropletAssociationForApp
+      tags:
+      - Apps
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RelationshipToOne'
+              examples:
+                default:
+                  summary: default
+                  value:
+                    data:
+                      guid: 123e4567-e89b-12d3-a456-426614174000
+                    links:
+                      self:
+                        href: https://api.example.org/v3/apps/d4c91047-7b29-4fda-b7f9-04033e5c9c9f/relationships/current_droplet
+                      related:
+                        href: https://api.example.org/v3/apps/d4c91047-7b29-4fda-b7f9-04033e5c9c9f/droplets/current
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      summary: Set current droplet
+      description: Set the current droplet for an app. The current droplet is the droplet that the app will use when running.
+      operationId: setCurrentDropletForApp
+      tags:
+      - Apps
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      requestBody:
+        description: Droplet relationship object that needs to be set
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/Relationship'
+              required:
+              - data
+              description: Request schema for setting the current droplet
+            examples:
+              default:
+                summary: default
+                value:
+                  data:
+                    guid: 123e4567-e89b-12d3-a456-426614174000
+      responses:
+        '200':
+          description: Successfully set current droplet
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RelationshipToOne'
+              examples:
+                default:
+                  summary: default
+                  value:
+                    data:
+                      guid: 123e4567-e89b-12d3-a456-426614174000
+                    links:
+                      self:
+                        href: https://api.example.org/v3/apps/d4c91047-7b29-4fda-b7f9-04033e5c9c9f/relationships/current_droplet
+                      related:
+                        href: https://api.example.org/v3/apps/d4c91047-7b29-4fda-b7f9-04033e5c9c9f/droplets/current
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /v3/apps/{guid}/actions/clear_buildpack_cache:
+    post:
+      summary: Clear buildpack cache for application
+      description: This endpoint will delete the buildpack cache for a specified app. The buildpack cache is used during staging by buildpacks as a way to cache certain resources, e.g. downloaded Ruby gems. A user may want to use this endpoint when an app doesn’t stage anymore due to out-of-disk caused by a large buildpack cache content.
+      operationId: clearBuildpackCacheForApplication
+      tags:
+      - Apps
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      responses:
+        '202':
+          description: Accepted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /v3/apps/{guid}/env:
+    get:
+      summary: Get environment for an app
+      description: Retrieve the environment variables that will be provided to an app at runtime. It will include environment variables for Environment Variable Groups and Service Bindings.
+      operationId: getEnvForApp
+      tags:
+      - Apps
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AppEnvironment'
+              examples:
+                default:
+                  summary: default
+                  value:
+                    staging_env_json:
+                      GEM_CACHE: http://gem-cache.example.org
+                    running_env_json:
+                      HTTP_PROXY: http://proxy.example.org
+                    environment_variables:
+                      RAILS_ENV: production
+                    system_env_json:
+                      VCAP_SERVICES:
+                        mysql:
+                        - name: db-for-my-app
+                          binding_id: 0e85b634-e043-4b43-96da-f83dfe83ab33
+                          binding_name: db-for-my-app
+                          instance_id: 07fca01c-f789-4d45-80b4-e19ba3ca862c
+                          instance_name: my-mysql-service
+                          label: mysql
+                          tags:
+                          - relational
+                          - sql
+                          plan: xlarge
+                          credentials:
+                            username: user
+                            password: top-secret
+                          syslog_drain_url: https://syslog.example.org/drain
+                          volume_mounts: []
+                          provider: null
+                    application_env_json:
+                      VCAP_APPLICATION:
+                        limits:
+                          fds: 16384
+                        application_name: my_app
+                        application_uris:
+                        - my_app.example.org
+                        name: my_app
+                        space_name: my_space
+                        space_id: 2f35885d-0c9d-4423-83ad-fd05066f8576
+                        uris:
+                        - my_app.example.org
+                        users: null
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /v3/apps/{guid}/environment_variables:
+    get:
+      summary: Get environment variables for an app
+      description: Retrieve the environment variables that are associated with the given app. For the entire list of environment variables that will be available to the app at runtime, see the env endpoint.
+      operationId: getEnvironmentVariablesForApp
+      tags:
+      - Apps
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AppEnvironmentVariables'
+              examples:
+                default:
+                  summary: default
+                  value:
+                    var:
+                      RAILS_ENV: production
+                    links:
+                      self:
+                        href: https://api.example.org/v3/apps/[guid]/environment_variables
+                      app:
+                        href: https://api.example.org/v3/apps/[guid]
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      summary: Update environment variables for an app
+      description: Update the environment variables associated with the given app. The variables given in the request will be merged with the existing app environment variables. Any requested variables with a value of `null` will be removed from the app. Environment variable names may not start with VCAP_. PORT is not a valid environment variable. The updated environment variables will not take effect until the app is restarted.
+      operationId: updateEnvironmentVariablesForApp
+      tags:
+      - Apps
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                var:
+                  type: object
+                  additionalProperties:
+                    type:
+                    - string
+                    - 'null'
+                  description: Environment variables to inject; keys and values must be strings
+            examples:
+              default:
+                summary: default
+                value:
+                  var:
+                    DEBUG: 'false'
+                    USER: null
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AppEnvironmentVariables'
+              examples:
+                default:
+                  summary: default
+                  value:
+                    var:
+                      RAILS_ENV: production
+                      DEBUG: 'false'
+                    links:
+                      self:
+                        href: https://api.example.org/v3/apps/[guid]/environment_variables
+                      app:
+                        href: https://api.example.org/v3/apps/[guid]
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /v3/apps/{guid}/features:
+    get:
+      summary: List app features
+      description: This endpoint retrieves the list of features for the specified app.
+      operationId: listAppFeatures
+      tags:
+      - Apps
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /v3/apps/{guid}/features/{name}:
+    get:
+      summary: Get an app feature
+      description: Get an app feature.
+      operationId: getAppFeature
+      tags:
+      - Apps
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+          enum:
+          - ssh
+          - revisions
+          - service-binding-k8s
+          - file-based-vcap-services
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      summary: Update an app feature
+      description: Update an app feature.
+      operationId: updateAppFeature
+      tags:
+      - Apps
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+          enum:
+          - ssh
+          - revisions
+          - service-binding-k8s
+          - file-based-vcap-services
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                enabled:
+                  type: boolean
+            examples:
+              default:
+                summary: default
+                value:
+                  enabled: false
+      responses:
+        '200':
+          description: OK
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /v3/apps/{guid}/permissions:
+    get:
+      summary: Get permissions for an app
+      description: Get the current user’s permissions for the given app. If a user can see an app, then they can see its basic data. Only admin, read-only admins, and space developers can read sensitive data.
+      operationId: getPermissionsForApp
+      tags:
+      - Apps
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AppPermissions'
+              examples:
+                default:
+                  summary: default
+                  value:
+                    read_basic_data: true
+                    read_sensitive_data: false
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /v3/apps/{guid}/ssh_enabled:
+    get:
+      summary: Get SSH enabled for an app
+      description: Returns if an application’s runtime environment will accept ssh connections. If ssh is disabled, the `reason` field will describe whether it is disabled globally, at the space level, or at the app level.
+      operationId: getSshEnabledForApp
+      tags:
+      - Apps
+      parameters:
+      - $ref: '#/components/parameters/Guid'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AppSshEnabled'
+              examples:
+                default:
+                  summary: default
+                  value:
+                    enabled: false
+                    reason: Disabled globally
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+components:
+  schemas:
+    IncludedResources:
+      type: object
+      description: Additional related resources included in the response when using the include parameter
+      properties:
+        spaces:
+          type: array
+          items:
+            $ref: '#/components/schemas/Space'
+          description: Array of included space resources
+        organizations:
+          type: array
+          items:
+            $ref: '#/components/schemas/Organization'
+          description: Array of included organization resources
+        domains:
+          type: array
+          items:
+            $ref: '#/components/schemas/Domain'
+          description: Array of included domain resources
+        service_offerings:
+          type: array
+          items:
+            $ref: '#/components/schemas/ServiceOffering'
+          description: Array of included service offering resources
+        service_instances:
+          type: array
+          items:
+            oneOf:
+            - $ref: '#/components/schemas/ManagedServiceInstance'
+            - $ref: '#/components/schemas/UserProvidedServiceInstance'
+            discriminator:
+              propertyName: type
+              mapping:
+                managed: '#/components/schemas/ManagedServiceInstance'
+                user-provided: '#/components/schemas/UserProvidedServiceInstance'
+          description: Array of included service instance resources
+        apps:
+          type: array
+          items:
+            $ref: '#/components/schemas/App'
+          description: Array of included app resources
+        routes:
+          type: array
+          items:
+            $ref: '#/components/schemas/Route'
+          description: Array of included route resources
+        users:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+          description: Array of included user resources
+      additionalProperties: false
+    Pagination:
+      type: object
+      properties:
+        total_results:
+          type: integer
+          description: The total number of results available
+        total_pages:
+          type: integer
+          description: The total number of pages available
+        first:
+          allOf:
+          - $ref: '#/components/schemas/Link'
+          - description: The first page of results
+        last:
+          allOf:
+          - $ref: '#/components/schemas/Link'
+          - description: The last page of results
+        next:
+          oneOf:
+          - $ref: '#/components/schemas/Link'
+          - type: 'null'
+          description: The next page of results
+        previous:
+          oneOf:
+          - $ref: '#/components/schemas/Link'
+          - type: 'null'
+          description: The previous page of results
+      description: 'Pagination is a technique used to divide a large set of results into smaller, more manageable sets. This allows clients to retrieve results in smaller chunks, reducing the amount of data transferred and improving performance.
+
+        The pagination object is a JSON object that contains information about the pagination state of the results. It includes the total number of results available, the total number of pages available, and links to the first, last, next, and previous pages of results.
+
+        '
     App:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/BaseSchema'
+      - properties:
+          name:
+            type: string
+            description: The name of the app
+          state:
+            type: string
+            description: Current desired state of the app
+            enum:
+            - STOPPED
+            - STARTED
+          lifecycle:
+            $ref: '#/components/schemas/Lifecycle'
+            description: Provides the default lifecycle object for the application. This lifecycle will be used when staging and running the application. The staging lifecycle can be overridden on builds
+          relationships:
+            $ref: '#/components/schemas/Relationships'
+          metadata:
+            $ref: '#/components/schemas/Metadata'
+          links:
+            type: object
+            properties:
+              self:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get this app
+              space:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get the space for this app
+              processes:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get the processes for this app
+              packages:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get the packages for this app
+              environment_variables:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get the environment variables for this app
+              current_droplet:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get the current droplet for this app
+              droplets:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get the droplets for this app
+              tasks:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get the tasks for this app
+              start:
+                $ref: '#/components/schemas/Link'
+                description: The URL to start the app
+              stop:
+                $ref: '#/components/schemas/Link'
+                description: The URL to stop the app
+              revisions:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get the revisions for this app
+              deployed_revisions:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get the deployed revisions for this app
+              features:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get the features for this app
+          included:
+            $ref: '#/components/schemas/IncludedResources'
+            description: Additional related resources included in the response when using the include parameter
+      description: 'Apps represent the core entities in the Cloud Foundry environment. They are the deployable units that run your code. Each app can have multiple processes, routes, and services associated with it. Apps can be scaled horizontally by increasing the number of instances. They can also be updated and restarted as needed.
+
+        '
+    AppEnvironmentVariables:
+      type: object
+      properties:
+        var:
+          type: object
+          description: Environment variables
+          additionalProperties:
+            type:
+            - string
+            - 'null'
+        links:
+          type: object
+          properties:
+            self:
+              $ref: '#/components/schemas/Link'
+              description: The URL to get the environment variables for this app
+            app:
+              $ref: '#/components/schemas/Link'
+              description: The URL to get the app for these environment variables
+      description: App environment variables with links
+    ServiceInstanceLastOperation:
+      type: object
+      properties:
+        type:
+          type: string
+          description: Type of the last operation
+          enum:
+          - create
+          - update
+          - delete
+        state:
+          type: string
+          description: State of the last operation
+          enum:
+          - initial
+          - in progress
+          - succeeded
+          - failed
+        description:
+          type:
+          - string
+          - 'null'
+          description: A textual explanation associated with this state
+        created_at:
+          type: string
+          format: date-time
+          description: When the last operation was created
+        updated_at:
+          type: string
+          format: date-time
+          description: When the last operation was last updated
+      description: The last operation object for service instances
+    AppEnvironment:
+      type: object
+      properties:
+        staging_env_json:
+          type: object
+          description: Environment variables used during staging
+          additionalProperties: true
+        running_env_json:
+          type: object
+          description: Environment variables used during runtime
+          additionalProperties: true
+        environment_variables:
+          type: object
+          description: User-defined environment variables
+          additionalProperties:
+            type:
+            - string
+            - 'null'
+        system_env_json:
+          type: object
+          description: System environment variables including VCAP_SERVICES
+          additionalProperties: true
+        application_env_json:
+          type: object
+          description: Application environment variables including VCAP_APPLICATION
+          additionalProperties: true
+      description: Environment variables that will be provided to an app at runtime
+    Link:
+      type: object
+      properties:
+        href:
+          type: string
+          description: The URL of the link
+        method:
+          type: string
+          description: An optional field containing the HTTP method to be used when following the URL
+      required:
+      - href
+      description: 'Each link is keyed by its type and will include a href for the URL and an optional method for links that cannot be followed using GET.
+
+        '
+    Droplet:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/BaseSchema'
+      - properties:
+          state:
+            type: string
+            description: State of the droplet; valid states are AWAITING_UPLOAD, PROCESSING_UPLOAD, STAGED, COPYING, FAILED, or EXPIRED
+          error:
+            type:
+            - string
+            - 'null'
+            description: A string describing the last error during the droplet lifecycle
+          lifecycle:
+            $ref: '#/components/schemas/Lifecycle'
+          execution_metadata:
+            type:
+            - string
+            - 'null'
+            description: Serialized JSON data resulting from staging for use when executing a droplet
+          process_types:
+            type: object
+            description: The process types (keys) and associated start commands (values) that will be created when the droplet is executed
+          metadata:
+            $ref: '#/components/schemas/Metadata'
+          links:
+            type: object
+            properties:
+              self:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get this droplet
+              package:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get the package for this droplet
+              app:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get the app for this droplet
+              assign_current_droplet:
+                $ref: '#/components/schemas/Link'
+                description: The URL to assign the droplet to an application
+              download:
+                $ref: '#/components/schemas/Link'
+                description: The URL to download the droplet
+              upload:
+                $ref: '#/components/schemas/Link'
+                description: The URL to upload the droplet
+          checksum:
+            type:
+            - object
+            - 'null'
+            properties:
+              type:
+                type: string
+                description: Hashing algorithm for checksum; supported algorithms are sha256 and sha1
+              value:
+                type: string
+                description: Checksum of the droplet
+          buildpacks:
+            type:
+            - array
+            - 'null'
+            items:
+              type: object
+              properties:
+                name:
+                  type:
+                  - string
+                  - 'null'
+                  description: System buildpack name
+                detect_output:
+                  type:
+                  - string
+                  - 'null'
+                  description: Output during buildpack detect process
+                version:
+                  type:
+                  - string
+                  - 'null'
+                  description: Version reported by the buildpack
+                buildpack_name:
+                  type:
+                  - string
+                  - 'null'
+                  description: Name reported by the buildpack
+          stack:
+            type:
+            - string
+            - 'null'
+            description: The root filesystem to use with the buildpack, for example cflinuxfs4
+          image:
+            type:
+            - string
+            - 'null'
+            description: Docker image name for Docker droplets
+      description: A droplet is the result of staging an application package. There are two types (lifecycles) of droplets buildpack and docker. In the case of the buildpacks, the droplet contains the bits produced by the buildpack, typically application code and dependencies.
+    RelationshipToOne:
+      type: object
+      properties:
+        data:
+          type:
+          - object
+          - 'null'
+          $ref: '#/components/schemas/Relationship'
+        links:
+          type: object
+          properties:
+            self:
+              $ref: '#/components/schemas/Link'
+            related:
+              $ref: '#/components/schemas/Link'
+      description: 'Some relationships relate a resource to exactly one other resource. For example an app can belong to only one space.
+
+        '
+    ManagedServiceInstance:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/BaseSchema'
+      - properties:
+          type:
+            type: string
+            enum:
+            - managed
+            description: Type of service instance
+          name:
+            type: string
+            description: Name of the service instance
+          tags:
+            type: array
+            items:
+              type: string
+            description: Tags for the service instance
+          syslog_drain_url:
+            type:
+            - string
+            - 'null'
+            format: uri
+            description: URL for syslog drain
+          route_service_url:
+            type:
+            - string
+            - 'null'
+            format: uri
+            description: URL for route service
+          dashboard_url:
+            type:
+            - string
+            - 'null'
+            format: uri
+            description: URL for service dashboard
+          maintenance_info:
+            type: object
+            properties:
+              version:
+                type: string
+                description: Version of maintenance info
+              description:
+                type:
+                - string
+                - 'null'
+                description: Description of maintenance info
+          upgrade_available:
+            type: boolean
+            description: Whether an upgrade is available
+          last_operation:
+            $ref: '#/components/schemas/ServiceInstanceLastOperation'
+          relationships:
+            type: object
+            properties:
+              space:
+                $ref: '#/components/schemas/RelationshipToOne'
+              service_plan:
+                $ref: '#/components/schemas/RelationshipToOne'
+            description: Relationships for the service instance
+          links:
+            type: object
+            properties:
+              self:
+                $ref: '#/components/schemas/Link'
+              space:
+                $ref: '#/components/schemas/Link'
+              service_plan:
+                $ref: '#/components/schemas/Link'
+              parameters:
+                $ref: '#/components/schemas/Link'
+              service_credential_bindings:
+                $ref: '#/components/schemas/Link'
+              service_route_bindings:
+                $ref: '#/components/schemas/Link'
+              shared_spaces:
+                $ref: '#/components/schemas/Link'
+          metadata:
+            $ref: '#/components/schemas/Metadata'
+        required:
+        - type
+        - name
+        - relationships
+        - links
+    Domain:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/BaseSchema'
+      - properties:
+          name:
+            type: string
+            description: The name of the domain; must be between 3 ~ 253 characters and follow [RFC 1035](https://tools.ietf.org/html/rfc1035)
+          internal:
+            type: boolean
+            description: Whether the domain is used for internal (container-to-container) traffic
+          router_group:
+            type:
+            - object
+            - 'null'
+            properties:
+              guid:
+                type: string
+                format: uuid
+            description: The guid of the desired router group to route `tcp` traffic through; if set, the domain will only be available for `tcp` traffic
+          supported_protocols:
+            type: array
+            items:
+              type: string
+              enum:
+              - http
+              - tcp
+            description: Available protocols for routes using the domain, currently `http` and `tcp`
+          relationships:
+            $ref: '#/components/schemas/Relationships'
+          metadata:
+            $ref: '#/components/schemas/Metadata'
+          links:
+            type: object
+            properties:
+              self:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get this domain
+              organization:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get the organization for this domain
+              route_reservations:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get the route reservations for this domain
+              shared_organizations:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get the shared organizations for this domain
+              router_group:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get the router group for this domain
+      description: 'A domain is a fully qualified domain name that is used for application routes. A domain can be scoped to an organization, meaning it can be used to create routes for spaces inside that organization, or be left unscoped to allow all organizations access.
+
+        '
+    Organization:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/BaseSchema'
+      - properties:
+          name:
+            type: string
+            description: Name of the organization
+          suspended:
+            type: boolean
+            description: Whether an organization is suspended or not; non-admins will be blocked from creating, updating, or deleting resources in a suspended organization
+          relationships:
+            type: object
+            properties:
+              quota:
+                $ref: '#/components/schemas/RelationshipToOne'
+            description: The quota applied to the organization
+          metadata:
+            $ref: '#/components/schemas/Metadata'
+          links:
+            type: object
+            properties:
+              self:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get this organization
+              domains:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get the domains for this organization
+              quota:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get the quota for this organization
+              default_domain:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get the default domain for this organization
+      description: 'An org is a development account that an individual or multiple collaborators can own and use. All collaborators access an org with user accounts. Collaborators in an org share a resource quota plan, applications, services availability, and custom domains.
+
+        '
+    Relationships:
+      type: object
+      description: 'Relationships represent associations between resources. When relationships are mutable, they can be used to create, read, update, and delete these associations. An app’s relationship to its current droplet is mutable, but an app’s relationship to its space is not.
+
+
+        Relationships do not affect the fundamental properties of a resource, but may affect their behavior and permissions logic. Relationships are tied to the lifecycles of the associated resources and will be removed if either of the associated resources are deleted. For example, if a user is removed from an organization, both the user and the organization persist, but the relationship between them does not.
+
+
+        Not all resources implement every relationship operation demonstrated in the examples below. See the docs for each resource to see how it interacts with its relationships.
+
+
+        Endpoints that return relationship data list this information under the relationships key.
+
+
+        The relationship object
+
+        The relationship object is a key-value pair that uniquely identifies a resource. In practice this is almost always the guid of a resource.
+
+        '
+    AppPermissions:
+      type: object
+      properties:
+        read_basic_data:
+          type: boolean
+          description: Whether the user can read basic app data
+        read_sensitive_data:
+          type: boolean
+          description: Whether the user can read sensitive app data
+      required:
+      - read_basic_data
+      - read_sensitive_data
+      description: User permissions for an app
+    Lifecycle:
+      type: object
+      properties:
+        type:
+          type: string
+          description: Type of the lifecycle; valid values are buildpack, cnb, docker
+        data:
+          type: object
+          additionalProperties: true
+          description: Data specific to the lifecycle
+          properties:
+            buildpacks:
+              type: array
+              items:
+                type: string
+              description: List of the names of buildpacks, URLs from which they may be downloaded, or null to auto-detect a suitable buildpack during staging (applicable for buildpack and cnb lifecycles)
+            stack:
+              type:
+              - string
+              - 'null'
+              description: The root filesystem to use with the buildpack, for example cflinuxfs4 (applicable for buildpack lifecycle)
+            credentials:
+              type: object
+              additionalProperties:
+                type: object
+                properties:
+                  username:
+                    type:
+                    - string
+                    - 'null'
+                  password:
+                    type:
+                    - string
+                    - 'null'
+                  token:
+                    type: string
+              description: Credentials used to download the configured buildpacks (applicable for cnb lifecycle)
+      description: 'The lifecycle type defines how the application droplet is created and run. The following lifecycle types are supported: - buildpack: Traditional buildpacks for Cloud Foundry applications. - cnb: Cloud Native Buildpacks that are OCI-compliant. - docker: Run pre-built Docker images.
+
+        '
+    ServiceOffering:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/BaseSchema'
+      - properties:
+          service_broker_guid:
+            type: string
+          service_broker_name:
+            type: string
+          metadata:
+            $ref: '#/components/schemas/Metadata'
+          links:
+            type: object
+            properties:
+              self:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get this service offering
+              service_plans:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get the service plans for this offering
+              service_broker:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get the service broker for this offering
+    Route:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/BaseSchema'
+      - properties:
+          protocol:
+            type: string
+          host:
+            type: string
+          path:
+            type: string
+          port:
+            type:
+            - integer
+            - 'null'
+          url:
+            type: string
+            description: Fully qualified path or address where the route directs traffic
+          relationships:
+            $ref: '#/components/schemas/Relationships'
+          metadata:
+            $ref: '#/components/schemas/Metadata'
+          links:
+            type: object
+            properties:
+              self:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get this route
+              space:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get the space for this route
+              domain:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get the domain for this route
+              destinations:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get the destinations for this route
+          included:
+            $ref: '#/components/schemas/IncludedResources'
+            description: Additional related resources included in the response when using the include parameter
+      description: A route in Cloud Foundry is used to direct traffic from a URL to an application.
+    Space:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/BaseSchema'
+      - properties:
+          name:
+            type: string
+            description: Name of the space
+          relationships:
+            type: object
+            properties:
+              organization:
+                $ref: '#/components/schemas/RelationshipToOne'
+              quota:
+                $ref: '#/components/schemas/RelationshipToOne'
+            description: Relationships for the space
+          links:
+            type: object
+            properties:
+              self:
+                $ref: '#/components/schemas/Link'
+              organization:
+                $ref: '#/components/schemas/Link'
+              features:
+                $ref: '#/components/schemas/Link'
+              apply_manifest:
+                $ref: '#/components/schemas/Link'
+          metadata:
+            $ref: '#/components/schemas/Metadata'
+          included:
+            $ref: '#/components/schemas/IncludedResources'
+            description: Additional related resources included in the response when using the include parameter
+        required:
+        - name
+        - relationships
+        - links
+    Metadata:
+      type: object
+      properties:
+        labels:
+          type: object
+          additionalProperties:
+            type:
+            - string
+            - 'null'
+          description: 'A set of key-value pairs that describe the resource. Labels are a JSON object that contains information about a resource. They are used to tag resources with metadata that can be used to filter and group resources. Labels are included in the response body of a request to retrieve a resource.
+
+            Labels are user-specified key/value pairs that are attached to API Resources. They are queryable, identifying attributes of a resource, but they do not affect the operation of CloudFoundry.
+
+
+            For example, an app may be assigned a label with key sensitive and possible values true or false.
+
+
+            Users could then find all sensitive apps with a selector for sensitive=true, resulting in a response containing only apps having the label key sensitive with a label value of true.
+
+
+            Labels
+
+            Labels allow users to apply identifying attributes to resources that are meaningful to the user, but not the CloudFoundry system.
+
+
+            Examples may include (but are not limited to):
+
+
+            "production" : "true" or "production" : "false"
+
+            "env" : "dev" or "env" : "test" or "env" : "prod"
+
+            "chargeback-code" : "abc123"
+
+            Label keys
+
+            Label keys are made up of an (optional) prefix, and name. If a prefix is present, it is separated from the name by a /. Prefixes are dns names intended to enable namespacing of label keys.
+
+
+            A label key prefix must adhere to the following restrictions:
+
+
+            Length: 0-253 characters
+
+            Allowed characters: alphanumeric ( [a-z0-9A-Z] ), -, and .
+
+            DNS subdomain format (series of subdomain labels separated by .)
+
+            A label key name must adhere to the following restrictions:
+
+
+            Length: 1-63 characters
+
+            Allowed characters: alphanumeric ( [a-z0-9A-Z] ), -, _, and .
+
+            Must begin and end with an alphanumeric character
+
+            Label values
+
+            Label values must adhere to the following restrictions:
+
+
+            Length: 0-63 characters
+
+            Allowed characters: alphanumeric ( [a-z0-9A-Z] ), -, _, and .
+
+            Must begin and end with an alphanumeric character
+
+            Empty values are allowed
+
+            '
+        annotations:
+          type: object
+          additionalProperties:
+            type:
+            - string
+            - 'null'
+          description: 'A set of key-value pairs that describe the resource. Annotations are a JSON object that contains information about a resource. They are used to tag resources with metadata that can be used to filter and group resources. Annotations are included in the response body of a request to retrieve a resource.
+
+            Annotations are user-specified key-value pairs that are attached to API resources. They do not affect the operation of Cloud Foundry. Annotations cannot be used in filters.
+
+
+            When a service instance is being created, the service broker is sent the annotations of the service instance, and the space and organization in which the service instance resides. When a service instance is being updated, the service broker is sent the annotations of the space and organization in which the service instance resides. When a service binding is being created, the service broker is sent annotations of any associated app, and the space and organization in which the binding resides. Only annotations with a prefix (e.g. company.com/contacts) are sent to service brokers.
+
+
+            Examples may include (but are not limited to):
+
+
+            "contact info": "bob@example.com jane@example.com"
+
+            "library versions": "Spring: 5.1, Redis Client: a184098. yaml parser: 38"
+
+            "git-sha": "d56fe0367554ae5e878e37ed6c5b9a82f5995512"
+
+            Annotation keys
+
+            Annotation keys are made up of an (optional) prefix and name. If a prefix is present, it is separated from the name by a /. Prefixes are DNS names intended to enable namespacing of annotation keys.
+
+
+            An annotation key prefix must adhere to the following restrictions:
+
+
+            Length: 0-253 characters
+
+            Allowed characters: a-z, A-Z, 0-9, -, and .; emojis cannot be used in keys
+
+            DNS subdomain format (series of subdomain annotations separated by .)
+
+            An annotation key name must adhere to the following restrictions:
+
+
+            Length: 1-63 characters
+
+            Allowed characters: a-z, A-Z, 0-9, -, _, and .; emojis cannot be used in keys
+
+            Must begin and end with an alphanumeric character
+
+            Annotation values
+
+            Annotation values must adhere to the following restrictions:
+
+
+            Length: 0-5000 unicode characters
+
+            '
+      description: 'Metadata is a JSON object that contains information about a resource. It includes the GUID of the resource, the time the resource was created, the time the resource was last updated, and links to the resource.
+
+        Metadata is included in the response body of a request to retrieve a resource.
+
+        '
+    User:
       type: object
       properties:
         guid:
           type: string
-        name:
+          description: Unique identifier for the user, matching either a UAA user id or client id. A client id may not be a uuid.
+        created_at:
           type: string
-        state:
+          format: date-time
+          description: The ISO8601 compatible date and time when resource was created
+        updated_at:
           type: string
-          enum:
-          - STARTED
-          - STOPPED
-        lifecycle:
+          format: date-time
+          description: The ISO8601 compatible date and time when resource was last updated
+        username:
+          type:
+          - string
+          - 'null'
+          description: The username of the user
+        presentation_name:
+          type: string
+          description: The presentation name of the user
+        origin:
+          type:
+          - string
+          - 'null'
+          description: The origin of the user
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+        links:
           type: object
-        relationships:
-          type: object
+          properties:
+            self:
+              $ref: '#/components/schemas/Link'
+              description: The URL to get this user
+    Errors:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/Error'
+      description: 'An error response will always return a list of error objects. Errors appear on the job resource for asynchronous operations.
+
+        Clients should use the code and title fields for programmatically handling specific errors. The message in the detail field is subject to change over time.
+
+        '
+    AppSshEnabled:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+          description: Whether SSH is enabled for the app
+        reason:
+          type: string
+          description: If SSH is disabled, describes whether it is disabled globally, at the space level, or at the app level
+      required:
+      - enabled
+      description: SSH enabled status for an app
+    DropletList:
+      type: object
+      properties:
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+        resources:
+          type: array
+          items:
+            $ref: '#/components/schemas/Droplet'
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: A numeric code for this error
+        detail:
+          type: string
+          description: Detailed description of the error
+        title:
+          type: string
+          description: Name of the error
+    UserProvidedServiceInstance:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/BaseSchema'
+      - properties:
+          type:
+            type: string
+            enum:
+            - user-provided
+            description: Type of service instance
+          name:
+            type: string
+            description: Name of the service instance
+          tags:
+            type: array
+            items:
+              type: string
+            description: Tags for the service instance
+          syslog_drain_url:
+            type:
+            - string
+            - 'null'
+            format: uri
+            description: URL for syslog drain
+          route_service_url:
+            type:
+            - string
+            - 'null'
+            format: uri
+            description: URL for route service
+          relationships:
+            type: object
+            properties:
+              space:
+                $ref: '#/components/schemas/RelationshipToOne'
+            description: Relationships for the service instance
+          links:
+            type: object
+            properties:
+              self:
+                $ref: '#/components/schemas/Link'
+              space:
+                $ref: '#/components/schemas/Link'
+              service_credential_bindings:
+                $ref: '#/components/schemas/Link'
+              service_route_bindings:
+                $ref: '#/components/schemas/Link'
+              credentials:
+                $ref: '#/components/schemas/Link'
+          metadata:
+            $ref: '#/components/schemas/Metadata'
+        required:
+        - type
+        - name
+        - relationships
+        - links
+    Relationship:
+      type: object
+      properties:
+        guid:
+          type: string
+          format: uuid
+          description: The GUID of the resource
+    AppList:
+      type: object
+      properties:
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+        resources:
+          type: array
+          items:
+            $ref: '#/components/schemas/App'
+        included:
+          $ref: '#/components/schemas/IncludedResources'
+          description: Additional related resources included in the response when using the include parameter
+    BaseSchema:
+      type: object
+      properties:
+        guid:
+          type: string
+          format: uuid
+          description: The unique identifier for the resource
+        created_at:
+          type: string
+          format: date-time
+          description: The ISO8601 compatible date and time when resource was created
+        updated_at:
+          type: string
+          format: date-time
+          description: The ISO8601 compatible date and time when resource was last updated
+      description: 'A resource represents an individual object within the system, such as an app or a service. It is represented as a JSON object.
+
+        A resource consists of several required resource fields and other attributes specific to the resource.
+
+        See Resources and Experimental Resources for specific resources.
+
+        '
+  requestBodies:
+    AppUpdateRequestBody:
+      description: App object that needs to be updated
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+                description: Name of the app
+              environment_variables:
+                type: object
+                description: Environment variables to be used for the App when running
+                additionalProperties:
+                  type: string
+              lifecycle:
+                $ref: '#/components/schemas/Lifecycle'
+                description: Lifecycle to be used when updating the app; note `data` is a required field in lifecycle if lifecycle is updated. `type` may NOT be changed from its current value.
+              metadata:
+                $ref: '#/components/schemas/Metadata'
+            description: Request schema for updating an app
+          examples:
+            default:
+              summary: default
+              value:
+                name: my_app
+                lifecycle:
+                  type: buildpack
+                  data:
+                    buildpacks:
+                    - java_buildpack
+    AppCreateRequestBody:
+      description: App object that needs to be created
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+                description: Name of the app
+              environment_variables:
+                type: object
+                description: Environment variables to be used for the App when running
+                additionalProperties:
+                  type: string
+              lifecycle:
+                $ref: '#/components/schemas/Lifecycle'
+                description: Provides the lifecycle object for the application
+              relationships:
+                type: object
+                properties:
+                  space:
+                    $ref: '#/components/schemas/RelationshipToOne'
+                    description: A relationship to a space
+                required:
+                - space
+              metadata:
+                $ref: '#/components/schemas/Metadata'
+            required:
+            - name
+            - relationships
+            description: Request schema for creating an app
+          examples:
+            default:
+              summary: default
+              value:
+                name: my_app
+                relationships:
+                  space:
+                    data:
+                      guid: 123e4567-e89b-12d3-a456-426614174000
+  responses:
+    UnprocessableEntity:
+      description: Unprocessable Entity
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    NotFound:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    BadGateway:
+      description: Bad Gateway
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Conflict:
+      description: Conflict
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    '500':
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    BadRequest:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+        text/html:
+          schema:
+            type: string
+    ServiceUnavailable:
+      description: Service Unavailable
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
   parameters:
+    OrderBy:
+      name: order_by
+      in: query
+      required: false
+      schema:
+        type: string
+      description: 'Value to sort by. Defaults to ascending; prepend with `-` to sort descending.
+
+        '
+      example: created_at
+    CreatedAts:
+      name: created_ats
+      in: query
+      required: false
+      schema:
+        type: string
+      description: 'Timestamp to filter by. When filtering on equality, several comma-delimited timestamps may be passed. Also supports filtering with [relational operators](#relational-operators).
+
+        '
+      example: '2021-01-01T00:00:00Z'
     PerPage:
       name: per_page
       in: query
+      required: false
       schema:
         type: integer
-        default: 50
-    GuidParam:
+      description: Number of results per page, valid values are 1 through 5000
+      example: 50
+    LabelSelector:
+      name: label_selector
+      in: query
+      description: A query string containing a list of [label selector](#labels-and-selectors) requirements
+      required: false
+      schema:
+        type: string
+      example: environment=production
+    Page:
+      name: page
+      in: query
+      required: false
+      schema:
+        type: integer
+      description: Page to display; valid values are integers >= 1
+      example: 1
+    UpdatedAts:
+      name: updated_ats
+      in: query
+      required: false
+      schema:
+        type: string
+      description: 'Timestamp to filter by. When filtering on equality, several comma-delimited timestamps may be passed. Also supports filtering with [relational operators](#relational-operators).
+
+        '
+      example: '2021-01-01T00:00:00Z'
+    Guid:
       name: guid
       in: path
       required: true
       schema:
         type: string
-    Page:
-      name: page
-      in: query
-      schema:
-        type: integer
-        default: 1
+        format: uuid
+      description: The unique identifier for the resource
   securitySchemes:
-    bearerAuth:
+    oauth:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: https://uaa.cloudfoundry.local/api-oauth/dialog
+          scopes:
+            cloud_controller.admin: This scope provides read and write access to all resources
+            cloud_controller.admin_read_only: This scope provides read only access to all resources
+            cloud_controller.global_auditor: This scope provides read access to all resources
+            cloud_controller.read: Read access to the Cloud Controller
+            cloud_controller.write: Write access to the Cloud Controller
+            cloud_controller.update_build_state: This scope allows its bearer to update the state of a build; currently only used when updating builds
+            cloud_controller_service_permissions.read: This scope provides read only access for service instance permissions
+    bearer:
       type: http
       scheme: bearer
       bearerFormat: JWT
+      description: Bearer JWT token authentication
