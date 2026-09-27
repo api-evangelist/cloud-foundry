@@ -42,7 +42,7 @@ tags:
 - Cloud Foundry Foundation
 - Containers
 - Multi-Cloud
-- Open-Source
+- Open Source
 - Platform-as-a-Service
 - Platform
 tags_raw:
@@ -52,6 +52,7 @@ tags_raw:
 - Open Source
 - PaaS
 - Platform
+- Open-Source
 apis:
 - aid: cloud-foundry:uaa
   name: Cloud Foundry UAA
@@ -258,9 +259,11 @@ apis:
   humanURL: https://v3-apidocs.cloudfoundry.org/
   baseURL: https://api.{system-domain}
   tags:
+  - Spaces
   - Space
   tags_raw:
   - Spaces
+  - Space
   properties:
   - type: OpenAPI
     url: openapi/cloud-foundry-spaces-api-openapi.yml

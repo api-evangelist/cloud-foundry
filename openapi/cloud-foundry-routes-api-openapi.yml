@@ -796,88 +796,90 @@ paths:
           $ref: '#/components/responses/UnprocessableEntity'
 components:
   schemas:
-    IncludedResources:
-      type: object
-      description: Additional related resources included in the response when using the include parameter
-      properties:
-        spaces:
-          type: array
-          items:
-            $ref: '#/components/schemas/Space'
-          description: Array of included space resources
-        organizations:
-          type: array
-          items:
-            $ref: '#/components/schemas/Organization'
-          description: Array of included organization resources
-        domains:
-          type: array
-          items:
-            $ref: '#/components/schemas/Domain'
-          description: Array of included domain resources
-        service_offerings:
-          type: array
-          items:
-            $ref: '#/components/schemas/ServiceOffering'
-          description: Array of included service offering resources
-        service_instances:
-          type: array
-          items:
-            oneOf:
-            - $ref: '#/components/schemas/ManagedServiceInstance'
-            - $ref: '#/components/schemas/UserProvidedServiceInstance'
-            discriminator:
-              propertyName: type
-              mapping:
-                managed: '#/components/schemas/ManagedServiceInstance'
-                user-provided: '#/components/schemas/UserProvidedServiceInstance'
-          description: Array of included service instance resources
-        apps:
-          type: array
-          items:
-            $ref: '#/components/schemas/App'
-          description: Array of included app resources
-        routes:
-          type: array
-          items:
-            $ref: '#/components/schemas/Route'
-          description: Array of included route resources
-        users:
-          type: array
-          items:
-            $ref: '#/components/schemas/User'
-          description: Array of included user resources
-      additionalProperties: false
-    Pagination:
+    Link:
       type: object
       properties:
-        total_results:
-          type: integer
-          description: The total number of results available
-        total_pages:
-          type: integer
-          description: The total number of pages available
-        first:
-          allOf:
-          - $ref: '#/components/schemas/Link'
-          - description: The first page of results
-        last:
-          allOf:
-          - $ref: '#/components/schemas/Link'
-          - description: The last page of results
-        next:
-          oneOf:
-          - $ref: '#/components/schemas/Link'
-          - type: 'null'
-          description: The next page of results
-        previous:
-          oneOf:
-          - $ref: '#/components/schemas/Link'
-          - type: 'null'
-          description: The previous page of results
-      description: 'Pagination is a technique used to divide a large set of results into smaller, more manageable sets. This allows clients to retrieve results in smaller chunks, reducing the amount of data transferred and improving performance.
+        href:
+          type: string
+          description: The URL of the link
+        method:
+          type: string
+          description: An optional field containing the HTTP method to be used when following the URL
+      required:
+      - href
+      description: 'Each link is keyed by its type and will include a href for the URL and an optional method for links that cannot be followed using GET.
 
-        The pagination object is a JSON object that contains information about the pagination state of the results. It includes the total number of results available, the total number of pages available, and links to the first, last, next, and previous pages of results.
+        '
+    Relationship:
+      type: object
+      properties:
+        guid:
+          type: string
+          format: uuid
+          description: The GUID of the resource
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: A numeric code for this error
+        detail:
+          type: string
+          description: Detailed description of the error
+        title:
+          type: string
+          description: Name of the error
+    Domain:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/BaseSchema'
+      - properties:
+          name:
+            type: string
+            description: The name of the domain; must be between 3 ~ 253 characters and follow [RFC 1035](https://tools.ietf.org/html/rfc1035)
+          internal:
+            type: boolean
+            description: Whether the domain is used for internal (container-to-container) traffic
+          router_group:
+            type:
+            - object
+            - 'null'
+            properties:
+              guid:
+                type: string
+                format: uuid
+            description: The guid of the desired router group to route `tcp` traffic through; if set, the domain will only be available for `tcp` traffic
+          supported_protocols:
+            type: array
+            items:
+              type: string
+              enum:
+              - http
+              - tcp
+            description: Available protocols for routes using the domain, currently `http` and `tcp`
+          relationships:
+            $ref: '#/components/schemas/Relationships'
+          metadata:
+            $ref: '#/components/schemas/Metadata'
+          links:
+            type: object
+            properties:
+              self:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get this domain
+              organization:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get the organization for this domain
+              route_reservations:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get the route reservations for this domain
+              shared_organizations:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get the shared organizations for this domain
+              router_group:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get the router group for this domain
+      description: 'A domain is a fully qualified domain name that is used for application routes. A domain can be scoped to an organization, meaning it can be used to create routes for spaces inside that organization, or be left unscoped to allow all organizations access.
 
         '
     App:
@@ -949,45 +951,66 @@ components:
       description: 'Apps represent the core entities in the Cloud Foundry environment. They are the deployable units that run your code. Each app can have multiple processes, routes, and services associated with it. Apps can be scaled horizontally by increasing the number of instances. They can also be updated and restarted as needed.
 
         '
-    ServiceInstanceLastOperation:
+    Errors:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/Error'
+      description: 'An error response will always return a list of error objects. Errors appear on the job resource for asynchronous operations.
+
+        Clients should use the code and title fields for programmatically handling specific errors. The message in the detail field is subject to change over time.
+
+        '
+    Lifecycle:
       type: object
       properties:
         type:
           type: string
-          description: Type of the last operation
-          enum:
-          - create
-          - update
-          - delete
-        state:
-          type: string
-          description: State of the last operation
-          enum:
-          - initial
-          - in progress
-          - succeeded
-          - failed
-        description:
-          type:
-          - string
-          - 'null'
-          description: A textual explanation associated with this state
-        created_at:
-          type: string
-          format: date-time
-          description: When the last operation was created
-        updated_at:
-          type: string
-          format: date-time
-          description: When the last operation was last updated
-      description: The last operation object for service instances
-    RelationshipToMany:
+          description: Type of the lifecycle; valid values are buildpack, cnb, docker
+        data:
+          type: object
+          additionalProperties: true
+          description: Data specific to the lifecycle
+          properties:
+            buildpacks:
+              type: array
+              items:
+                type: string
+              description: List of the names of buildpacks, URLs from which they may be downloaded, or null to auto-detect a suitable buildpack during staging (applicable for buildpack and cnb lifecycles)
+            stack:
+              type:
+              - string
+              - 'null'
+              description: The root filesystem to use with the buildpack, for example cflinuxfs4 (applicable for buildpack lifecycle)
+            credentials:
+              type: object
+              additionalProperties:
+                type: object
+                properties:
+                  username:
+                    type:
+                    - string
+                    - 'null'
+                  password:
+                    type:
+                    - string
+                    - 'null'
+                  token:
+                    type: string
+              description: Credentials used to download the configured buildpacks (applicable for cnb lifecycle)
+      description: 'The lifecycle type defines how the application droplet is created and run. The following lifecycle types are supported: - buildpack: Traditional buildpacks for Cloud Foundry applications. - cnb: Cloud Native Buildpacks that are OCI-compliant. - docker: Run pre-built Docker images.
+
+        '
+    RelationshipToOne:
       type: object
       properties:
         data:
-          type: array
-          items:
-            $ref: '#/components/schemas/Relationship'
+          type:
+          - object
+          - 'null'
+          $ref: '#/components/schemas/Relationship'
         links:
           type: object
           properties:
@@ -995,23 +1018,185 @@ components:
               $ref: '#/components/schemas/Link'
             related:
               $ref: '#/components/schemas/Link'
-      description: 'Some relationships relate a resource to several other resources. For example, an isolation segment can be entitled to multiple organizations.
+      description: 'Some relationships relate a resource to exactly one other resource. For example an app can belong to only one space.
 
         '
-    Link:
+    RouteList:
       type: object
       properties:
-        href:
-          type: string
-          description: The URL of the link
-        method:
-          type: string
-          description: An optional field containing the HTTP method to be used when following the URL
-      required:
-      - href
-      description: 'Each link is keyed by its type and will include a href for the URL and an optional method for links that cannot be followed using GET.
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+        resources:
+          type: array
+          items:
+            $ref: '#/components/schemas/Route'
+        included:
+          $ref: '#/components/schemas/IncludedResources'
+          description: Additional related resources included in the response when using the include parameter
+      description: A list of routes
+    ServiceOffering:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/BaseSchema'
+      - properties:
+          service_broker_guid:
+            type: string
+          service_broker_name:
+            type: string
+          metadata:
+            $ref: '#/components/schemas/Metadata'
+          links:
+            type: object
+            properties:
+              self:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get this service offering
+              service_plans:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get the service plans for this offering
+              service_broker:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get the service broker for this offering
+    Organization:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/BaseSchema'
+      - properties:
+          name:
+            type: string
+            description: Name of the organization
+          suspended:
+            type: boolean
+            description: Whether an organization is suspended or not; non-admins will be blocked from creating, updating, or deleting resources in a suspended organization
+          relationships:
+            type: object
+            properties:
+              quota:
+                $ref: '#/components/schemas/RelationshipToOne'
+            description: The quota applied to the organization
+          metadata:
+            $ref: '#/components/schemas/Metadata'
+          links:
+            type: object
+            properties:
+              self:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get this organization
+              domains:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get the domains for this organization
+              quota:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get the quota for this organization
+              default_domain:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get the default domain for this organization
+      description: 'An org is a development account that an individual or multiple collaborators can own and use. All collaborators access an org with user accounts. Collaborators in an org share a resource quota plan, applications, services availability, and custom domains.
 
         '
+    IncludedResources:
+      type: object
+      description: Additional related resources included in the response when using the include parameter
+      properties:
+        spaces:
+          type: array
+          items:
+            $ref: '#/components/schemas/Space'
+          description: Array of included space resources
+        organizations:
+          type: array
+          items:
+            $ref: '#/components/schemas/Organization'
+          description: Array of included organization resources
+        domains:
+          type: array
+          items:
+            $ref: '#/components/schemas/Domain'
+          description: Array of included domain resources
+        service_offerings:
+          type: array
+          items:
+            $ref: '#/components/schemas/ServiceOffering'
+          description: Array of included service offering resources
+        service_instances:
+          type: array
+          items:
+            oneOf:
+            - $ref: '#/components/schemas/ManagedServiceInstance'
+            - $ref: '#/components/schemas/UserProvidedServiceInstance'
+            discriminator:
+              propertyName: type
+              mapping:
+                managed: '#/components/schemas/ManagedServiceInstance'
+                user-provided: '#/components/schemas/UserProvidedServiceInstance'
+          description: Array of included service instance resources
+        apps:
+          type: array
+          items:
+            $ref: '#/components/schemas/App'
+          description: Array of included app resources
+        routes:
+          type: array
+          items:
+            $ref: '#/components/schemas/Route'
+          description: Array of included route resources
+        users:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+          description: Array of included user resources
+      additionalProperties: false
+    Route:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/BaseSchema'
+      - properties:
+          protocol:
+            type: string
+          host:
+            type: string
+          path:
+            type: string
+          port:
+            type:
+            - integer
+            - 'null'
+          url:
+            type: string
+            description: Fully qualified path or address where the route directs traffic
+          relationships:
+            $ref: '#/components/schemas/Relationships'
+          metadata:
+            $ref: '#/components/schemas/Metadata'
+          links:
+            type: object
+            properties:
+              self:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get this route
+              space:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get the space for this route
+              domain:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get the domain for this route
+              destinations:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get the destinations for this route
+          included:
+            $ref: '#/components/schemas/IncludedResources'
+            description: Additional related resources included in the response when using the include parameter
+      description: A route in Cloud Foundry is used to direct traffic from a URL to an application.
+    RouteDestinationList:
+      type: object
+      properties:
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+        destinations:
+          type: array
+          items:
+            $ref: '#/components/schemas/RouteDestination'
+      description: A list of route destinations
     RouteDestination:
       type: object
       properties:
@@ -1057,24 +1242,74 @@ components:
               $ref: '#/components/schemas/Link'
               description: The URL to get the route for this destination
       description: A route destination is a specification for where traffic on a route should be directed.
-    RelationshipToOne:
+    Pagination:
       type: object
       properties:
-        data:
-          type:
-          - object
-          - 'null'
-          $ref: '#/components/schemas/Relationship'
-        links:
-          type: object
-          properties:
-            self:
-              $ref: '#/components/schemas/Link'
-            related:
-              $ref: '#/components/schemas/Link'
-      description: 'Some relationships relate a resource to exactly one other resource. For example an app can belong to only one space.
+        total_results:
+          type: integer
+          description: The total number of results available
+        total_pages:
+          type: integer
+          description: The total number of pages available
+        first:
+          allOf:
+          - $ref: '#/components/schemas/Link'
+          - description: The first page of results
+        last:
+          allOf:
+          - $ref: '#/components/schemas/Link'
+          - description: The last page of results
+        next:
+          oneOf:
+          - $ref: '#/components/schemas/Link'
+          - type: 'null'
+          description: The next page of results
+        previous:
+          oneOf:
+          - $ref: '#/components/schemas/Link'
+          - type: 'null'
+          description: The previous page of results
+      description: 'Pagination is a technique used to divide a large set of results into smaller, more manageable sets. This allows clients to retrieve results in smaller chunks, reducing the amount of data transferred and improving performance.
+
+        The pagination object is a JSON object that contains information about the pagination state of the results. It includes the total number of results available, the total number of pages available, and links to the first, last, next, and previous pages of results.
 
         '
+    Space:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/BaseSchema'
+      - properties:
+          name:
+            type: string
+            description: Name of the space
+          relationships:
+            type: object
+            properties:
+              organization:
+                $ref: '#/components/schemas/RelationshipToOne'
+              quota:
+                $ref: '#/components/schemas/RelationshipToOne'
+            description: Relationships for the space
+          links:
+            type: object
+            properties:
+              self:
+                $ref: '#/components/schemas/Link'
+              organization:
+                $ref: '#/components/schemas/Link'
+              features:
+                $ref: '#/components/schemas/Link'
+              apply_manifest:
+                $ref: '#/components/schemas/Link'
+          metadata:
+            $ref: '#/components/schemas/Metadata'
+          included:
+            $ref: '#/components/schemas/IncludedResources'
+            description: Additional related resources included in the response when using the include parameter
+        required:
+        - name
+        - relationships
+        - links
     ManagedServiceInstance:
       type: object
       allOf:
@@ -1159,255 +1394,94 @@ components:
         - name
         - relationships
         - links
-    Domain:
+    UserProvidedServiceInstance:
       type: object
       allOf:
       - $ref: '#/components/schemas/BaseSchema'
       - properties:
+          type:
+            type: string
+            enum:
+            - user-provided
+            description: Type of service instance
           name:
             type: string
-            description: The name of the domain; must be between 3 ~ 253 characters and follow [RFC 1035](https://tools.ietf.org/html/rfc1035)
-          internal:
-            type: boolean
-            description: Whether the domain is used for internal (container-to-container) traffic
-          router_group:
-            type:
-            - object
-            - 'null'
-            properties:
-              guid:
-                type: string
-                format: uuid
-            description: The guid of the desired router group to route `tcp` traffic through; if set, the domain will only be available for `tcp` traffic
-          supported_protocols:
+            description: Name of the service instance
+          tags:
             type: array
             items:
               type: string
-              enum:
-              - http
-              - tcp
-            description: Available protocols for routes using the domain, currently `http` and `tcp`
-          relationships:
-            $ref: '#/components/schemas/Relationships'
-          metadata:
-            $ref: '#/components/schemas/Metadata'
-          links:
-            type: object
-            properties:
-              self:
-                $ref: '#/components/schemas/Link'
-                description: The URL to get this domain
-              organization:
-                $ref: '#/components/schemas/Link'
-                description: The URL to get the organization for this domain
-              route_reservations:
-                $ref: '#/components/schemas/Link'
-                description: The URL to get the route reservations for this domain
-              shared_organizations:
-                $ref: '#/components/schemas/Link'
-                description: The URL to get the shared organizations for this domain
-              router_group:
-                $ref: '#/components/schemas/Link'
-                description: The URL to get the router group for this domain
-      description: 'A domain is a fully qualified domain name that is used for application routes. A domain can be scoped to an organization, meaning it can be used to create routes for spaces inside that organization, or be left unscoped to allow all organizations access.
-
-        '
-    Organization:
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/BaseSchema'
-      - properties:
-          name:
-            type: string
-            description: Name of the organization
-          suspended:
-            type: boolean
-            description: Whether an organization is suspended or not; non-admins will be blocked from creating, updating, or deleting resources in a suspended organization
+            description: Tags for the service instance
+          syslog_drain_url:
+            type:
+            - string
+            - 'null'
+            format: uri
+            description: URL for syslog drain
+          route_service_url:
+            type:
+            - string
+            - 'null'
+            format: uri
+            description: URL for route service
           relationships:
             type: object
             properties:
-              quota:
+              space:
                 $ref: '#/components/schemas/RelationshipToOne'
-            description: The quota applied to the organization
-          metadata:
-            $ref: '#/components/schemas/Metadata'
+            description: Relationships for the service instance
           links:
             type: object
             properties:
               self:
                 $ref: '#/components/schemas/Link'
-                description: The URL to get this organization
-              domains:
+              space:
                 $ref: '#/components/schemas/Link'
-                description: The URL to get the domains for this organization
-              quota:
+              service_credential_bindings:
                 $ref: '#/components/schemas/Link'
-                description: The URL to get the quota for this organization
-              default_domain:
+              service_route_bindings:
                 $ref: '#/components/schemas/Link'
-                description: The URL to get the default domain for this organization
-      description: 'An org is a development account that an individual or multiple collaborators can own and use. All collaborators access an org with user accounts. Collaborators in an org share a resource quota plan, applications, services availability, and custom domains.
-
-        '
-    Relationships:
-      type: object
-      description: 'Relationships represent associations between resources. When relationships are mutable, they can be used to create, read, update, and delete these associations. An app’s relationship to its current droplet is mutable, but an app’s relationship to its space is not.
-
-
-        Relationships do not affect the fundamental properties of a resource, but may affect their behavior and permissions logic. Relationships are tied to the lifecycles of the associated resources and will be removed if either of the associated resources are deleted. For example, if a user is removed from an organization, both the user and the organization persist, but the relationship between them does not.
-
-
-        Not all resources implement every relationship operation demonstrated in the examples below. See the docs for each resource to see how it interacts with its relationships.
-
-
-        Endpoints that return relationship data list this information under the relationships key.
-
-
-        The relationship object
-
-        The relationship object is a key-value pair that uniquely identifies a resource. In practice this is almost always the guid of a resource.
-
-        '
-    Lifecycle:
+              credentials:
+                $ref: '#/components/schemas/Link'
+          metadata:
+            $ref: '#/components/schemas/Metadata'
+        required:
+        - type
+        - name
+        - relationships
+        - links
+    ServiceInstanceLastOperation:
       type: object
       properties:
         type:
           type: string
-          description: Type of the lifecycle; valid values are buildpack, cnb, docker
-        data:
-          type: object
-          additionalProperties: true
-          description: Data specific to the lifecycle
-          properties:
-            buildpacks:
-              type: array
-              items:
-                type: string
-              description: List of the names of buildpacks, URLs from which they may be downloaded, or null to auto-detect a suitable buildpack during staging (applicable for buildpack and cnb lifecycles)
-            stack:
-              type:
-              - string
-              - 'null'
-              description: The root filesystem to use with the buildpack, for example cflinuxfs4 (applicable for buildpack lifecycle)
-            credentials:
-              type: object
-              additionalProperties:
-                type: object
-                properties:
-                  username:
-                    type:
-                    - string
-                    - 'null'
-                  password:
-                    type:
-                    - string
-                    - 'null'
-                  token:
-                    type: string
-              description: Credentials used to download the configured buildpacks (applicable for cnb lifecycle)
-      description: 'The lifecycle type defines how the application droplet is created and run. The following lifecycle types are supported: - buildpack: Traditional buildpacks for Cloud Foundry applications. - cnb: Cloud Native Buildpacks that are OCI-compliant. - docker: Run pre-built Docker images.
-
-        '
-    ServiceOffering:
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/BaseSchema'
-      - properties:
-          service_broker_guid:
-            type: string
-          service_broker_name:
-            type: string
-          metadata:
-            $ref: '#/components/schemas/Metadata'
-          links:
-            type: object
-            properties:
-              self:
-                $ref: '#/components/schemas/Link'
-                description: The URL to get this service offering
-              service_plans:
-                $ref: '#/components/schemas/Link'
-                description: The URL to get the service plans for this offering
-              service_broker:
-                $ref: '#/components/schemas/Link'
-                description: The URL to get the service broker for this offering
-    Route:
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/BaseSchema'
-      - properties:
-          protocol:
-            type: string
-          host:
-            type: string
-          path:
-            type: string
-          port:
-            type:
-            - integer
-            - 'null'
-          url:
-            type: string
-            description: Fully qualified path or address where the route directs traffic
-          relationships:
-            $ref: '#/components/schemas/Relationships'
-          metadata:
-            $ref: '#/components/schemas/Metadata'
-          links:
-            type: object
-            properties:
-              self:
-                $ref: '#/components/schemas/Link'
-                description: The URL to get this route
-              space:
-                $ref: '#/components/schemas/Link'
-                description: The URL to get the space for this route
-              domain:
-                $ref: '#/components/schemas/Link'
-                description: The URL to get the domain for this route
-              destinations:
-                $ref: '#/components/schemas/Link'
-                description: The URL to get the destinations for this route
-          included:
-            $ref: '#/components/schemas/IncludedResources'
-            description: Additional related resources included in the response when using the include parameter
-      description: A route in Cloud Foundry is used to direct traffic from a URL to an application.
-    Space:
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/BaseSchema'
-      - properties:
-          name:
-            type: string
-            description: Name of the space
-          relationships:
-            type: object
-            properties:
-              organization:
-                $ref: '#/components/schemas/RelationshipToOne'
-              quota:
-                $ref: '#/components/schemas/RelationshipToOne'
-            description: Relationships for the space
-          links:
-            type: object
-            properties:
-              self:
-                $ref: '#/components/schemas/Link'
-              organization:
-                $ref: '#/components/schemas/Link'
-              features:
-                $ref: '#/components/schemas/Link'
-              apply_manifest:
-                $ref: '#/components/schemas/Link'
-          metadata:
-            $ref: '#/components/schemas/Metadata'
-          included:
-            $ref: '#/components/schemas/IncludedResources'
-            description: Additional related resources included in the response when using the include parameter
-        required:
-        - name
-        - relationships
-        - links
+          description: Type of the last operation
+          enum:
+          - create
+          - update
+          - delete
+        state:
+          type: string
+          description: State of the last operation
+          enum:
+          - initial
+          - in progress
+          - succeeded
+          - failed
+        description:
+          type:
+          - string
+          - 'null'
+          description: A textual explanation associated with this state
+        created_at:
+          type: string
+          format: date-time
+          description: When the last operation was created
+        updated_at:
+          type: string
+          format: date-time
+          description: When the last operation was last updated
+      description: The last operation object for service instances
     Metadata:
       type: object
       properties:
@@ -1538,6 +1612,23 @@ components:
         Metadata is included in the response body of a request to retrieve a resource.
 
         '
+    RelationshipToMany:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Relationship'
+        links:
+          type: object
+          properties:
+            self:
+              $ref: '#/components/schemas/Link'
+            related:
+              $ref: '#/components/schemas/Link'
+      description: 'Some relationships relate a resource to several other resources. For example, an isolation segment can be entitled to multiple organizations.
+
+        '
     User:
       type: object
       properties:
@@ -1573,116 +1664,6 @@ components:
             self:
               $ref: '#/components/schemas/Link'
               description: The URL to get this user
-    Errors:
-      type: object
-      properties:
-        errors:
-          type: array
-          items:
-            $ref: '#/components/schemas/Error'
-      description: 'An error response will always return a list of error objects. Errors appear on the job resource for asynchronous operations.
-
-        Clients should use the code and title fields for programmatically handling specific errors. The message in the detail field is subject to change over time.
-
-        '
-    RouteDestinationList:
-      type: object
-      properties:
-        pagination:
-          $ref: '#/components/schemas/Pagination'
-        destinations:
-          type: array
-          items:
-            $ref: '#/components/schemas/RouteDestination'
-      description: A list of route destinations
-    Error:
-      type: object
-      properties:
-        code:
-          type: integer
-          description: A numeric code for this error
-        detail:
-          type: string
-          description: Detailed description of the error
-        title:
-          type: string
-          description: Name of the error
-    RouteList:
-      type: object
-      properties:
-        pagination:
-          $ref: '#/components/schemas/Pagination'
-        resources:
-          type: array
-          items:
-            $ref: '#/components/schemas/Route'
-        included:
-          $ref: '#/components/schemas/IncludedResources'
-          description: Additional related resources included in the response when using the include parameter
-      description: A list of routes
-    UserProvidedServiceInstance:
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/BaseSchema'
-      - properties:
-          type:
-            type: string
-            enum:
-            - user-provided
-            description: Type of service instance
-          name:
-            type: string
-            description: Name of the service instance
-          tags:
-            type: array
-            items:
-              type: string
-            description: Tags for the service instance
-          syslog_drain_url:
-            type:
-            - string
-            - 'null'
-            format: uri
-            description: URL for syslog drain
-          route_service_url:
-            type:
-            - string
-            - 'null'
-            format: uri
-            description: URL for route service
-          relationships:
-            type: object
-            properties:
-              space:
-                $ref: '#/components/schemas/RelationshipToOne'
-            description: Relationships for the service instance
-          links:
-            type: object
-            properties:
-              self:
-                $ref: '#/components/schemas/Link'
-              space:
-                $ref: '#/components/schemas/Link'
-              service_credential_bindings:
-                $ref: '#/components/schemas/Link'
-              service_route_bindings:
-                $ref: '#/components/schemas/Link'
-              credentials:
-                $ref: '#/components/schemas/Link'
-          metadata:
-            $ref: '#/components/schemas/Metadata'
-        required:
-        - type
-        - name
-        - relationships
-        - links
-    Relationship:
-      type: object
-      properties:
-        guid:
-          type: string
-          format: uuid
-          description: The GUID of the resource
     BaseSchema:
       type: object
       properties:
@@ -1705,15 +1686,28 @@ components:
         See Resources and Experimental Resources for specific resources.
 
         '
+    Relationships:
+      type: object
+      description: 'Relationships represent associations between resources. When relationships are mutable, they can be used to create, read, update, and delete these associations. An app’s relationship to its current droplet is mutable, but an app’s relationship to its space is not.
+
+
+        Relationships do not affect the fundamental properties of a resource, but may affect their behavior and permissions logic. Relationships are tied to the lifecycles of the associated resources and will be removed if either of the associated resources are deleted. For example, if a user is removed from an organization, both the user and the organization persist, but the relationship between them does not.
+
+
+        Not all resources implement every relationship operation demonstrated in the examples below. See the docs for each resource to see how it interacts with its relationships.
+
+
+        Endpoints that return relationship data list this information under the relationships key.
+
+
+        The relationship object
+
+        The relationship object is a key-value pair that uniquely identifies a resource. In practice this is almost always the guid of a resource.
+
+        '
   responses:
-    UnprocessableEntity:
-      description: Unprocessable Entity
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    Unauthorized:
-      description: Unauthorized
+    Forbidden:
+      description: Forbidden
       content:
         application/json:
           schema:
@@ -1724,24 +1718,27 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Errors'
+    UnprocessableEntity:
+      description: Unprocessable Entity
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
     BadGateway:
       description: Bad Gateway
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
-    Conflict:
-      description: Conflict
+    BadRequest:
+      description: Bad Request
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Errors'
-    '500':
-      description: Internal Server Error
-      content:
-        application/json:
+        text/html:
           schema:
-            $ref: '#/components/schemas/Errors'
+            type: string
     RouteListResponse:
       description: A list of routes
       content:
@@ -1755,21 +1752,24 @@ components:
                 type: array
                 items:
                   $ref: '#/components/schemas/Route'
-    Forbidden:
-      description: Forbidden
+    Unauthorized:
+      description: Unauthorized
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Errors'
-    BadRequest:
-      description: Bad Request
+    Conflict:
+      description: Conflict
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Errors'
-        text/html:
+    '500':
+      description: Internal Server Error
+      content:
+        application/json:
           schema:
-            type: string
+            $ref: '#/components/schemas/Errors'
     ServiceUnavailable:
       description: Service Unavailable
       content:
@@ -1787,16 +1787,14 @@ components:
 
         '
       example: created_at
-    CreatedAts:
-      name: created_ats
-      in: query
-      required: false
+    Guid:
+      name: guid
+      in: path
+      required: true
       schema:
         type: string
-      description: 'Timestamp to filter by. When filtering on equality, several comma-delimited timestamps may be passed. Also supports filtering with [relational operators](#relational-operators).
-
-        '
-      example: '2021-01-01T00:00:00Z'
+        format: uuid
+      description: The unique identifier for the resource
     PerPage:
       name: per_page
       in: query
@@ -1805,14 +1803,6 @@ components:
         type: integer
       description: Number of results per page, valid values are 1 through 5000
       example: 50
-    LabelSelector:
-      name: label_selector
-      in: query
-      description: A query string containing a list of [label selector](#labels-and-selectors) requirements
-      required: false
-      schema:
-        type: string
-      example: environment=production
     Page:
       name: page
       in: query
@@ -1831,42 +1821,25 @@ components:
 
         '
       example: '2021-01-01T00:00:00Z'
-    Guid:
-      name: guid
-      in: path
-      required: true
+    LabelSelector:
+      name: label_selector
+      in: query
+      description: A query string containing a list of [label selector](#labels-and-selectors) requirements
+      required: false
       schema:
         type: string
-        format: uuid
-      description: The unique identifier for the resource
+      example: environment=production
+    CreatedAts:
+      name: created_ats
+      in: query
+      required: false
+      schema:
+        type: string
+      description: 'Timestamp to filter by. When filtering on equality, several comma-delimited timestamps may be passed. Also supports filtering with [relational operators](#relational-operators).
+
+        '
+      example: '2021-01-01T00:00:00Z'
   requestBodies:
-    RouteDestinations:
-      description: A list of route destinations
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              destinations:
-                type: array
-                items:
-                  $ref: '#/components/schemas/RouteDestination'
-                description: List of destinations to add to route; destinations without `process.type` specified will get process type `"web"` by default
-          examples:
-            default:
-              summary: default
-              value:
-                destinations:
-                - app:
-                    guid: 123e4567-e89b-12d3-a456-426614174000
-                  weight: 61
-                - app:
-                    guid: 123e4567-e89b-12d3-a456-426614174000
-                    process:
-                      type: api
-                  weight: 39
-                  port: 9000
-                  protocol: http1
     RouteCreateRequestBody:
       description: Route to create
       content:
@@ -1917,6 +1890,33 @@ components:
                     key: value
                   annotations:
                     note: detailed information
+    RouteDestinations:
+      description: A list of route destinations
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              destinations:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RouteDestination'
+                description: List of destinations to add to route; destinations without `process.type` specified will get process type `"web"` by default
+          examples:
+            default:
+              summary: default
+              value:
+                destinations:
+                - app:
+                    guid: 123e4567-e89b-12d3-a456-426614174000
+                  weight: 61
+                - app:
+                    guid: 123e4567-e89b-12d3-a456-426614174000
+                    process:
+                      type: api
+                  weight: 39
+                  port: 9000
+                  protocol: http1
   securitySchemes:
     oauth:
       type: oauth2

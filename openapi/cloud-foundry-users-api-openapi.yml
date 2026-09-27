@@ -198,6 +198,44 @@ paths:
           $ref: '#/components/responses/500'
 components:
   schemas:
+    Link:
+      type: object
+      properties:
+        href:
+          type: string
+          description: The URL of the link
+        method:
+          type: string
+          description: An optional field containing the HTTP method to be used when following the URL
+      required:
+      - href
+      description: 'Each link is keyed by its type and will include a href for the URL and an optional method for links that cannot be followed using GET.
+
+        '
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: A numeric code for this error
+        detail:
+          type: string
+          description: Detailed description of the error
+        title:
+          type: string
+          description: Name of the error
+    Errors:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/Error'
+      description: 'An error response will always return a list of error objects. Errors appear on the job resource for asynchronous operations.
+
+        Clients should use the code and title fields for programmatically handling specific errors. The message in the detail field is subject to change over time.
+
+        '
     Pagination:
       type: object
       properties:
@@ -228,29 +266,6 @@ components:
       description: 'Pagination is a technique used to divide a large set of results into smaller, more manageable sets. This allows clients to retrieve results in smaller chunks, reducing the amount of data transferred and improving performance.
 
         The pagination object is a JSON object that contains information about the pagination state of the results. It includes the total number of results available, the total number of pages available, and links to the first, last, next, and previous pages of results.
-
-        '
-    UserList:
-      type: object
-      properties:
-        pagination:
-          $ref: '#/components/schemas/Pagination'
-        resources:
-          type: array
-          items:
-            $ref: '#/components/schemas/User'
-    Link:
-      type: object
-      properties:
-        href:
-          type: string
-          description: The URL of the link
-        method:
-          type: string
-          description: An optional field containing the HTTP method to be used when following the URL
-      required:
-      - href
-      description: 'Each link is keyed by its type and will include a href for the URL and an optional method for links that cannot be followed using GET.
 
         '
     Metadata:
@@ -418,39 +433,18 @@ components:
             self:
               $ref: '#/components/schemas/Link'
               description: The URL to get this user
-    Errors:
+    UserList:
       type: object
       properties:
-        errors:
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+        resources:
           type: array
           items:
-            $ref: '#/components/schemas/Error'
-      description: 'An error response will always return a list of error objects. Errors appear on the job resource for asynchronous operations.
-
-        Clients should use the code and title fields for programmatically handling specific errors. The message in the detail field is subject to change over time.
-
-        '
-    Error:
-      type: object
-      properties:
-        code:
-          type: integer
-          description: A numeric code for this error
-        detail:
-          type: string
-          description: Detailed description of the error
-        title:
-          type: string
-          description: Name of the error
+            $ref: '#/components/schemas/User'
   responses:
-    Unauthorized:
-      description: Unauthorized
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    UnprocessableEntity:
-      description: Unprocessable Entity
+    Forbidden:
+      description: Forbidden
       content:
         application/json:
           schema:
@@ -461,20 +455,47 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Errors'
+    UnprocessableEntity:
+      description: Unprocessable Entity
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
     BadGateway:
       description: Bad Gateway
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
-    Conflict:
-      description: Conflict
+    BadRequest:
+      description: Bad Request
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Errors'
-    '500':
-      description: Internal Server Error
+        text/html:
+          schema:
+            type: string
+    UserCreateResponse:
+      description: User created
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/User'
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    UserUpdateResponse:
+      description: User updated
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/User'
+    Conflict:
+      description: Conflict
       content:
         application/json:
           schema:
@@ -500,39 +521,18 @@ components:
                     detail:
                       type: string
                       example: Rate limit exceeded
-    Forbidden:
-      description: Forbidden
+    '500':
+      description: Internal Server Error
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Errors'
-    UserUpdateResponse:
-      description: User updated
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/User'
-    BadRequest:
-      description: Bad Request
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-        text/html:
-          schema:
-            type: string
     ServiceUnavailable:
       description: Service Unavailable
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Errors'
-    UserCreateResponse:
-      description: User created
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/User'
   parameters:
     OrderBy:
       name: order_by
@@ -544,16 +544,6 @@ components:
 
         '
       example: created_at
-    CreatedAts:
-      name: created_ats
-      in: query
-      required: false
-      schema:
-        type: string
-      description: 'Timestamp to filter by. When filtering on equality, several comma-delimited timestamps may be passed. Also supports filtering with [relational operators](#relational-operators).
-
-        '
-      example: '2021-01-01T00:00:00Z'
     PerPage:
       name: per_page
       in: query
@@ -562,14 +552,13 @@ components:
         type: integer
       description: Number of results per page, valid values are 1 through 5000
       example: 50
-    LabelSelector:
-      name: label_selector
-      in: query
-      description: A query string containing a list of [label selector](#labels-and-selectors) requirements
-      required: false
+    UserGuid:
+      name: guid
+      in: path
+      required: true
       schema:
         type: string
-      example: environment=production
+      description: The unique identifier for the user, matching either a UAA user id or client id. A client id may not be a uuid.
     Page:
       name: page
       in: query
@@ -588,42 +577,25 @@ components:
 
         '
       example: '2021-01-01T00:00:00Z'
-    UserGuid:
-      name: guid
-      in: path
-      required: true
+    LabelSelector:
+      name: label_selector
+      in: query
+      description: A query string containing a list of [label selector](#labels-and-selectors) requirements
+      required: false
       schema:
         type: string
-      description: The unique identifier for the user, matching either a UAA user id or client id. A client id may not be a uuid.
+      example: environment=production
+    CreatedAts:
+      name: created_ats
+      in: query
+      required: false
+      schema:
+        type: string
+      description: 'Timestamp to filter by. When filtering on equality, several comma-delimited timestamps may be passed. Also supports filtering with [relational operators](#relational-operators).
+
+        '
+      example: '2021-01-01T00:00:00Z'
   requestBodies:
-    UserCreate:
-      description: User to create
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              guid:
-                type: string
-                description: Unique identifier for the user
-              username:
-                type: string
-                description: Username of the user to be created. This can only be provided together with origin
-              origin:
-                type: string
-                description: Origin of the user to be created. This can only be provided together with username and cannot be uaa
-              metadata:
-                $ref: '#/components/schemas/Metadata'
-          examples:
-            default:
-              summary: default
-              value:
-                guid: 123e4567-e89b-12d3-a456-426614174000
-            by_username_and_origin:
-              summary: by username and origin
-              value:
-                username: some-user
-                origin: some-origin
     UserUpdate:
       description: User to update
       content:
@@ -659,6 +631,34 @@ components:
                     note: detailed information
                 rate_limits:
                   custom_request_limit: 2000
+    UserCreate:
+      description: User to create
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              guid:
+                type: string
+                description: Unique identifier for the user
+              username:
+                type: string
+                description: Username of the user to be created. This can only be provided together with origin
+              origin:
+                type: string
+                description: Origin of the user to be created. This can only be provided together with username and cannot be uaa
+              metadata:
+                $ref: '#/components/schemas/Metadata'
+          examples:
+            default:
+              summary: default
+              value:
+                guid: 123e4567-e89b-12d3-a456-426614174000
+            by_username_and_origin:
+              summary: by username and origin
+              value:
+                username: some-user
+                origin: some-origin
   securitySchemes:
     oauth:
       type: oauth2

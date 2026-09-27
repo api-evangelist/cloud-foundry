@@ -403,6 +403,61 @@ paths:
           $ref: '#/components/responses/UnprocessableEntity'
 components:
   schemas:
+    Link:
+      type: object
+      properties:
+        href:
+          type: string
+          description: The URL of the link
+        method:
+          type: string
+          description: An optional field containing the HTTP method to be used when following the URL
+      required:
+      - href
+      description: 'Each link is keyed by its type and will include a href for the URL and an optional method for links that cannot be followed using GET.
+
+        '
+    Relationship:
+      type: object
+      properties:
+        guid:
+          type: string
+          format: uuid
+          description: The GUID of the resource
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: A numeric code for this error
+        detail:
+          type: string
+          description: Detailed description of the error
+        title:
+          type: string
+          description: Name of the error
+    Errors:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/Error'
+      description: 'An error response will always return a list of error objects. Errors appear on the job resource for asynchronous operations.
+
+        Clients should use the code and title fields for programmatically handling specific errors. The message in the detail field is subject to change over time.
+
+        '
+    OrganizationQuotaList:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/Pagination'
+      - properties:
+          resources:
+            type: array
+            items:
+              $ref: '#/components/schemas/OrganizationQuota'
+      description: A paginated list of organization quotas
     Pagination:
       type: object
       properties:
@@ -433,37 +488,6 @@ components:
       description: 'Pagination is a technique used to divide a large set of results into smaller, more manageable sets. This allows clients to retrieve results in smaller chunks, reducing the amount of data transferred and improving performance.
 
         The pagination object is a JSON object that contains information about the pagination state of the results. It includes the total number of results available, the total number of pages available, and links to the first, last, next, and previous pages of results.
-
-        '
-    RelationshipToMany:
-      type: object
-      properties:
-        data:
-          type: array
-          items:
-            $ref: '#/components/schemas/Relationship'
-        links:
-          type: object
-          properties:
-            self:
-              $ref: '#/components/schemas/Link'
-            related:
-              $ref: '#/components/schemas/Link'
-      description: 'Some relationships relate a resource to several other resources. For example, an isolation segment can be entitled to multiple organizations.
-
-        '
-    Link:
-      type: object
-      properties:
-        href:
-          type: string
-          description: The URL of the link
-        method:
-          type: string
-          description: An optional field containing the HTTP method to be used when following the URL
-      required:
-      - href
-      description: 'Each link is keyed by its type and will include a href for the URL and an optional method for links that cannot be followed using GET.
 
         '
     OrganizationQuota:
@@ -563,16 +587,6 @@ components:
       description: 'Organization quotas are named sets of memory, log rate, service, and instance usage quotas. For example, one organization quota might allow up to 10 services, 10 routes, and 2 GB of RAM, while another might offer 100 services, 100 routes, and 10 GB of RAM.
 
         '
-    OrganizationQuotaList:
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/Pagination'
-      - properties:
-          resources:
-            type: array
-            items:
-              $ref: '#/components/schemas/OrganizationQuota'
-      description: A paginated list of organization quotas
     Metadata:
       type: object
       properties:
@@ -703,37 +717,23 @@ components:
         Metadata is included in the response body of a request to retrieve a resource.
 
         '
-    Errors:
+    RelationshipToMany:
       type: object
       properties:
-        errors:
+        data:
           type: array
           items:
-            $ref: '#/components/schemas/Error'
-      description: 'An error response will always return a list of error objects. Errors appear on the job resource for asynchronous operations.
-
-        Clients should use the code and title fields for programmatically handling specific errors. The message in the detail field is subject to change over time.
+            $ref: '#/components/schemas/Relationship'
+        links:
+          type: object
+          properties:
+            self:
+              $ref: '#/components/schemas/Link'
+            related:
+              $ref: '#/components/schemas/Link'
+      description: 'Some relationships relate a resource to several other resources. For example, an isolation segment can be entitled to multiple organizations.
 
         '
-    Error:
-      type: object
-      properties:
-        code:
-          type: integer
-          description: A numeric code for this error
-        detail:
-          type: string
-          description: Detailed description of the error
-        title:
-          type: string
-          description: Name of the error
-    Relationship:
-      type: object
-      properties:
-        guid:
-          type: string
-          format: uuid
-          description: The GUID of the resource
     BaseSchema:
       type: object
       properties:
@@ -757,14 +757,8 @@ components:
 
         '
   responses:
-    Unauthorized:
-      description: Unauthorized
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    UnprocessableEntity:
-      description: Unprocessable Entity
+    Forbidden:
+      description: Forbidden
       content:
         application/json:
           schema:
@@ -775,12 +769,33 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Errors'
+    UnprocessableEntity:
+      description: Unprocessable Entity
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
     BadGateway:
       description: Bad Gateway
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
+    BadRequest:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+        text/html:
+          schema:
+            type: string
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
     Conflict:
       description: Conflict
       content:
@@ -793,21 +808,6 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Errors'
-    Forbidden:
-      description: Forbidden
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    BadRequest:
-      description: Bad Request
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-        text/html:
-          schema:
-            type: string
     ServiceUnavailable:
       description: Service Unavailable
       content:
@@ -825,16 +825,14 @@ components:
 
         '
       example: created_at
-    CreatedAts:
-      name: created_ats
-      in: query
-      required: false
+    Guid:
+      name: guid
+      in: path
+      required: true
       schema:
         type: string
-      description: 'Timestamp to filter by. When filtering on equality, several comma-delimited timestamps may be passed. Also supports filtering with [relational operators](#relational-operators).
-
-        '
-      example: '2021-01-01T00:00:00Z'
+        format: uuid
+      description: The unique identifier for the resource
     PerPage:
       name: per_page
       in: query
@@ -851,6 +849,16 @@ components:
         type: integer
       description: Page to display; valid values are integers >= 1
       example: 1
+    CreatedAts:
+      name: created_ats
+      in: query
+      required: false
+      schema:
+        type: string
+      description: 'Timestamp to filter by. When filtering on equality, several comma-delimited timestamps may be passed. Also supports filtering with [relational operators](#relational-operators).
+
+        '
+      example: '2021-01-01T00:00:00Z'
     UpdatedAts:
       name: updated_ats
       in: query
@@ -861,14 +869,6 @@ components:
 
         '
       example: '2021-01-01T00:00:00Z'
-    Guid:
-      name: guid
-      in: path
-      required: true
-      schema:
-        type: string
-        format: uuid
-      description: The unique identifier for the resource
   requestBodies:
     OrganizationQuotaUpdateRequestBody:
       description: Organization quota object that needs to be updated

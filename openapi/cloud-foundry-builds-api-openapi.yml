@@ -394,6 +394,27 @@ paths:
           $ref: '#/components/responses/UnprocessableEntity'
 components:
   schemas:
+    Link:
+      type: object
+      properties:
+        href:
+          type: string
+          description: The URL of the link
+        method:
+          type: string
+          description: An optional field containing the HTTP method to be used when following the URL
+      required:
+      - href
+      description: 'Each link is keyed by its type and will include a href for the URL and an optional method for links that cannot be followed using GET.
+
+        '
+    Relationship:
+      type: object
+      properties:
+        guid:
+          type: string
+          format: uuid
+          description: The GUID of the resource
     BuildUpdate:
       type: object
       properties:
@@ -427,78 +448,28 @@ components:
           description: Provides the lifecycle object to use during staging
         metadata:
           $ref: '#/components/schemas/Metadata'
-    Pagination:
+    Error:
       type: object
       properties:
-        total_results:
+        code:
           type: integer
-          description: The total number of results available
-        total_pages:
-          type: integer
-          description: The total number of pages available
-        first:
-          allOf:
-          - $ref: '#/components/schemas/Link'
-          - description: The first page of results
-        last:
-          allOf:
-          - $ref: '#/components/schemas/Link'
-          - description: The last page of results
-        next:
-          oneOf:
-          - $ref: '#/components/schemas/Link'
-          - type: 'null'
-          description: The next page of results
-        previous:
-          oneOf:
-          - $ref: '#/components/schemas/Link'
-          - type: 'null'
-          description: The previous page of results
-      description: 'Pagination is a technique used to divide a large set of results into smaller, more manageable sets. This allows clients to retrieve results in smaller chunks, reducing the amount of data transferred and improving performance.
-
-        The pagination object is a JSON object that contains information about the pagination state of the results. It includes the total number of results available, the total number of pages available, and links to the first, last, next, and previous pages of results.
-
-        '
-    Link:
+          description: A numeric code for this error
+        detail:
+          type: string
+          description: Detailed description of the error
+        title:
+          type: string
+          description: Name of the error
+    Errors:
       type: object
       properties:
-        href:
-          type: string
-          description: The URL of the link
-        method:
-          type: string
-          description: An optional field containing the HTTP method to be used when following the URL
-      required:
-      - href
-      description: 'Each link is keyed by its type and will include a href for the URL and an optional method for links that cannot be followed using GET.
-
-        '
-    BuildList:
-      type: object
-      properties:
-        pagination:
-          $ref: '#/components/schemas/Pagination'
-        resources:
+        errors:
           type: array
           items:
-            $ref: '#/components/schemas/Build'
-    Relationships:
-      type: object
-      description: 'Relationships represent associations between resources. When relationships are mutable, they can be used to create, read, update, and delete these associations. An app’s relationship to its current droplet is mutable, but an app’s relationship to its space is not.
+            $ref: '#/components/schemas/Error'
+      description: 'An error response will always return a list of error objects. Errors appear on the job resource for asynchronous operations.
 
-
-        Relationships do not affect the fundamental properties of a resource, but may affect their behavior and permissions logic. Relationships are tied to the lifecycles of the associated resources and will be removed if either of the associated resources are deleted. For example, if a user is removed from an organization, both the user and the organization persist, but the relationship between them does not.
-
-
-        Not all resources implement every relationship operation demonstrated in the examples below. See the docs for each resource to see how it interacts with its relationships.
-
-
-        Endpoints that return relationship data list this information under the relationships key.
-
-
-        The relationship object
-
-        The relationship object is a key-value pair that uniquely identifies a resource. In practice this is almost always the guid of a resource.
+        Clients should use the code and title fields for programmatically handling specific errors. The message in the detail field is subject to change over time.
 
         '
     Lifecycle:
@@ -541,6 +512,140 @@ components:
       description: 'The lifecycle type defines how the application droplet is created and run. The following lifecycle types are supported: - buildpack: Traditional buildpacks for Cloud Foundry applications. - cnb: Cloud Native Buildpacks that are OCI-compliant. - docker: Run pre-built Docker images.
 
         '
+    Build:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/BaseSchema'
+      - properties:
+          state:
+            type: string
+            description: State of the build
+            enum:
+            - STAGING
+            - STAGED
+            - FAILED
+          staging_memory_in_mb:
+            type:
+            - integer
+            - 'null'
+            description: Memory in MB allocated for staging of the build
+          staging_disk_in_mb:
+            type:
+            - integer
+            - 'null'
+            description: Disk space in MB allocated for staging of the build
+          staging_log_rate_limit_bytes_per_second:
+            type: integer
+            description: Log rate limit in bytes per second allocated for staging of the build
+          error:
+            type:
+            - string
+            - 'null'
+            description: A string describing errors during the build process
+          lifecycle:
+            $ref: '#/components/schemas/Lifecycle'
+            description: Provides the lifecycle object to use during staging; this will override the build’s application’s default lifecycle for this build
+          checksum:
+            type: object
+            properties:
+              type:
+                type: string
+                description: Hashing algorithm for checksum; supported algorithms are sha256 and sha1
+              value:
+                type: string
+                description: Checksum of build
+          metadata:
+            $ref: '#/components/schemas/Metadata'
+          relationships:
+            $ref: '#/components/schemas/Relationships'
+          package:
+            type: object
+            properties:
+              guid:
+                type: string
+                format: uuid
+            description: The package that is the input to the staging process
+          droplet:
+            type:
+            - object
+            - 'null'
+            properties:
+              guid:
+                type: string
+                format: uuid
+            description: A resulting droplet from the staging process; `droplet` will be `null` if staging has not completed
+          created_by:
+            type: object
+            properties:
+              guid:
+                type: string
+                description: The guid of the user that created the build
+              name:
+                type:
+                - string
+                - 'null'
+                description: The name of the user that created the build
+              email:
+                type:
+                - string
+                - 'null'
+                description: The email of the user that created the build
+          links:
+            type: object
+            properties:
+              self:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get this build
+              app:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get the app for this build
+              droplet:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get the droplet for this build
+      description: 'Builds represent the process of transforming source code into a runnable artifact. Builds can be triggered manually or automatically as part of the app lifecycle. A successful build results in a droplet that can be used to run the app.
+
+        '
+    Pagination:
+      type: object
+      properties:
+        total_results:
+          type: integer
+          description: The total number of results available
+        total_pages:
+          type: integer
+          description: The total number of pages available
+        first:
+          allOf:
+          - $ref: '#/components/schemas/Link'
+          - description: The first page of results
+        last:
+          allOf:
+          - $ref: '#/components/schemas/Link'
+          - description: The last page of results
+        next:
+          oneOf:
+          - $ref: '#/components/schemas/Link'
+          - type: 'null'
+          description: The next page of results
+        previous:
+          oneOf:
+          - $ref: '#/components/schemas/Link'
+          - type: 'null'
+          description: The previous page of results
+      description: 'Pagination is a technique used to divide a large set of results into smaller, more manageable sets. This allows clients to retrieve results in smaller chunks, reducing the amount of data transferred and improving performance.
+
+        The pagination object is a JSON object that contains information about the pagination state of the results. It includes the total number of results available, the total number of pages available, and links to the first, last, next, and previous pages of results.
+
+        '
+    BuildList:
+      type: object
+      properties:
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+        resources:
+          type: array
+          items:
+            $ref: '#/components/schemas/Build'
     Metadata:
       type: object
       properties:
@@ -671,130 +776,6 @@ components:
         Metadata is included in the response body of a request to retrieve a resource.
 
         '
-    Errors:
-      type: object
-      properties:
-        errors:
-          type: array
-          items:
-            $ref: '#/components/schemas/Error'
-      description: 'An error response will always return a list of error objects. Errors appear on the job resource for asynchronous operations.
-
-        Clients should use the code and title fields for programmatically handling specific errors. The message in the detail field is subject to change over time.
-
-        '
-    Build:
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/BaseSchema'
-      - properties:
-          state:
-            type: string
-            description: State of the build
-            enum:
-            - STAGING
-            - STAGED
-            - FAILED
-          staging_memory_in_mb:
-            type:
-            - integer
-            - 'null'
-            description: Memory in MB allocated for staging of the build
-          staging_disk_in_mb:
-            type:
-            - integer
-            - 'null'
-            description: Disk space in MB allocated for staging of the build
-          staging_log_rate_limit_bytes_per_second:
-            type: integer
-            description: Log rate limit in bytes per second allocated for staging of the build
-          error:
-            type:
-            - string
-            - 'null'
-            description: A string describing errors during the build process
-          lifecycle:
-            $ref: '#/components/schemas/Lifecycle'
-            description: Provides the lifecycle object to use during staging; this will override the build’s application’s default lifecycle for this build
-          checksum:
-            type: object
-            properties:
-              type:
-                type: string
-                description: Hashing algorithm for checksum; supported algorithms are sha256 and sha1
-              value:
-                type: string
-                description: Checksum of build
-          metadata:
-            $ref: '#/components/schemas/Metadata'
-          relationships:
-            $ref: '#/components/schemas/Relationships'
-          package:
-            type: object
-            properties:
-              guid:
-                type: string
-                format: uuid
-            description: The package that is the input to the staging process
-          droplet:
-            type:
-            - object
-            - 'null'
-            properties:
-              guid:
-                type: string
-                format: uuid
-            description: A resulting droplet from the staging process; `droplet` will be `null` if staging has not completed
-          created_by:
-            type: object
-            properties:
-              guid:
-                type: string
-                description: The guid of the user that created the build
-              name:
-                type:
-                - string
-                - 'null'
-                description: The name of the user that created the build
-              email:
-                type:
-                - string
-                - 'null'
-                description: The email of the user that created the build
-          links:
-            type: object
-            properties:
-              self:
-                $ref: '#/components/schemas/Link'
-                description: The URL to get this build
-              app:
-                $ref: '#/components/schemas/Link'
-                description: The URL to get the app for this build
-              droplet:
-                $ref: '#/components/schemas/Link'
-                description: The URL to get the droplet for this build
-      description: 'Builds represent the process of transforming source code into a runnable artifact. Builds can be triggered manually or automatically as part of the app lifecycle. A successful build results in a droplet that can be used to run the app.
-
-        '
-    Error:
-      type: object
-      properties:
-        code:
-          type: integer
-          description: A numeric code for this error
-        detail:
-          type: string
-          description: Detailed description of the error
-        title:
-          type: string
-          description: Name of the error
-    Relationship:
-      type: object
-      properties:
-        guid:
-          type: string
-          format: uuid
-          description: The GUID of the resource
     BaseSchema:
       type: object
       properties:
@@ -817,15 +798,28 @@ components:
         See Resources and Experimental Resources for specific resources.
 
         '
+    Relationships:
+      type: object
+      description: 'Relationships represent associations between resources. When relationships are mutable, they can be used to create, read, update, and delete these associations. An app’s relationship to its current droplet is mutable, but an app’s relationship to its space is not.
+
+
+        Relationships do not affect the fundamental properties of a resource, but may affect their behavior and permissions logic. Relationships are tied to the lifecycles of the associated resources and will be removed if either of the associated resources are deleted. For example, if a user is removed from an organization, both the user and the organization persist, but the relationship between them does not.
+
+
+        Not all resources implement every relationship operation demonstrated in the examples below. See the docs for each resource to see how it interacts with its relationships.
+
+
+        Endpoints that return relationship data list this information under the relationships key.
+
+
+        The relationship object
+
+        The relationship object is a key-value pair that uniquely identifies a resource. In practice this is almost always the guid of a resource.
+
+        '
   responses:
-    Unauthorized:
-      description: Unauthorized
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    UnprocessableEntity:
-      description: Unprocessable Entity
+    Forbidden:
+      description: Forbidden
       content:
         application/json:
           schema:
@@ -836,12 +830,33 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Errors'
+    UnprocessableEntity:
+      description: Unprocessable Entity
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
     BadGateway:
       description: Bad Gateway
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
+    BadRequest:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+        text/html:
+          schema:
+            type: string
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
     Conflict:
       description: Conflict
       content:
@@ -854,21 +869,6 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Errors'
-    Forbidden:
-      description: Forbidden
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    BadRequest:
-      description: Bad Request
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-        text/html:
-          schema:
-            type: string
     ServiceUnavailable:
       description: Service Unavailable
       content:
@@ -886,16 +886,14 @@ components:
 
         '
       example: created_at
-    CreatedAts:
-      name: created_ats
-      in: query
-      required: false
+    Guid:
+      name: guid
+      in: path
+      required: true
       schema:
         type: string
-      description: 'Timestamp to filter by. When filtering on equality, several comma-delimited timestamps may be passed. Also supports filtering with [relational operators](#relational-operators).
-
-        '
-      example: '2021-01-01T00:00:00Z'
+        format: uuid
+      description: The unique identifier for the resource
     PerPage:
       name: per_page
       in: query
@@ -904,14 +902,6 @@ components:
         type: integer
       description: Number of results per page, valid values are 1 through 5000
       example: 50
-    LabelSelector:
-      name: label_selector
-      in: query
-      description: A query string containing a list of [label selector](#labels-and-selectors) requirements
-      required: false
-      schema:
-        type: string
-      example: environment=production
     Page:
       name: page
       in: query
@@ -930,14 +920,24 @@ components:
 
         '
       example: '2021-01-01T00:00:00Z'
-    Guid:
-      name: guid
-      in: path
-      required: true
+    LabelSelector:
+      name: label_selector
+      in: query
+      description: A query string containing a list of [label selector](#labels-and-selectors) requirements
+      required: false
       schema:
         type: string
-        format: uuid
-      description: The unique identifier for the resource
+      example: environment=production
+    CreatedAts:
+      name: created_ats
+      in: query
+      required: false
+      schema:
+        type: string
+      description: 'Timestamp to filter by. When filtering on equality, several comma-delimited timestamps may be passed. Also supports filtering with [relational operators](#relational-operators).
+
+        '
+      example: '2021-01-01T00:00:00Z'
   securitySchemes:
     oauth:
       type: oauth2

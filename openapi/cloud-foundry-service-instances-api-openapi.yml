@@ -688,6 +688,9 @@ paths:
     - url: https://api.example.local
       description: Cloud Foundry V3 API server
   /v2/service_instances/{instance_id}:
+    servers:
+    - url: https://api.example.local
+      description: Cloud Foundry V3 API server
     put:
       summary: provision a service instance
       tags:
@@ -919,10 +922,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+  /v2/service_instances/{instance_id}/last_operation:
     servers:
     - url: https://api.example.local
       description: Cloud Foundry V3 API server
-  /v2/service_instances/{instance_id}/last_operation:
     get:
       summary: get the last requested operation state for service instance
       tags:
@@ -988,11 +991,87 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-    servers:
-    - url: https://api.example.local
-      description: Cloud Foundry V3 API server
 components:
   schemas:
+    Link:
+      type: object
+      properties:
+        href:
+          type: string
+          description: The URL of the link
+        method:
+          type: string
+          description: An optional field containing the HTTP method to be used when following the URL
+      required:
+      - href
+      description: 'Each link is keyed by its type and will include a href for the URL and an optional method for links that cannot be followed using GET.
+
+        '
+    Relationship:
+      type: object
+      properties:
+        guid:
+          type: string
+          format: uuid
+          description: The GUID of the resource
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: A numeric code for this error
+        detail:
+          type: string
+          description: Detailed description of the error
+        title:
+          type: string
+          description: Name of the error
+    Errors:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/Error'
+      description: 'An error response will always return a list of error objects. Errors appear on the job resource for asynchronous operations.
+
+        Clients should use the code and title fields for programmatically handling specific errors. The message in the detail field is subject to change over time.
+
+        '
+    ServiceInstanceList:
+      type: object
+      properties:
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+        resources:
+          type: array
+          items:
+            oneOf:
+            - $ref: '#/components/schemas/ManagedServiceInstance'
+            - $ref: '#/components/schemas/UserProvidedServiceInstance'
+            discriminator:
+              propertyName: type
+              mapping:
+                managed: '#/components/schemas/ManagedServiceInstance'
+                user-provided: '#/components/schemas/UserProvidedServiceInstance'
+    RelationshipToOne:
+      type: object
+      properties:
+        data:
+          type:
+          - object
+          - 'null'
+          $ref: '#/components/schemas/Relationship'
+        links:
+          type: object
+          properties:
+            self:
+              $ref: '#/components/schemas/Link'
+            related:
+              $ref: '#/components/schemas/Link'
+      description: 'Some relationships relate a resource to exactly one other resource. For example an app can belong to only one space.
+
+        '
     Pagination:
       type: object
       properties:
@@ -1023,87 +1102,6 @@ components:
       description: 'Pagination is a technique used to divide a large set of results into smaller, more manageable sets. This allows clients to retrieve results in smaller chunks, reducing the amount of data transferred and improving performance.
 
         The pagination object is a JSON object that contains information about the pagination state of the results. It includes the total number of results available, the total number of pages available, and links to the first, last, next, and previous pages of results.
-
-        '
-    ServiceInstanceLastOperation:
-      type: object
-      properties:
-        type:
-          type: string
-          description: Type of the last operation
-          enum:
-          - create
-          - update
-          - delete
-        state:
-          type: string
-          description: State of the last operation
-          enum:
-          - initial
-          - in progress
-          - succeeded
-          - failed
-        description:
-          type:
-          - string
-          - 'null'
-          description: A textual explanation associated with this state
-        created_at:
-          type: string
-          format: date-time
-          description: When the last operation was created
-        updated_at:
-          type: string
-          format: date-time
-          description: When the last operation was last updated
-      description: The last operation object for service instances
-    RelationshipToMany:
-      type: object
-      properties:
-        data:
-          type: array
-          items:
-            $ref: '#/components/schemas/Relationship'
-        links:
-          type: object
-          properties:
-            self:
-              $ref: '#/components/schemas/Link'
-            related:
-              $ref: '#/components/schemas/Link'
-      description: 'Some relationships relate a resource to several other resources. For example, an isolation segment can be entitled to multiple organizations.
-
-        '
-    Link:
-      type: object
-      properties:
-        href:
-          type: string
-          description: The URL of the link
-        method:
-          type: string
-          description: An optional field containing the HTTP method to be used when following the URL
-      required:
-      - href
-      description: 'Each link is keyed by its type and will include a href for the URL and an optional method for links that cannot be followed using GET.
-
-        '
-    RelationshipToOne:
-      type: object
-      properties:
-        data:
-          type:
-          - object
-          - 'null'
-          $ref: '#/components/schemas/Relationship'
-        links:
-          type: object
-          properties:
-            self:
-              $ref: '#/components/schemas/Link'
-            related:
-              $ref: '#/components/schemas/Link'
-      description: 'Some relationships relate a resource to exactly one other resource. For example an app can belong to only one space.
 
         '
     ManagedServiceInstance:
@@ -1190,22 +1188,94 @@ components:
         - name
         - relationships
         - links
-    ServiceInstanceList:
+    UserProvidedServiceInstance:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/BaseSchema'
+      - properties:
+          type:
+            type: string
+            enum:
+            - user-provided
+            description: Type of service instance
+          name:
+            type: string
+            description: Name of the service instance
+          tags:
+            type: array
+            items:
+              type: string
+            description: Tags for the service instance
+          syslog_drain_url:
+            type:
+            - string
+            - 'null'
+            format: uri
+            description: URL for syslog drain
+          route_service_url:
+            type:
+            - string
+            - 'null'
+            format: uri
+            description: URL for route service
+          relationships:
+            type: object
+            properties:
+              space:
+                $ref: '#/components/schemas/RelationshipToOne'
+            description: Relationships for the service instance
+          links:
+            type: object
+            properties:
+              self:
+                $ref: '#/components/schemas/Link'
+              space:
+                $ref: '#/components/schemas/Link'
+              service_credential_bindings:
+                $ref: '#/components/schemas/Link'
+              service_route_bindings:
+                $ref: '#/components/schemas/Link'
+              credentials:
+                $ref: '#/components/schemas/Link'
+          metadata:
+            $ref: '#/components/schemas/Metadata'
+        required:
+        - type
+        - name
+        - relationships
+        - links
+    ServiceInstanceLastOperation:
       type: object
       properties:
-        pagination:
-          $ref: '#/components/schemas/Pagination'
-        resources:
-          type: array
-          items:
-            oneOf:
-            - $ref: '#/components/schemas/ManagedServiceInstance'
-            - $ref: '#/components/schemas/UserProvidedServiceInstance'
-            discriminator:
-              propertyName: type
-              mapping:
-                managed: '#/components/schemas/ManagedServiceInstance'
-                user-provided: '#/components/schemas/UserProvidedServiceInstance'
+        type:
+          type: string
+          description: Type of the last operation
+          enum:
+          - create
+          - update
+          - delete
+        state:
+          type: string
+          description: State of the last operation
+          enum:
+          - initial
+          - in progress
+          - succeeded
+          - failed
+        description:
+          type:
+          - string
+          - 'null'
+          description: A textual explanation associated with this state
+        created_at:
+          type: string
+          format: date-time
+          description: When the last operation was created
+        updated_at:
+          type: string
+          format: date-time
+          description: When the last operation was last updated
+      description: The last operation object for service instances
     Metadata:
       type: object
       properties:
@@ -1336,93 +1406,23 @@ components:
         Metadata is included in the response body of a request to retrieve a resource.
 
         '
-    Errors:
+    RelationshipToMany:
       type: object
       properties:
-        errors:
+        data:
           type: array
           items:
-            $ref: '#/components/schemas/Error'
-      description: 'An error response will always return a list of error objects. Errors appear on the job resource for asynchronous operations.
-
-        Clients should use the code and title fields for programmatically handling specific errors. The message in the detail field is subject to change over time.
+            $ref: '#/components/schemas/Relationship'
+        links:
+          type: object
+          properties:
+            self:
+              $ref: '#/components/schemas/Link'
+            related:
+              $ref: '#/components/schemas/Link'
+      description: 'Some relationships relate a resource to several other resources. For example, an isolation segment can be entitled to multiple organizations.
 
         '
-    Error:
-      type: object
-      properties:
-        code:
-          type: integer
-          description: A numeric code for this error
-        detail:
-          type: string
-          description: Detailed description of the error
-        title:
-          type: string
-          description: Name of the error
-    UserProvidedServiceInstance:
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/BaseSchema'
-      - properties:
-          type:
-            type: string
-            enum:
-            - user-provided
-            description: Type of service instance
-          name:
-            type: string
-            description: Name of the service instance
-          tags:
-            type: array
-            items:
-              type: string
-            description: Tags for the service instance
-          syslog_drain_url:
-            type:
-            - string
-            - 'null'
-            format: uri
-            description: URL for syslog drain
-          route_service_url:
-            type:
-            - string
-            - 'null'
-            format: uri
-            description: URL for route service
-          relationships:
-            type: object
-            properties:
-              space:
-                $ref: '#/components/schemas/RelationshipToOne'
-            description: Relationships for the service instance
-          links:
-            type: object
-            properties:
-              self:
-                $ref: '#/components/schemas/Link'
-              space:
-                $ref: '#/components/schemas/Link'
-              service_credential_bindings:
-                $ref: '#/components/schemas/Link'
-              service_route_bindings:
-                $ref: '#/components/schemas/Link'
-              credentials:
-                $ref: '#/components/schemas/Link'
-          metadata:
-            $ref: '#/components/schemas/Metadata'
-        required:
-        - type
-        - name
-        - relationships
-        - links
-    Relationship:
-      type: object
-      properties:
-        guid:
-          type: string
-          format: uuid
-          description: The GUID of the resource
     BaseSchema:
       type: object
       properties:
@@ -1460,31 +1460,6 @@ components:
           $ref: '#/components/schemas/MaintenanceInfo'
         metadata:
           $ref: '#/components/schemas/ServiceInstanceMetadata'
-    ServiceInstanceProvisionResponse:
-      type: object
-      properties:
-        dashboard_url:
-          type: string
-        metadata:
-          $ref: '#/components/schemas/ServiceInstanceMetadata'
-    MaintenanceInfo:
-      type: object
-      required:
-      - version
-      properties:
-        version:
-          type: string
-        description:
-          type: string
-    Object:
-      type: object
-    ServiceInstanceMetadata:
-      type: object
-      properties:
-        labels:
-          type: object
-        attributes:
-          type: object
     ServiceInstanceUpdateRequestBody:
       type: object
       required:
@@ -1531,6 +1506,9 @@ components:
         space_id:
           type: string
           deprecated: true
+    Context:
+      description: See [Context Conventions](https://github.com/openservicebrokerapi/servicebroker/blob/master/profile.md#context-object) for more details.
+      type: object
     AsyncOperation:
       type: object
       properties:
@@ -1558,9 +1536,24 @@ components:
           deprecated: true
         parameters:
           $ref: '#/components/schemas/Object'
-    Context:
-      description: See [Context Conventions](https://github.com/openservicebrokerapi/servicebroker/blob/master/profile.md#context-object) for more details.
+    MaintenanceInfo:
       type: object
+      required:
+      - version
+      properties:
+        version:
+          type: string
+        description:
+          type: string
+    Object:
+      type: object
+    ServiceInstanceMetadata:
+      type: object
+      properties:
+        labels:
+          type: object
+        attributes:
+          type: object
     ServiceInstanceAsyncOperation:
       type: object
       properties:
@@ -1570,7 +1563,121 @@ components:
           type: string
         metadata:
           $ref: '#/components/schemas/ServiceInstanceMetadata'
+    ServiceInstanceProvisionResponse:
+      type: object
+      properties:
+        dashboard_url:
+          type: string
+        metadata:
+          $ref: '#/components/schemas/ServiceInstanceMetadata'
   requestBodies:
+    ServiceInstanceUpdateRequestBody:
+      description: A request to update a service instance
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+                description: Name of the service instance
+              parameters:
+                type: object
+                description: A JSON object that is passed to the service broker (managed services only)
+              credentials:
+                type: object
+                description: A JSON object that is made available to apps bound to this service instance (user-provided services only)
+              tags:
+                type: array
+                items:
+                  type: string
+                description: Tags are used by apps to identify service instances; they are shown in the app VCAP_SERVICES env
+              syslog_drain_url:
+                type: string
+                description: URL to which logs for bound applications will be streamed (user-provided services only)
+              route_service_url:
+                type: string
+                description: URL to which requests for bound routes will be forwarded; must use the https protocol (user-provided services only)
+              relationships:
+                type: object
+                properties:
+                  service_plan:
+                    $ref: '#/components/schemas/RelationshipToOne'
+                    description: The service plan from which to create the service instance
+                description: Relationships for the service instance
+              maintenance_info:
+                type: object
+                required:
+                - version
+                properties:
+                  version:
+                    type: string
+                    description: Must be a semantic version value and it must match the version in the maintenance_info for the service instance plan in the updated broker catalog
+                description: If provided, must have the `version` field; `version` must be a semantic version value and it must match the `version` in the `maintenance_info` for the service instance plan in the updated broker catalog. Any other value for `version` will cause a `MaintenanceInfoConflict` error
+              metadata:
+                $ref: '#/components/schemas/Metadata'
+          examples:
+            managed_service_instance:
+              summary: Update managed service instance
+              value:
+                name: my_service_instance
+                parameters:
+                  foo: bar
+                  baz: qux
+                tags:
+                - foo
+                - bar
+                - baz
+                relationships:
+                  service_plan:
+                    data:
+                      guid: f2b6ba9c-a4d2-11ea-8ae6-48bf6bec2d78
+                metadata:
+                  annotations:
+                    note: detailed information
+                  labels:
+                    key: value
+            managed_service_instance_upgrade:
+              summary: Upgrade managed service instance
+              value:
+                maintenance_info:
+                  version: 2.1.1
+            user_provided_service_instance:
+              summary: Update user-provided service instance
+              value:
+                name: my_service_instance
+                credentials:
+                  foo: bar
+                  baz: qux
+                tags:
+                - foo
+                - bar
+                - baz
+                syslog_drain_url: https://syslog.com/drain
+                route_service_url: https://route.com/service
+                metadata:
+                  annotations:
+                    foo: bar
+                  labels:
+                    baz: qux
+            default:
+              summary: default
+              value:
+                name: my_service_instance
+                credentials:
+                  foo: bar
+                  baz: qux
+                tags:
+                - foo
+                - bar
+                - baz
+                syslog_drain_url: https://syslog.com/drain
+                route_service_url: https://route.com/service
+                metadata:
+                  annotations:
+                    foo: bar
+                  labels:
+                    baz: qux
     ServiceInstanceCreateRequestBody:
       description: A request to create a service instance
       content:
@@ -1693,122 +1800,9 @@ components:
                   space:
                     data:
                       guid: 123e4567-e89b-12d3-a456-426614174000
-    ServiceInstanceUpdateRequestBody:
-      description: A request to update a service instance
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              name:
-                type: string
-                description: Name of the service instance
-              parameters:
-                type: object
-                description: A JSON object that is passed to the service broker (managed services only)
-              credentials:
-                type: object
-                description: A JSON object that is made available to apps bound to this service instance (user-provided services only)
-              tags:
-                type: array
-                items:
-                  type: string
-                description: Tags are used by apps to identify service instances; they are shown in the app VCAP_SERVICES env
-              syslog_drain_url:
-                type: string
-                description: URL to which logs for bound applications will be streamed (user-provided services only)
-              route_service_url:
-                type: string
-                description: URL to which requests for bound routes will be forwarded; must use the https protocol (user-provided services only)
-              relationships:
-                type: object
-                properties:
-                  service_plan:
-                    $ref: '#/components/schemas/RelationshipToOne'
-                    description: The service plan from which to create the service instance
-                description: Relationships for the service instance
-              maintenance_info:
-                type: object
-                required:
-                - version
-                properties:
-                  version:
-                    type: string
-                    description: Must be a semantic version value and it must match the version in the maintenance_info for the service instance plan in the updated broker catalog
-                description: If provided, must have the `version` field; `version` must be a semantic version value and it must match the `version` in the `maintenance_info` for the service instance plan in the updated broker catalog. Any other value for `version` will cause a `MaintenanceInfoConflict` error
-              metadata:
-                $ref: '#/components/schemas/Metadata'
-          examples:
-            managed_service_instance:
-              summary: Update managed service instance
-              value:
-                name: my_service_instance
-                parameters:
-                  foo: bar
-                  baz: qux
-                tags:
-                - foo
-                - bar
-                - baz
-                relationships:
-                  service_plan:
-                    data:
-                      guid: f2b6ba9c-a4d2-11ea-8ae6-48bf6bec2d78
-                metadata:
-                  annotations:
-                    note: detailed information
-                  labels:
-                    key: value
-            managed_service_instance_upgrade:
-              summary: Upgrade managed service instance
-              value:
-                maintenance_info:
-                  version: 2.1.1
-            user_provided_service_instance:
-              summary: Update user-provided service instance
-              value:
-                name: my_service_instance
-                credentials:
-                  foo: bar
-                  baz: qux
-                tags:
-                - foo
-                - bar
-                - baz
-                syslog_drain_url: https://syslog.com/drain
-                route_service_url: https://route.com/service
-                metadata:
-                  annotations:
-                    foo: bar
-                  labels:
-                    baz: qux
-            default:
-              summary: default
-              value:
-                name: my_service_instance
-                credentials:
-                  foo: bar
-                  baz: qux
-                tags:
-                - foo
-                - bar
-                - baz
-                syslog_drain_url: https://syslog.com/drain
-                route_service_url: https://route.com/service
-                metadata:
-                  annotations:
-                    foo: bar
-                  labels:
-                    baz: qux
   responses:
-    UnprocessableEntity:
-      description: Unprocessable Entity
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    Unauthorized:
-      description: Unauthorized
+    Forbidden:
+      description: Forbidden
       content:
         application/json:
           schema:
@@ -1819,12 +1813,33 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Errors'
+    UnprocessableEntity:
+      description: Unprocessable Entity
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
     BadGateway:
       description: Bad Gateway
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
+    BadRequest:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+        text/html:
+          schema:
+            type: string
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
     Conflict:
       description: Conflict
       content:
@@ -1837,21 +1852,6 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Errors'
-    Forbidden:
-      description: Forbidden
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    BadRequest:
-      description: Bad Request
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-        text/html:
-          schema:
-            type: string
     ServiceUnavailable:
       description: Service Unavailable
       content:
@@ -1869,16 +1869,14 @@ components:
 
         '
       example: created_at
-    CreatedAts:
-      name: created_ats
-      in: query
-      required: false
+    Guid:
+      name: guid
+      in: path
+      required: true
       schema:
         type: string
-      description: 'Timestamp to filter by. When filtering on equality, several comma-delimited timestamps may be passed. Also supports filtering with [relational operators](#relational-operators).
-
-        '
-      example: '2021-01-01T00:00:00Z'
+        format: uuid
+      description: The unique identifier for the resource
     PerPage:
       name: per_page
       in: query
@@ -1887,14 +1885,6 @@ components:
         type: integer
       description: Number of results per page, valid values are 1 through 5000
       example: 50
-    LabelSelector:
-      name: label_selector
-      in: query
-      description: A query string containing a list of [label selector](#labels-and-selectors) requirements
-      required: false
-      schema:
-        type: string
-      example: environment=production
     Page:
       name: page
       in: query
@@ -1913,14 +1903,24 @@ components:
 
         '
       example: '2021-01-01T00:00:00Z'
-    Guid:
-      name: guid
-      in: path
-      required: true
+    LabelSelector:
+      name: label_selector
+      in: query
+      description: A query string containing a list of [label selector](#labels-and-selectors) requirements
+      required: false
       schema:
         type: string
-        format: uuid
-      description: The unique identifier for the resource
+      example: environment=production
+    CreatedAts:
+      name: created_ats
+      in: query
+      required: false
+      schema:
+        type: string
+      description: 'Timestamp to filter by. When filtering on equality, several comma-delimited timestamps may be passed. Also supports filtering with [relational operators](#relational-operators).
+
+        '
+      example: '2021-01-01T00:00:00Z'
     APIVersion:
       name: X-Broker-API-Version
       in: header

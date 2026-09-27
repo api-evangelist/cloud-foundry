@@ -37,7 +37,7 @@ paths:
                 $ref: '#/components/schemas/Catalog'
 components:
   schemas:
-    ServiceBindingSchema:
+    ServiceInstanceSchema:
       type: object
       properties:
         create:
@@ -45,25 +45,11 @@ components:
           properties:
             parameters:
               type: object
-    Catalog:
-      type: object
-      properties:
-        services:
-          type: array
-          items:
-            $ref: '#/components/schemas/Service'
-    MaintenanceInfo:
-      type: object
-      required:
-      - version
-      properties:
-        version:
-          type: string
-        description:
-          type: string
-    Metadata:
-      description: See [Service Metadata Conventions](https://github.com/openservicebrokerapi/servicebroker/blob/master/profile.md#service-metadata) for more details.
-      type: object
+        update:
+          type: object
+          properties:
+            parameters:
+              type: object
     Service:
       type: object
       required:
@@ -105,6 +91,49 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Plan'
+    MaintenanceInfo:
+      type: object
+      required:
+      - version
+      properties:
+        version:
+          type: string
+        description:
+          type: string
+    Catalog:
+      type: object
+      properties:
+        services:
+          type: array
+          items:
+            $ref: '#/components/schemas/Service'
+    Metadata:
+      description: See [Service Metadata Conventions](https://github.com/openservicebrokerapi/servicebroker/blob/master/profile.md#service-metadata) for more details.
+      type: object
+    Schemas:
+      type: object
+      properties:
+        service_instance:
+          $ref: '#/components/schemas/ServiceInstanceSchema'
+        service_binding:
+          $ref: '#/components/schemas/ServiceBindingSchema'
+    DashboardClient:
+      type: object
+      properties:
+        id:
+          type: string
+        secret:
+          type: string
+        redirect_uri:
+          type: string
+    ServiceBindingSchema:
+      type: object
+      properties:
+        create:
+          type: object
+          properties:
+            parameters:
+              type: object
     Plan:
       type: object
       required:
@@ -136,35 +165,6 @@ components:
         binding_rotatable:
           type: boolean
           default: false
-    ServiceInstanceSchema:
-      type: object
-      properties:
-        create:
-          type: object
-          properties:
-            parameters:
-              type: object
-        update:
-          type: object
-          properties:
-            parameters:
-              type: object
-    DashboardClient:
-      type: object
-      properties:
-        id:
-          type: string
-        secret:
-          type: string
-        redirect_uri:
-          type: string
-    Schemas:
-      type: object
-      properties:
-        service_instance:
-          $ref: '#/components/schemas/ServiceInstanceSchema'
-        service_binding:
-          $ref: '#/components/schemas/ServiceBindingSchema'
   parameters:
     APIVersion:
       name: X-Broker-API-Version
