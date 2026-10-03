@@ -661,7 +661,193 @@ paths:
         '422':
           $ref: '#/components/responses/UnprocessableEntity'
 components:
+  requestBodies:
+    ProcessUpdateRequestBody:
+      description: Process object that needs to be updated
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              command:
+                type:
+                - string
+                - 'null'
+                description: The command used to start the process; use null to revert to the buildpack-detected or procfile-provided start command
+              health_check:
+                $ref: '#/components/schemas/HealthCheck'
+                description: The health check to perform on the process
+              readiness_health_check:
+                $ref: '#/components/schemas/HealthCheck'
+                description: The readiness health check to perform on the process
+              metadata:
+                $ref: '#/components/schemas/Metadata'
+            description: Request schema for updating a process
+          examples:
+            default:
+              summary: default
+              value:
+                command: rackup
+                metadata:
+                  labels:
+                    key: value
+                  annotations:
+                    note: detailed information
+  parameters:
+    OrderBy:
+      name: order_by
+      in: query
+      required: false
+      schema:
+        type: string
+      description: 'Value to sort by. Defaults to ascending; prepend with `-` to sort descending.
+
+        '
+      example: created_at
+    PerPage:
+      name: per_page
+      in: query
+      required: false
+      schema:
+        type: integer
+      description: Number of results per page, valid values are 1 through 5000
+      example: 50
+    Page:
+      name: page
+      in: query
+      required: false
+      schema:
+        type: integer
+      description: Page to display; valid values are integers >= 1
+      example: 1
+    CreatedAts:
+      name: created_ats
+      in: query
+      required: false
+      schema:
+        type: string
+      description: 'Timestamp to filter by. When filtering on equality, several comma-delimited timestamps may be passed. Also supports filtering with [relational operators](#relational-operators).
+
+        '
+      example: '2021-01-01T00:00:00Z'
+    Guid:
+      name: guid
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: The unique identifier for the resource
+    UpdatedAts:
+      name: updated_ats
+      in: query
+      required: false
+      schema:
+        type: string
+      description: 'Timestamp to filter by. When filtering on equality, several comma-delimited timestamps may be passed. Also supports filtering with [relational operators](#relational-operators).
+
+        '
+      example: '2021-01-01T00:00:00Z'
+    LabelSelector:
+      name: label_selector
+      in: query
+      description: A query string containing a list of [label selector](#labels-and-selectors) requirements
+      required: false
+      schema:
+        type: string
+      example: environment=production
+  responses:
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    Conflict:
+      description: Conflict
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    BadGateway:
+      description: Bad Gateway
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    BadRequest:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+        text/html:
+          schema:
+            type: string
+    NotFound:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    '500':
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    ServiceUnavailable:
+      description: Service Unavailable
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    UnprocessableEntity:
+      description: Unprocessable Entity
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
   schemas:
+    Pagination:
+      type: object
+      properties:
+        total_results:
+          type: integer
+          description: The total number of results available
+        total_pages:
+          type: integer
+          description: The total number of pages available
+        first:
+          allOf:
+          - $ref: '#/components/schemas/Link'
+          - description: The first page of results
+        last:
+          allOf:
+          - $ref: '#/components/schemas/Link'
+          - description: The last page of results
+        next:
+          oneOf:
+          - $ref: '#/components/schemas/Link'
+          - type: 'null'
+          description: The next page of results
+        previous:
+          oneOf:
+          - $ref: '#/components/schemas/Link'
+          - type: 'null'
+          description: The previous page of results
+      description: 'Pagination is a technique used to divide a large set of results into smaller, more manageable sets. This allows clients to retrieve results in smaller chunks, reducing the amount of data transferred and improving performance.
+
+        The pagination object is a JSON object that contains information about the pagination state of the results. It includes the total number of results available, the total number of pages available, and links to the first, last, next, and previous pages of results.
+
+        '
     Link:
       type: object
       properties:
@@ -676,25 +862,28 @@ components:
       description: 'Each link is keyed by its type and will include a href for the URL and an optional method for links that cannot be followed using GET.
 
         '
-    Relationship:
+    BaseSchema:
       type: object
       properties:
         guid:
           type: string
           format: uuid
-          description: The GUID of the resource
-    Error:
-      type: object
-      properties:
-        code:
-          type: integer
-          description: A numeric code for this error
-        detail:
+          description: The unique identifier for the resource
+        created_at:
           type: string
-          description: Detailed description of the error
-        title:
+          format: date-time
+          description: The ISO8601 compatible date and time when resource was created
+        updated_at:
           type: string
-          description: Name of the error
+          format: date-time
+          description: The ISO8601 compatible date and time when resource was last updated
+      description: 'A resource represents an individual object within the system, such as an app or a service. It is represented as a JSON object.
+
+        A resource consists of several required resource fields and other attributes specific to the resource.
+
+        See Resources and Experimental Resources for specific resources.
+
+        '
     ProcessStats:
       type: object
       properties:
@@ -746,182 +935,18 @@ components:
                   log_rate:
                     type: integer
       description: Statistics for a process
-    Errors:
+    Error:
       type: object
       properties:
-        errors:
-          type: array
-          items:
-            $ref: '#/components/schemas/Error'
-      description: 'An error response will always return a list of error objects. Errors appear on the job resource for asynchronous operations.
-
-        Clients should use the code and title fields for programmatically handling specific errors. The message in the detail field is subject to change over time.
-
-        '
-    RelationshipToOne:
-      type: object
-      properties:
-        data:
-          type:
-          - object
-          - 'null'
-          $ref: '#/components/schemas/Relationship'
-        links:
-          type: object
-          properties:
-            self:
-              $ref: '#/components/schemas/Link'
-            related:
-              $ref: '#/components/schemas/Link'
-      description: 'Some relationships relate a resource to exactly one other resource. For example an app can belong to only one space.
-
-        '
-    Process:
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/BaseSchema'
-      - properties:
-          version:
-            type: string
-            format: uuid
-            description: Random identifier that changes every time the process will be recreated in the runtime
-          type:
-            type: string
-            description: Process type; a unique identifier for processes belonging to an app
-          command:
-            type:
-            - string
-            - 'null'
-            description: The command used to start the process; use null to revert to the buildpack-detected or procfile-provided start command
-          user:
-            type:
-            - string
-            - 'null'
-            description: The user used to run the process; use null to revert to the docker-detected or default 'vcap' user
-          instances:
-            type: integer
-            description: The number of instances to run
-          memory_in_mb:
-            type:
-            - integer
-            - 'null'
-            description: The memory in MB allocated per instance
-          disk_in_mb:
-            type:
-            - integer
-            - 'null'
-            description: The disk in MB allocated per instance
-          log_rate_limit_in_bytes_per_second:
-            type: integer
-            description: The log rate in bytes per second allocated per instance
-          health_check:
-            $ref: '#/components/schemas/HealthCheck'
-          readiness_health_check:
-            $ref: '#/components/schemas/HealthCheck'
-          relationships:
-            type: object
-            properties:
-              app:
-                $ref: '#/components/schemas/RelationshipToOne'
-              revision:
-                oneOf:
-                - $ref: '#/components/schemas/RelationshipToOne'
-                - type: 'null'
-          metadata:
-            $ref: '#/components/schemas/Metadata'
-          links:
-            type: object
-            properties:
-              self:
-                $ref: '#/components/schemas/Link'
-                description: The URL to get this process
-              scale:
-                $ref: '#/components/schemas/Link'
-                description: The URL to scale this process
-              app:
-                $ref: '#/components/schemas/Link'
-                description: The URL to get the app for this process
-              space:
-                $ref: '#/components/schemas/Link'
-                description: The URL to get the space for this process
-              stats:
-                $ref: '#/components/schemas/Link'
-                description: The URL to get the stats for this process
-      description: A process defines the runnable units of an app
-    Pagination:
-      type: object
-      properties:
-        total_results:
+        code:
           type: integer
-          description: The total number of results available
-        total_pages:
-          type: integer
-          description: The total number of pages available
-        first:
-          allOf:
-          - $ref: '#/components/schemas/Link'
-          - description: The first page of results
-        last:
-          allOf:
-          - $ref: '#/components/schemas/Link'
-          - description: The last page of results
-        next:
-          oneOf:
-          - $ref: '#/components/schemas/Link'
-          - type: 'null'
-          description: The next page of results
-        previous:
-          oneOf:
-          - $ref: '#/components/schemas/Link'
-          - type: 'null'
-          description: The previous page of results
-      description: 'Pagination is a technique used to divide a large set of results into smaller, more manageable sets. This allows clients to retrieve results in smaller chunks, reducing the amount of data transferred and improving performance.
-
-        The pagination object is a JSON object that contains information about the pagination state of the results. It includes the total number of results available, the total number of pages available, and links to the first, last, next, and previous pages of results.
-
-        '
-    HealthCheck:
-      type: object
-      properties:
-        type:
+          description: A numeric code for this error
+        detail:
           type: string
-          enum:
-          - port
-          - process
-          - http
-          description: The type of health check to perform; valid values are http, port, and process; default is port
-        data:
-          type: object
-          properties:
-            timeout:
-              type:
-              - integer
-              - 'null'
-              description: The duration in seconds that health checks can fail before the process is restarted
-            invocation_timeout:
-              type:
-              - integer
-              - 'null'
-              description: The timeout in seconds for individual health check requests for http and port health checks
-            interval:
-              type:
-              - integer
-              - 'null'
-              description: The interval in seconds between health check requests
-            endpoint:
-              type: string
-              description: The endpoint called to determine if the app is healthy; this key is only present for http health checks
-      description: Health check configuration for a process
-    ProcessList:
-      allOf:
-      - $ref: '#/components/schemas/Pagination'
-      - type: object
-        properties:
-          resources:
-            type: array
-            items:
-              $ref: '#/components/schemas/Process'
-      description: A list of processes
+          description: Detailed description of the error
+        title:
+          type: string
+          description: Name of the error
     Metadata:
       type: object
       properties:
@@ -1052,182 +1077,157 @@ components:
         Metadata is included in the response body of a request to retrieve a resource.
 
         '
-    BaseSchema:
+    Errors:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/Error'
+      description: 'An error response will always return a list of error objects. Errors appear on the job resource for asynchronous operations.
+
+        Clients should use the code and title fields for programmatically handling specific errors. The message in the detail field is subject to change over time.
+
+        '
+    HealthCheck:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+          - port
+          - process
+          - http
+          description: The type of health check to perform; valid values are http, port, and process; default is port
+        data:
+          type: object
+          properties:
+            timeout:
+              type:
+              - integer
+              - 'null'
+              description: The duration in seconds that health checks can fail before the process is restarted
+            invocation_timeout:
+              type:
+              - integer
+              - 'null'
+              description: The timeout in seconds for individual health check requests for http and port health checks
+            interval:
+              type:
+              - integer
+              - 'null'
+              description: The interval in seconds between health check requests
+            endpoint:
+              type: string
+              description: The endpoint called to determine if the app is healthy; this key is only present for http health checks
+      description: Health check configuration for a process
+    RelationshipToOne:
+      type: object
+      properties:
+        data:
+          type:
+          - object
+          - 'null'
+          $ref: '#/components/schemas/Relationship'
+        links:
+          type: object
+          properties:
+            self:
+              $ref: '#/components/schemas/Link'
+            related:
+              $ref: '#/components/schemas/Link'
+      description: 'Some relationships relate a resource to exactly one other resource. For example an app can belong to only one space.
+
+        '
+    Process:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/BaseSchema'
+      - properties:
+          version:
+            type: string
+            format: uuid
+            description: Random identifier that changes every time the process will be recreated in the runtime
+          type:
+            type: string
+            description: Process type; a unique identifier for processes belonging to an app
+          command:
+            type:
+            - string
+            - 'null'
+            description: The command used to start the process; use null to revert to the buildpack-detected or procfile-provided start command
+          user:
+            type:
+            - string
+            - 'null'
+            description: The user used to run the process; use null to revert to the docker-detected or default 'vcap' user
+          instances:
+            type: integer
+            description: The number of instances to run
+          memory_in_mb:
+            type:
+            - integer
+            - 'null'
+            description: The memory in MB allocated per instance
+          disk_in_mb:
+            type:
+            - integer
+            - 'null'
+            description: The disk in MB allocated per instance
+          log_rate_limit_in_bytes_per_second:
+            type: integer
+            description: The log rate in bytes per second allocated per instance
+          health_check:
+            $ref: '#/components/schemas/HealthCheck'
+          readiness_health_check:
+            $ref: '#/components/schemas/HealthCheck'
+          relationships:
+            type: object
+            properties:
+              app:
+                $ref: '#/components/schemas/RelationshipToOne'
+              revision:
+                oneOf:
+                - $ref: '#/components/schemas/RelationshipToOne'
+                - type: 'null'
+          metadata:
+            $ref: '#/components/schemas/Metadata'
+          links:
+            type: object
+            properties:
+              self:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get this process
+              scale:
+                $ref: '#/components/schemas/Link'
+                description: The URL to scale this process
+              app:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get the app for this process
+              space:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get the space for this process
+              stats:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get the stats for this process
+      description: A process defines the runnable units of an app
+    ProcessList:
+      allOf:
+      - $ref: '#/components/schemas/Pagination'
+      - type: object
+        properties:
+          resources:
+            type: array
+            items:
+              $ref: '#/components/schemas/Process'
+      description: A list of processes
+    Relationship:
       type: object
       properties:
         guid:
           type: string
           format: uuid
-          description: The unique identifier for the resource
-        created_at:
-          type: string
-          format: date-time
-          description: The ISO8601 compatible date and time when resource was created
-        updated_at:
-          type: string
-          format: date-time
-          description: The ISO8601 compatible date and time when resource was last updated
-      description: 'A resource represents an individual object within the system, such as an app or a service. It is represented as a JSON object.
-
-        A resource consists of several required resource fields and other attributes specific to the resource.
-
-        See Resources and Experimental Resources for specific resources.
-
-        '
-  responses:
-    Forbidden:
-      description: Forbidden
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    NotFound:
-      description: Not Found
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    UnprocessableEntity:
-      description: Unprocessable Entity
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    BadGateway:
-      description: Bad Gateway
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-    BadRequest:
-      description: Bad Request
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-        text/html:
-          schema:
-            type: string
-    Unauthorized:
-      description: Unauthorized
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    Conflict:
-      description: Conflict
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    '500':
-      description: Internal Server Error
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    ServiceUnavailable:
-      description: Service Unavailable
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-  parameters:
-    OrderBy:
-      name: order_by
-      in: query
-      required: false
-      schema:
-        type: string
-      description: 'Value to sort by. Defaults to ascending; prepend with `-` to sort descending.
-
-        '
-      example: created_at
-    Guid:
-      name: guid
-      in: path
-      required: true
-      schema:
-        type: string
-        format: uuid
-      description: The unique identifier for the resource
-    PerPage:
-      name: per_page
-      in: query
-      required: false
-      schema:
-        type: integer
-      description: Number of results per page, valid values are 1 through 5000
-      example: 50
-    Page:
-      name: page
-      in: query
-      required: false
-      schema:
-        type: integer
-      description: Page to display; valid values are integers >= 1
-      example: 1
-    UpdatedAts:
-      name: updated_ats
-      in: query
-      required: false
-      schema:
-        type: string
-      description: 'Timestamp to filter by. When filtering on equality, several comma-delimited timestamps may be passed. Also supports filtering with [relational operators](#relational-operators).
-
-        '
-      example: '2021-01-01T00:00:00Z'
-    LabelSelector:
-      name: label_selector
-      in: query
-      description: A query string containing a list of [label selector](#labels-and-selectors) requirements
-      required: false
-      schema:
-        type: string
-      example: environment=production
-    CreatedAts:
-      name: created_ats
-      in: query
-      required: false
-      schema:
-        type: string
-      description: 'Timestamp to filter by. When filtering on equality, several comma-delimited timestamps may be passed. Also supports filtering with [relational operators](#relational-operators).
-
-        '
-      example: '2021-01-01T00:00:00Z'
-  requestBodies:
-    ProcessUpdateRequestBody:
-      description: Process object that needs to be updated
-      required: true
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              command:
-                type:
-                - string
-                - 'null'
-                description: The command used to start the process; use null to revert to the buildpack-detected or procfile-provided start command
-              health_check:
-                $ref: '#/components/schemas/HealthCheck'
-                description: The health check to perform on the process
-              readiness_health_check:
-                $ref: '#/components/schemas/HealthCheck'
-                description: The readiness health check to perform on the process
-              metadata:
-                $ref: '#/components/schemas/Metadata'
-            description: Request schema for updating a process
-          examples:
-            default:
-              summary: default
-              value:
-                command: rackup
-                metadata:
-                  labels:
-                    key: value
-                  annotations:
-                    note: detailed information
+          description: The GUID of the resource
   securitySchemes:
     oauth:
       type: oauth2

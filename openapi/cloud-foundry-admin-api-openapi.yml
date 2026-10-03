@@ -69,6 +69,12 @@ components:
 
         '
   responses:
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
     Forbidden:
       description: Forbidden
       content:
@@ -77,12 +83,6 @@ components:
             $ref: '#/components/schemas/Errors'
     NotFound:
       description: Not Found
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    Unauthorized:
-      description: Unauthorized
       content:
         application/json:
           schema:

@@ -37,6 +37,63 @@ paths:
                 $ref: '#/components/schemas/Catalog'
 components:
   schemas:
+    MaintenanceInfo:
+      type: object
+      required:
+      - version
+      properties:
+        version:
+          type: string
+        description:
+          type: string
+    Plan:
+      type: object
+      required:
+      - id
+      - name
+      - description
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+        maintenance_info:
+          $ref: '#/components/schemas/MaintenanceInfo'
+        free:
+          type: boolean
+          default: true
+        bindable:
+          type: boolean
+        schemas:
+          $ref: '#/components/schemas/Schemas'
+        maximum_polling_duration:
+          type: integer
+        plan_updateable:
+          type: boolean
+        binding_rotatable:
+          type: boolean
+          default: false
+    Catalog:
+      type: object
+      properties:
+        services:
+          type: array
+          items:
+            $ref: '#/components/schemas/Service'
+    Metadata:
+      description: See [Service Metadata Conventions](https://github.com/openservicebrokerapi/servicebroker/blob/master/profile.md#service-metadata) for more details.
+      type: object
+    Schemas:
+      type: object
+      properties:
+        service_instance:
+          $ref: '#/components/schemas/ServiceInstanceSchema'
+        service_binding:
+          $ref: '#/components/schemas/ServiceBindingSchema'
     ServiceInstanceSchema:
       type: object
       properties:
@@ -91,32 +148,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Plan'
-    MaintenanceInfo:
-      type: object
-      required:
-      - version
-      properties:
-        version:
-          type: string
-        description:
-          type: string
-    Catalog:
-      type: object
-      properties:
-        services:
-          type: array
-          items:
-            $ref: '#/components/schemas/Service'
-    Metadata:
-      description: See [Service Metadata Conventions](https://github.com/openservicebrokerapi/servicebroker/blob/master/profile.md#service-metadata) for more details.
-      type: object
-    Schemas:
-      type: object
-      properties:
-        service_instance:
-          $ref: '#/components/schemas/ServiceInstanceSchema'
-        service_binding:
-          $ref: '#/components/schemas/ServiceBindingSchema'
     DashboardClient:
       type: object
       properties:
@@ -134,37 +165,6 @@ components:
           properties:
             parameters:
               type: object
-    Plan:
-      type: object
-      required:
-      - id
-      - name
-      - description
-      properties:
-        id:
-          type: string
-        name:
-          type: string
-        description:
-          type: string
-        metadata:
-          $ref: '#/components/schemas/Metadata'
-        maintenance_info:
-          $ref: '#/components/schemas/MaintenanceInfo'
-        free:
-          type: boolean
-          default: true
-        bindable:
-          type: boolean
-        schemas:
-          $ref: '#/components/schemas/Schemas'
-        maximum_polling_duration:
-          type: integer
-        plan_updateable:
-          type: boolean
-        binding_rotatable:
-          type: boolean
-          default: false
   parameters:
     APIVersion:
       name: X-Broker-API-Version

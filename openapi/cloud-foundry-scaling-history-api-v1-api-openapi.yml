@@ -104,16 +104,39 @@ paths:
       x-operation-id-source: derived
 components:
   schemas:
-    HistoryIgnoreEntry:
-      description: Description of an ignored scaling event in history.
+    History:
+      description: Object containing scaling history.
       type: object
       properties:
-        ignore_reason:
+        total_results:
+          type: integer
+          format: int64
+          description: Number of history entries found for the given query.
+          example: 2
+        total_pages:
+          type: integer
+          format: int64
+          description: Number of Pages from the query
+          example: 1
+        page:
+          type: integer
+          format: int64
+          description: Number of the current page.
+          example: 1
+        prev_url:
           type: string
-          description: 'In case the scaling was ignored, the reason is provided in this field.
-
-            '
-          example: app in cooldown period
+          format: uri
+        next_url:
+          type: string
+          format: uri
+        resources:
+          type: array
+          items:
+            $ref: '#/components/schemas/HistoryEntry'
+    HistorySuccessEntry:
+      description: Description of a successful scaling event event in history.
+      type: object
+      properties: {}
     HistoryErrorEntry:
       description: Description of a failed scaling even in history.
       type: object
@@ -124,10 +147,6 @@ components:
 
             '
           example: failed to compute new app instances
-    HistorySuccessEntry:
-      description: Description of a successful scaling event event in history.
-      type: object
-      properties: {}
     HistoryEntry:
       description: Properties common for each entry in the scaling history.
       type: object
@@ -181,35 +200,16 @@ components:
           type: string
           description: Textual information about the scaling event.
           example: app
-    History:
-      description: Object containing scaling history.
+    HistoryIgnoreEntry:
+      description: Description of an ignored scaling event in history.
       type: object
       properties:
-        total_results:
-          type: integer
-          format: int64
-          description: Number of history entries found for the given query.
-          example: 2
-        total_pages:
-          type: integer
-          format: int64
-          description: Number of Pages from the query
-          example: 1
-        page:
-          type: integer
-          format: int64
-          description: Number of the current page.
-          example: 1
-        prev_url:
+        ignore_reason:
           type: string
-          format: uri
-        next_url:
-          type: string
-          format: uri
-        resources:
-          type: array
-          items:
-            $ref: '#/components/schemas/HistoryEntry'
+          description: 'In case the scaling was ignored, the reason is provided in this field.
+
+            '
+          example: app in cooldown period
   securitySchemes:
     bearerAuth:
       type: http

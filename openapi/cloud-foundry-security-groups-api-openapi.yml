@@ -455,7 +455,79 @@ paths:
         '422':
           $ref: '#/components/responses/UnprocessableEntity'
 components:
+  parameters:
+    OrderBy:
+      name: order_by
+      in: query
+      required: false
+      schema:
+        type: string
+      description: 'Value to sort by. Defaults to ascending; prepend with `-` to sort descending.
+
+        '
+      example: created_at
+    PerPage:
+      name: per_page
+      in: query
+      required: false
+      schema:
+        type: integer
+      description: Number of results per page, valid values are 1 through 5000
+      example: 50
+    Page:
+      name: page
+      in: query
+      required: false
+      schema:
+        type: integer
+      description: Page to display; valid values are integers >= 1
+      example: 1
+    CreatedAts:
+      name: created_ats
+      in: query
+      required: false
+      schema:
+        type: string
+      description: 'Timestamp to filter by. When filtering on equality, several comma-delimited timestamps may be passed. Also supports filtering with [relational operators](#relational-operators).
+
+        '
+      example: '2021-01-01T00:00:00Z'
+    Guid:
+      name: guid
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: The unique identifier for the resource
+    SpaceGuid:
+      name: space_guid
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: The unique identifier for the space
+    UpdatedAts:
+      name: updated_ats
+      in: query
+      required: false
+      schema:
+        type: string
+      description: 'Timestamp to filter by. When filtering on equality, several comma-delimited timestamps may be passed. Also supports filtering with [relational operators](#relational-operators).
+
+        '
+      example: '2021-01-01T00:00:00Z'
   schemas:
+    SecurityGroupList:
+      type: object
+      properties:
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+        resources:
+          type: array
+          items:
+            $ref: '#/components/schemas/SecurityGroup'
     Link:
       type: object
       properties:
@@ -470,108 +542,58 @@ components:
       description: 'Each link is keyed by its type and will include a href for the URL and an optional method for links that cannot be followed using GET.
 
         '
-    Relationship:
+    Pagination:
+      type: object
+      properties:
+        total_results:
+          type: integer
+          description: The total number of results available
+        total_pages:
+          type: integer
+          description: The total number of pages available
+        first:
+          allOf:
+          - $ref: '#/components/schemas/Link'
+          - description: The first page of results
+        last:
+          allOf:
+          - $ref: '#/components/schemas/Link'
+          - description: The last page of results
+        next:
+          oneOf:
+          - $ref: '#/components/schemas/Link'
+          - type: 'null'
+          description: The next page of results
+        previous:
+          oneOf:
+          - $ref: '#/components/schemas/Link'
+          - type: 'null'
+          description: The previous page of results
+      description: 'Pagination is a technique used to divide a large set of results into smaller, more manageable sets. This allows clients to retrieve results in smaller chunks, reducing the amount of data transferred and improving performance.
+
+        The pagination object is a JSON object that contains information about the pagination state of the results. It includes the total number of results available, the total number of pages available, and links to the first, last, next, and previous pages of results.
+
+        '
+    BaseSchema:
       type: object
       properties:
         guid:
           type: string
           format: uuid
-          description: The GUID of the resource
-    Error:
-      type: object
-      properties:
-        code:
-          type: integer
-          description: A numeric code for this error
-        detail:
+          description: The unique identifier for the resource
+        created_at:
           type: string
-          description: Detailed description of the error
-        title:
+          format: date-time
+          description: The ISO8601 compatible date and time when resource was created
+        updated_at:
           type: string
-          description: Name of the error
-    SecurityGroup:
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/BaseSchema'
-      - properties:
-          name:
-            type: string
-            description: Name of the security group
-          globally_enabled:
-            type: object
-            properties:
-              running:
-                type: boolean
-                description: Whether the security group is globally enabled for running apps
-              staging:
-                type: boolean
-                description: Whether the security group is globally enabled for staging apps
-          rules:
-            type: array
-            items:
-              type: object
-              properties:
-                protocol:
-                  type: string
-                  description: Protocol for the rule
-                destination:
-                  type: string
-                  description: Destination for the rule
-                ports:
-                  type: string
-                  description: Ports for the rule
-                type:
-                  type: integer
-                  description: Type for ICMP rules
-                code:
-                  type: integer
-                  description: Code for ICMP rules
-                description:
-                  type: string
-                  description: Description of the rule
-            description: Rules for the security group
-          running_spaces:
-            type: object
-            properties:
-              data:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Relationship'
-            description: Spaces where this security group is applied to running apps
-          staging_spaces:
-            type: object
-            properties:
-              data:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Relationship'
-            description: Spaces where this security group is applied to staging apps
-          links:
-            type: object
-            properties:
-              self:
-                $ref: '#/components/schemas/Link'
-              running_spaces:
-                $ref: '#/components/schemas/Link'
-              staging_spaces:
-                $ref: '#/components/schemas/Link'
-          metadata:
-            $ref: '#/components/schemas/Metadata'
-        required:
-        - name
-        - globally_enabled
-        - rules
-        - links
-    Errors:
-      type: object
-      properties:
-        errors:
-          type: array
-          items:
-            $ref: '#/components/schemas/Error'
-      description: 'An error response will always return a list of error objects. Errors appear on the job resource for asynchronous operations.
+          format: date-time
+          description: The ISO8601 compatible date and time when resource was last updated
+      description: 'A resource represents an individual object within the system, such as an app or a service. It is represented as a JSON object.
 
-        Clients should use the code and title fields for programmatically handling specific errors. The message in the detail field is subject to change over time.
+        A resource consists of several required resource fields and other attributes specific to the resource.
+
+        See Resources and Experimental Resources for specific resources.
 
         '
     SecurityGroupUpdate:
@@ -617,92 +639,18 @@ components:
           description: Rules for the security group
         metadata:
           $ref: '#/components/schemas/Metadata'
-    Pagination:
+    Error:
       type: object
       properties:
-        total_results:
+        code:
           type: integer
-          description: The total number of results available
-        total_pages:
-          type: integer
-          description: The total number of pages available
-        first:
-          allOf:
-          - $ref: '#/components/schemas/Link'
-          - description: The first page of results
-        last:
-          allOf:
-          - $ref: '#/components/schemas/Link'
-          - description: The last page of results
-        next:
-          oneOf:
-          - $ref: '#/components/schemas/Link'
-          - type: 'null'
-          description: The next page of results
-        previous:
-          oneOf:
-          - $ref: '#/components/schemas/Link'
-          - type: 'null'
-          description: The previous page of results
-      description: 'Pagination is a technique used to divide a large set of results into smaller, more manageable sets. This allows clients to retrieve results in smaller chunks, reducing the amount of data transferred and improving performance.
-
-        The pagination object is a JSON object that contains information about the pagination state of the results. It includes the total number of results available, the total number of pages available, and links to the first, last, next, and previous pages of results.
-
-        '
-    SecurityGroupCreate:
-      type: object
-      properties:
-        name:
+          description: A numeric code for this error
+        detail:
           type: string
-          description: Name of the security group
-        globally_enabled:
-          type: object
-          properties:
-            running:
-              type: boolean
-              description: Whether the security group is globally enabled for running apps
-            staging:
-              type: boolean
-              description: Whether the security group is globally enabled for staging apps
-        rules:
-          type: array
-          items:
-            type: object
-            properties:
-              protocol:
-                type: string
-                description: Protocol for the rule
-              destination:
-                type: string
-                description: Destination for the rule
-              ports:
-                type: string
-                description: Ports for the rule
-              type:
-                type: integer
-                description: Type for ICMP rules
-              code:
-                type: integer
-                description: Code for ICMP rules
-              description:
-                type:
-                - string
-                - 'null'
-                description: Description of the rule
-          description: Rules for the security group
-        metadata:
-          $ref: '#/components/schemas/Metadata'
-      required:
-      - name
-    SecurityGroupList:
-      type: object
-      properties:
-        pagination:
-          $ref: '#/components/schemas/Pagination'
-        resources:
-          type: array
-          items:
-            $ref: '#/components/schemas/SecurityGroup'
+          description: Detailed description of the error
+        title:
+          type: string
+          description: Name of the error
     Metadata:
       type: object
       properties:
@@ -833,6 +781,63 @@ components:
         Metadata is included in the response body of a request to retrieve a resource.
 
         '
+    SecurityGroupCreate:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the security group
+        globally_enabled:
+          type: object
+          properties:
+            running:
+              type: boolean
+              description: Whether the security group is globally enabled for running apps
+            staging:
+              type: boolean
+              description: Whether the security group is globally enabled for staging apps
+        rules:
+          type: array
+          items:
+            type: object
+            properties:
+              protocol:
+                type: string
+                description: Protocol for the rule
+              destination:
+                type: string
+                description: Destination for the rule
+              ports:
+                type: string
+                description: Ports for the rule
+              type:
+                type: integer
+                description: Type for ICMP rules
+              code:
+                type: integer
+                description: Code for ICMP rules
+              description:
+                type:
+                - string
+                - 'null'
+                description: Description of the rule
+          description: Rules for the security group
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+      required:
+      - name
+    Errors:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/Error'
+      description: 'An error response will always return a list of error objects. Errors appear on the job resource for asynchronous operations.
+
+        Clients should use the code and title fields for programmatically handling specific errors. The message in the detail field is subject to change over time.
+
+        '
     RelationshipToMany:
       type: object
       properties:
@@ -850,43 +855,101 @@ components:
       description: 'Some relationships relate a resource to several other resources. For example, an isolation segment can be entitled to multiple organizations.
 
         '
-    BaseSchema:
+    SecurityGroup:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/BaseSchema'
+      - properties:
+          name:
+            type: string
+            description: Name of the security group
+          globally_enabled:
+            type: object
+            properties:
+              running:
+                type: boolean
+                description: Whether the security group is globally enabled for running apps
+              staging:
+                type: boolean
+                description: Whether the security group is globally enabled for staging apps
+          rules:
+            type: array
+            items:
+              type: object
+              properties:
+                protocol:
+                  type: string
+                  description: Protocol for the rule
+                destination:
+                  type: string
+                  description: Destination for the rule
+                ports:
+                  type: string
+                  description: Ports for the rule
+                type:
+                  type: integer
+                  description: Type for ICMP rules
+                code:
+                  type: integer
+                  description: Code for ICMP rules
+                description:
+                  type: string
+                  description: Description of the rule
+            description: Rules for the security group
+          running_spaces:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Relationship'
+            description: Spaces where this security group is applied to running apps
+          staging_spaces:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Relationship'
+            description: Spaces where this security group is applied to staging apps
+          links:
+            type: object
+            properties:
+              self:
+                $ref: '#/components/schemas/Link'
+              running_spaces:
+                $ref: '#/components/schemas/Link'
+              staging_spaces:
+                $ref: '#/components/schemas/Link'
+          metadata:
+            $ref: '#/components/schemas/Metadata'
+        required:
+        - name
+        - globally_enabled
+        - rules
+        - links
+    Relationship:
       type: object
       properties:
         guid:
           type: string
           format: uuid
-          description: The unique identifier for the resource
-        created_at:
-          type: string
-          format: date-time
-          description: The ISO8601 compatible date and time when resource was created
-        updated_at:
-          type: string
-          format: date-time
-          description: The ISO8601 compatible date and time when resource was last updated
-      description: 'A resource represents an individual object within the system, such as an app or a service. It is represented as a JSON object.
-
-        A resource consists of several required resource fields and other attributes specific to the resource.
-
-        See Resources and Experimental Resources for specific resources.
-
-        '
+          description: The GUID of the resource
   responses:
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
     Forbidden:
       description: Forbidden
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Errors'
-    NotFound:
-      description: Not Found
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    UnprocessableEntity:
-      description: Unprocessable Entity
+    Conflict:
+      description: Conflict
       content:
         application/json:
           schema:
@@ -906,14 +969,8 @@ components:
         text/html:
           schema:
             type: string
-    Unauthorized:
-      description: Unauthorized
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    Conflict:
-      description: Conflict
+    NotFound:
+      description: Not Found
       content:
         application/json:
           schema:
@@ -930,69 +987,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Errors'
-  parameters:
-    OrderBy:
-      name: order_by
-      in: query
-      required: false
-      schema:
-        type: string
-      description: 'Value to sort by. Defaults to ascending; prepend with `-` to sort descending.
-
-        '
-      example: created_at
-    Guid:
-      name: guid
-      in: path
-      required: true
-      schema:
-        type: string
-        format: uuid
-      description: The unique identifier for the resource
-    PerPage:
-      name: per_page
-      in: query
-      required: false
-      schema:
-        type: integer
-      description: Number of results per page, valid values are 1 through 5000
-      example: 50
-    Page:
-      name: page
-      in: query
-      required: false
-      schema:
-        type: integer
-      description: Page to display; valid values are integers >= 1
-      example: 1
-    UpdatedAts:
-      name: updated_ats
-      in: query
-      required: false
-      schema:
-        type: string
-      description: 'Timestamp to filter by. When filtering on equality, several comma-delimited timestamps may be passed. Also supports filtering with [relational operators](#relational-operators).
-
-        '
-      example: '2021-01-01T00:00:00Z'
-    SpaceGuid:
-      name: space_guid
-      in: path
-      required: true
-      schema:
-        type: string
-        format: uuid
-      description: The unique identifier for the space
-    CreatedAts:
-      name: created_ats
-      in: query
-      required: false
-      schema:
-        type: string
-      description: 'Timestamp to filter by. When filtering on equality, several comma-delimited timestamps may be passed. Also supports filtering with [relational operators](#relational-operators).
-
-        '
-      example: '2021-01-01T00:00:00Z'
+    UnprocessableEntity:
+      description: Unprocessable Entity
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
   securitySchemes:
     oauth:
       type: oauth2

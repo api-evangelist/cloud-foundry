@@ -56,6 +56,22 @@ paths:
       x-operation-id-source: derived
 components:
   schemas:
+    Metrics:
+      required:
+      - instance_index
+      - metrics
+      type: object
+      properties:
+        instance_index:
+          type: integer
+          format: int64
+          description: The index of the application instance the custom metrics are submitted for. Can be found in the `CF_INSTANCE_INDEX` environment variable.
+          example: 0
+        metrics:
+          type: array
+          items:
+            $ref: '#/components/schemas/Metric'
+          description: The custom metrics to be submitted.
     Metric:
       required:
       - name
@@ -74,22 +90,6 @@ components:
           type: string
           description: An optional unit for the metric, for display purposes only.
           example: jobs
-    Metrics:
-      required:
-      - instance_index
-      - metrics
-      type: object
-      properties:
-        instance_index:
-          type: integer
-          format: int64
-          description: The index of the application instance the custom metrics are submitted for. Can be found in the `CF_INSTANCE_INDEX` environment variable.
-          example: 0
-        metrics:
-          type: array
-          items:
-            $ref: '#/components/schemas/Metric'
-          description: The custom metrics to be submitted.
   securitySchemes:
     mtls:
       type: mutualTLS

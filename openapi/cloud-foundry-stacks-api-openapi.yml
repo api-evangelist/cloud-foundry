@@ -378,40 +378,128 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 components:
-  schemas:
-    Link:
-      type: object
-      properties:
-        href:
-          type: string
-          description: The URL of the link
-        method:
-          type: string
-          description: An optional field containing the HTTP method to be used when following the URL
-      required:
-      - href
-      description: 'Each link is keyed by its type and will include a href for the URL and an optional method for links that cannot be followed using GET.
+  parameters:
+    OrderBy:
+      name: order_by
+      in: query
+      required: false
+      schema:
+        type: string
+      description: 'Value to sort by. Defaults to ascending; prepend with `-` to sort descending.
 
         '
-    Relationship:
-      type: object
-      properties:
-        guid:
-          type: string
-          format: uuid
-          description: The GUID of the resource
-    Error:
-      type: object
-      properties:
-        code:
-          type: integer
-          description: A numeric code for this error
-        detail:
-          type: string
-          description: Detailed description of the error
-        title:
-          type: string
-          description: Name of the error
+      example: created_at
+    PerPage:
+      name: per_page
+      in: query
+      required: false
+      schema:
+        type: integer
+      description: Number of results per page, valid values are 1 through 5000
+      example: 50
+    Page:
+      name: page
+      in: query
+      required: false
+      schema:
+        type: integer
+      description: Page to display; valid values are integers >= 1
+      example: 1
+    CreatedAts:
+      name: created_ats
+      in: query
+      required: false
+      schema:
+        type: string
+      description: 'Timestamp to filter by. When filtering on equality, several comma-delimited timestamps may be passed. Also supports filtering with [relational operators](#relational-operators).
+
+        '
+      example: '2021-01-01T00:00:00Z'
+    Guid:
+      name: guid
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: The unique identifier for the resource
+    UpdatedAts:
+      name: updated_ats
+      in: query
+      required: false
+      schema:
+        type: string
+      description: 'Timestamp to filter by. When filtering on equality, several comma-delimited timestamps may be passed. Also supports filtering with [relational operators](#relational-operators).
+
+        '
+      example: '2021-01-01T00:00:00Z'
+    LabelSelector:
+      name: label_selector
+      in: query
+      description: A query string containing a list of [label selector](#labels-and-selectors) requirements
+      required: false
+      schema:
+        type: string
+      example: environment=production
+  responses:
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    Conflict:
+      description: Conflict
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    BadGateway:
+      description: Bad Gateway
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    BadRequest:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+        text/html:
+          schema:
+            type: string
+    NotFound:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    '500':
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    ServiceUnavailable:
+      description: Service Unavailable
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    UnprocessableEntity:
+      description: Unprocessable Entity
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+  schemas:
     Domain:
       type: object
       allOf:
@@ -465,189 +553,74 @@ components:
       description: 'A domain is a fully qualified domain name that is used for application routes. A domain can be scoped to an organization, meaning it can be used to create routes for spaces inside that organization, or be left unscoped to allow all organizations access.
 
         '
-    StackList:
+    Pagination:
       type: object
       properties:
-        pagination:
-          $ref: '#/components/schemas/Pagination'
-        resources:
-          type: array
-          items:
-            $ref: '#/components/schemas/Stack'
-    App:
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/BaseSchema'
-      - properties:
-          name:
-            type: string
-            description: The name of the app
-          state:
-            type: string
-            description: Current desired state of the app
-            enum:
-            - STOPPED
-            - STARTED
-          lifecycle:
-            $ref: '#/components/schemas/Lifecycle'
-            description: Provides the default lifecycle object for the application. This lifecycle will be used when staging and running the application. The staging lifecycle can be overridden on builds
-          relationships:
-            $ref: '#/components/schemas/Relationships'
-          metadata:
-            $ref: '#/components/schemas/Metadata'
-          links:
-            type: object
-            properties:
-              self:
-                $ref: '#/components/schemas/Link'
-                description: The URL to get this app
-              space:
-                $ref: '#/components/schemas/Link'
-                description: The URL to get the space for this app
-              processes:
-                $ref: '#/components/schemas/Link'
-                description: The URL to get the processes for this app
-              packages:
-                $ref: '#/components/schemas/Link'
-                description: The URL to get the packages for this app
-              environment_variables:
-                $ref: '#/components/schemas/Link'
-                description: The URL to get the environment variables for this app
-              current_droplet:
-                $ref: '#/components/schemas/Link'
-                description: The URL to get the current droplet for this app
-              droplets:
-                $ref: '#/components/schemas/Link'
-                description: The URL to get the droplets for this app
-              tasks:
-                $ref: '#/components/schemas/Link'
-                description: The URL to get the tasks for this app
-              start:
-                $ref: '#/components/schemas/Link'
-                description: The URL to start the app
-              stop:
-                $ref: '#/components/schemas/Link'
-                description: The URL to stop the app
-              revisions:
-                $ref: '#/components/schemas/Link'
-                description: The URL to get the revisions for this app
-              deployed_revisions:
-                $ref: '#/components/schemas/Link'
-                description: The URL to get the deployed revisions for this app
-              features:
-                $ref: '#/components/schemas/Link'
-                description: The URL to get the features for this app
-          included:
-            $ref: '#/components/schemas/IncludedResources'
-            description: Additional related resources included in the response when using the include parameter
-      description: 'Apps represent the core entities in the Cloud Foundry environment. They are the deployable units that run your code. Each app can have multiple processes, routes, and services associated with it. Apps can be scaled horizontally by increasing the number of instances. They can also be updated and restarted as needed.
+        total_results:
+          type: integer
+          description: The total number of results available
+        total_pages:
+          type: integer
+          description: The total number of pages available
+        first:
+          allOf:
+          - $ref: '#/components/schemas/Link'
+          - description: The first page of results
+        last:
+          allOf:
+          - $ref: '#/components/schemas/Link'
+          - description: The last page of results
+        next:
+          oneOf:
+          - $ref: '#/components/schemas/Link'
+          - type: 'null'
+          description: The next page of results
+        previous:
+          oneOf:
+          - $ref: '#/components/schemas/Link'
+          - type: 'null'
+          description: The previous page of results
+      description: 'Pagination is a technique used to divide a large set of results into smaller, more manageable sets. This allows clients to retrieve results in smaller chunks, reducing the amount of data transferred and improving performance.
+
+        The pagination object is a JSON object that contains information about the pagination state of the results. It includes the total number of results available, the total number of pages available, and links to the first, last, next, and previous pages of results.
 
         '
-    Errors:
+    Link:
       type: object
       properties:
-        errors:
-          type: array
-          items:
-            $ref: '#/components/schemas/Error'
-      description: 'An error response will always return a list of error objects. Errors appear on the job resource for asynchronous operations.
-
-        Clients should use the code and title fields for programmatically handling specific errors. The message in the detail field is subject to change over time.
-
-        '
-    Lifecycle:
-      type: object
-      properties:
-        type:
+        href:
           type: string
-          description: Type of the lifecycle; valid values are buildpack, cnb, docker
-        data:
-          type: object
-          additionalProperties: true
-          description: Data specific to the lifecycle
-          properties:
-            buildpacks:
-              type: array
-              items:
-                type: string
-              description: List of the names of buildpacks, URLs from which they may be downloaded, or null to auto-detect a suitable buildpack during staging (applicable for buildpack and cnb lifecycles)
-            stack:
-              type:
-              - string
-              - 'null'
-              description: The root filesystem to use with the buildpack, for example cflinuxfs4 (applicable for buildpack lifecycle)
-            credentials:
-              type: object
-              additionalProperties:
-                type: object
-                properties:
-                  username:
-                    type:
-                    - string
-                    - 'null'
-                  password:
-                    type:
-                    - string
-                    - 'null'
-                  token:
-                    type: string
-              description: Credentials used to download the configured buildpacks (applicable for cnb lifecycle)
-      description: 'The lifecycle type defines how the application droplet is created and run. The following lifecycle types are supported: - buildpack: Traditional buildpacks for Cloud Foundry applications. - cnb: Cloud Native Buildpacks that are OCI-compliant. - docker: Run pre-built Docker images.
+          description: The URL of the link
+        method:
+          type: string
+          description: An optional field containing the HTTP method to be used when following the URL
+      required:
+      - href
+      description: 'Each link is keyed by its type and will include a href for the URL and an optional method for links that cannot be followed using GET.
 
         '
-    RelationshipToOne:
+    BaseSchema:
       type: object
       properties:
-        data:
-          type:
-          - object
-          - 'null'
-          $ref: '#/components/schemas/Relationship'
-        links:
-          type: object
-          properties:
-            self:
-              $ref: '#/components/schemas/Link'
-            related:
-              $ref: '#/components/schemas/Link'
-      description: 'Some relationships relate a resource to exactly one other resource. For example an app can belong to only one space.
+        guid:
+          type: string
+          format: uuid
+          description: The unique identifier for the resource
+        created_at:
+          type: string
+          format: date-time
+          description: The ISO8601 compatible date and time when resource was created
+        updated_at:
+          type: string
+          format: date-time
+          description: The ISO8601 compatible date and time when resource was last updated
+      description: 'A resource represents an individual object within the system, such as an app or a service. It is represented as a JSON object.
+
+        A resource consists of several required resource fields and other attributes specific to the resource.
+
+        See Resources and Experimental Resources for specific resources.
 
         '
-    AppList:
-      type: object
-      properties:
-        pagination:
-          $ref: '#/components/schemas/Pagination'
-        resources:
-          type: array
-          items:
-            $ref: '#/components/schemas/App'
-        included:
-          $ref: '#/components/schemas/IncludedResources'
-          description: Additional related resources included in the response when using the include parameter
-    ServiceOffering:
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/BaseSchema'
-      - properties:
-          service_broker_guid:
-            type: string
-          service_broker_name:
-            type: string
-          metadata:
-            $ref: '#/components/schemas/Metadata'
-          links:
-            type: object
-            properties:
-              self:
-                $ref: '#/components/schemas/Link'
-                description: The URL to get this service offering
-              service_plans:
-                $ref: '#/components/schemas/Link'
-                description: The URL to get the service plans for this offering
-              service_broker:
-                $ref: '#/components/schemas/Link'
-                description: The URL to get the service broker for this offering
     Stack:
       type: object
       allOf:
@@ -681,6 +654,53 @@ components:
         - name
         - description
         - links
+    User:
+      type: object
+      properties:
+        guid:
+          type: string
+          description: Unique identifier for the user, matching either a UAA user id or client id. A client id may not be a uuid.
+        created_at:
+          type: string
+          format: date-time
+          description: The ISO8601 compatible date and time when resource was created
+        updated_at:
+          type: string
+          format: date-time
+          description: The ISO8601 compatible date and time when resource was last updated
+        username:
+          type:
+          - string
+          - 'null'
+          description: The username of the user
+        presentation_name:
+          type: string
+          description: The presentation name of the user
+        origin:
+          type:
+          - string
+          - 'null'
+          description: The origin of the user
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+        links:
+          type: object
+          properties:
+            self:
+              $ref: '#/components/schemas/Link'
+              description: The URL to get this user
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: A numeric code for this error
+        detail:
+          type: string
+          description: Detailed description of the error
+        title:
+          type: string
+          description: Name of the error
     Organization:
       type: object
       allOf:
@@ -718,339 +738,6 @@ components:
       description: 'An org is a development account that an individual or multiple collaborators can own and use. All collaborators access an org with user accounts. Collaborators in an org share a resource quota plan, applications, services availability, and custom domains.
 
         '
-    IncludedResources:
-      type: object
-      description: Additional related resources included in the response when using the include parameter
-      properties:
-        spaces:
-          type: array
-          items:
-            $ref: '#/components/schemas/Space'
-          description: Array of included space resources
-        organizations:
-          type: array
-          items:
-            $ref: '#/components/schemas/Organization'
-          description: Array of included organization resources
-        domains:
-          type: array
-          items:
-            $ref: '#/components/schemas/Domain'
-          description: Array of included domain resources
-        service_offerings:
-          type: array
-          items:
-            $ref: '#/components/schemas/ServiceOffering'
-          description: Array of included service offering resources
-        service_instances:
-          type: array
-          items:
-            oneOf:
-            - $ref: '#/components/schemas/ManagedServiceInstance'
-            - $ref: '#/components/schemas/UserProvidedServiceInstance'
-            discriminator:
-              propertyName: type
-              mapping:
-                managed: '#/components/schemas/ManagedServiceInstance'
-                user-provided: '#/components/schemas/UserProvidedServiceInstance'
-          description: Array of included service instance resources
-        apps:
-          type: array
-          items:
-            $ref: '#/components/schemas/App'
-          description: Array of included app resources
-        routes:
-          type: array
-          items:
-            $ref: '#/components/schemas/Route'
-          description: Array of included route resources
-        users:
-          type: array
-          items:
-            $ref: '#/components/schemas/User'
-          description: Array of included user resources
-      additionalProperties: false
-    Route:
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/BaseSchema'
-      - properties:
-          protocol:
-            type: string
-          host:
-            type: string
-          path:
-            type: string
-          port:
-            type:
-            - integer
-            - 'null'
-          url:
-            type: string
-            description: Fully qualified path or address where the route directs traffic
-          relationships:
-            $ref: '#/components/schemas/Relationships'
-          metadata:
-            $ref: '#/components/schemas/Metadata'
-          links:
-            type: object
-            properties:
-              self:
-                $ref: '#/components/schemas/Link'
-                description: The URL to get this route
-              space:
-                $ref: '#/components/schemas/Link'
-                description: The URL to get the space for this route
-              domain:
-                $ref: '#/components/schemas/Link'
-                description: The URL to get the domain for this route
-              destinations:
-                $ref: '#/components/schemas/Link'
-                description: The URL to get the destinations for this route
-          included:
-            $ref: '#/components/schemas/IncludedResources'
-            description: Additional related resources included in the response when using the include parameter
-      description: A route in Cloud Foundry is used to direct traffic from a URL to an application.
-    Pagination:
-      type: object
-      properties:
-        total_results:
-          type: integer
-          description: The total number of results available
-        total_pages:
-          type: integer
-          description: The total number of pages available
-        first:
-          allOf:
-          - $ref: '#/components/schemas/Link'
-          - description: The first page of results
-        last:
-          allOf:
-          - $ref: '#/components/schemas/Link'
-          - description: The last page of results
-        next:
-          oneOf:
-          - $ref: '#/components/schemas/Link'
-          - type: 'null'
-          description: The next page of results
-        previous:
-          oneOf:
-          - $ref: '#/components/schemas/Link'
-          - type: 'null'
-          description: The previous page of results
-      description: 'Pagination is a technique used to divide a large set of results into smaller, more manageable sets. This allows clients to retrieve results in smaller chunks, reducing the amount of data transferred and improving performance.
-
-        The pagination object is a JSON object that contains information about the pagination state of the results. It includes the total number of results available, the total number of pages available, and links to the first, last, next, and previous pages of results.
-
-        '
-    Space:
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/BaseSchema'
-      - properties:
-          name:
-            type: string
-            description: Name of the space
-          relationships:
-            type: object
-            properties:
-              organization:
-                $ref: '#/components/schemas/RelationshipToOne'
-              quota:
-                $ref: '#/components/schemas/RelationshipToOne'
-            description: Relationships for the space
-          links:
-            type: object
-            properties:
-              self:
-                $ref: '#/components/schemas/Link'
-              organization:
-                $ref: '#/components/schemas/Link'
-              features:
-                $ref: '#/components/schemas/Link'
-              apply_manifest:
-                $ref: '#/components/schemas/Link'
-          metadata:
-            $ref: '#/components/schemas/Metadata'
-          included:
-            $ref: '#/components/schemas/IncludedResources'
-            description: Additional related resources included in the response when using the include parameter
-        required:
-        - name
-        - relationships
-        - links
-    ManagedServiceInstance:
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/BaseSchema'
-      - properties:
-          type:
-            type: string
-            enum:
-            - managed
-            description: Type of service instance
-          name:
-            type: string
-            description: Name of the service instance
-          tags:
-            type: array
-            items:
-              type: string
-            description: Tags for the service instance
-          syslog_drain_url:
-            type:
-            - string
-            - 'null'
-            format: uri
-            description: URL for syslog drain
-          route_service_url:
-            type:
-            - string
-            - 'null'
-            format: uri
-            description: URL for route service
-          dashboard_url:
-            type:
-            - string
-            - 'null'
-            format: uri
-            description: URL for service dashboard
-          maintenance_info:
-            type: object
-            properties:
-              version:
-                type: string
-                description: Version of maintenance info
-              description:
-                type:
-                - string
-                - 'null'
-                description: Description of maintenance info
-          upgrade_available:
-            type: boolean
-            description: Whether an upgrade is available
-          last_operation:
-            $ref: '#/components/schemas/ServiceInstanceLastOperation'
-          relationships:
-            type: object
-            properties:
-              space:
-                $ref: '#/components/schemas/RelationshipToOne'
-              service_plan:
-                $ref: '#/components/schemas/RelationshipToOne'
-            description: Relationships for the service instance
-          links:
-            type: object
-            properties:
-              self:
-                $ref: '#/components/schemas/Link'
-              space:
-                $ref: '#/components/schemas/Link'
-              service_plan:
-                $ref: '#/components/schemas/Link'
-              parameters:
-                $ref: '#/components/schemas/Link'
-              service_credential_bindings:
-                $ref: '#/components/schemas/Link'
-              service_route_bindings:
-                $ref: '#/components/schemas/Link'
-              shared_spaces:
-                $ref: '#/components/schemas/Link'
-          metadata:
-            $ref: '#/components/schemas/Metadata'
-        required:
-        - type
-        - name
-        - relationships
-        - links
-    UserProvidedServiceInstance:
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/BaseSchema'
-      - properties:
-          type:
-            type: string
-            enum:
-            - user-provided
-            description: Type of service instance
-          name:
-            type: string
-            description: Name of the service instance
-          tags:
-            type: array
-            items:
-              type: string
-            description: Tags for the service instance
-          syslog_drain_url:
-            type:
-            - string
-            - 'null'
-            format: uri
-            description: URL for syslog drain
-          route_service_url:
-            type:
-            - string
-            - 'null'
-            format: uri
-            description: URL for route service
-          relationships:
-            type: object
-            properties:
-              space:
-                $ref: '#/components/schemas/RelationshipToOne'
-            description: Relationships for the service instance
-          links:
-            type: object
-            properties:
-              self:
-                $ref: '#/components/schemas/Link'
-              space:
-                $ref: '#/components/schemas/Link'
-              service_credential_bindings:
-                $ref: '#/components/schemas/Link'
-              service_route_bindings:
-                $ref: '#/components/schemas/Link'
-              credentials:
-                $ref: '#/components/schemas/Link'
-          metadata:
-            $ref: '#/components/schemas/Metadata'
-        required:
-        - type
-        - name
-        - relationships
-        - links
-    ServiceInstanceLastOperation:
-      type: object
-      properties:
-        type:
-          type: string
-          description: Type of the last operation
-          enum:
-          - create
-          - update
-          - delete
-        state:
-          type: string
-          description: State of the last operation
-          enum:
-          - initial
-          - in progress
-          - succeeded
-          - failed
-        description:
-          type:
-          - string
-          - 'null'
-          description: A textual explanation associated with this state
-        created_at:
-          type: string
-          format: date-time
-          description: When the last operation was created
-        updated_at:
-          type: string
-          format: date-time
-          description: When the last operation was last updated
-      description: The last operation object for service instances
     Metadata:
       type: object
       properties:
@@ -1181,61 +868,202 @@ components:
         Metadata is included in the response body of a request to retrieve a resource.
 
         '
-    User:
+    Route:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/BaseSchema'
+      - properties:
+          protocol:
+            type: string
+          host:
+            type: string
+          path:
+            type: string
+          port:
+            type:
+            - integer
+            - 'null'
+          url:
+            type: string
+            description: Fully qualified path or address where the route directs traffic
+          relationships:
+            $ref: '#/components/schemas/Relationships'
+          metadata:
+            $ref: '#/components/schemas/Metadata'
+          links:
+            type: object
+            properties:
+              self:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get this route
+              space:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get the space for this route
+              domain:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get the domain for this route
+              destinations:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get the destinations for this route
+          included:
+            $ref: '#/components/schemas/IncludedResources'
+            description: Additional related resources included in the response when using the include parameter
+      description: A route in Cloud Foundry is used to direct traffic from a URL to an application.
+    Errors:
       type: object
       properties:
-        guid:
-          type: string
-          description: Unique identifier for the user, matching either a UAA user id or client id. A client id may not be a uuid.
-        created_at:
-          type: string
-          format: date-time
-          description: The ISO8601 compatible date and time when resource was created
-        updated_at:
-          type: string
-          format: date-time
-          description: The ISO8601 compatible date and time when resource was last updated
-        username:
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/Error'
+      description: 'An error response will always return a list of error objects. Errors appear on the job resource for asynchronous operations.
+
+        Clients should use the code and title fields for programmatically handling specific errors. The message in the detail field is subject to change over time.
+
+        '
+    AppList:
+      type: object
+      properties:
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+        resources:
+          type: array
+          items:
+            $ref: '#/components/schemas/App'
+        included:
+          $ref: '#/components/schemas/IncludedResources'
+          description: Additional related resources included in the response when using the include parameter
+    UserProvidedServiceInstance:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/BaseSchema'
+      - properties:
           type:
-          - string
-          - 'null'
-          description: The username of the user
-        presentation_name:
-          type: string
-          description: The presentation name of the user
-        origin:
+            type: string
+            enum:
+            - user-provided
+            description: Type of service instance
+          name:
+            type: string
+            description: Name of the service instance
+          tags:
+            type: array
+            items:
+              type: string
+            description: Tags for the service instance
+          syslog_drain_url:
+            type:
+            - string
+            - 'null'
+            format: uri
+            description: URL for syslog drain
+          route_service_url:
+            type:
+            - string
+            - 'null'
+            format: uri
+            description: URL for route service
+          relationships:
+            type: object
+            properties:
+              space:
+                $ref: '#/components/schemas/RelationshipToOne'
+            description: Relationships for the service instance
+          links:
+            type: object
+            properties:
+              self:
+                $ref: '#/components/schemas/Link'
+              space:
+                $ref: '#/components/schemas/Link'
+              service_credential_bindings:
+                $ref: '#/components/schemas/Link'
+              service_route_bindings:
+                $ref: '#/components/schemas/Link'
+              credentials:
+                $ref: '#/components/schemas/Link'
+          metadata:
+            $ref: '#/components/schemas/Metadata'
+        required:
+        - type
+        - name
+        - relationships
+        - links
+    ServiceOffering:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/BaseSchema'
+      - properties:
+          service_broker_guid:
+            type: string
+          service_broker_name:
+            type: string
+          metadata:
+            $ref: '#/components/schemas/Metadata'
+          links:
+            type: object
+            properties:
+              self:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get this service offering
+              service_plans:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get the service plans for this offering
+              service_broker:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get the service broker for this offering
+    Space:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/BaseSchema'
+      - properties:
+          name:
+            type: string
+            description: Name of the space
+          relationships:
+            type: object
+            properties:
+              organization:
+                $ref: '#/components/schemas/RelationshipToOne'
+              quota:
+                $ref: '#/components/schemas/RelationshipToOne'
+            description: Relationships for the space
+          links:
+            type: object
+            properties:
+              self:
+                $ref: '#/components/schemas/Link'
+              organization:
+                $ref: '#/components/schemas/Link'
+              features:
+                $ref: '#/components/schemas/Link'
+              apply_manifest:
+                $ref: '#/components/schemas/Link'
+          metadata:
+            $ref: '#/components/schemas/Metadata'
+          included:
+            $ref: '#/components/schemas/IncludedResources'
+            description: Additional related resources included in the response when using the include parameter
+        required:
+        - name
+        - relationships
+        - links
+    RelationshipToOne:
+      type: object
+      properties:
+        data:
           type:
-          - string
+          - object
           - 'null'
-          description: The origin of the user
-        metadata:
-          $ref: '#/components/schemas/Metadata'
+          $ref: '#/components/schemas/Relationship'
         links:
           type: object
           properties:
             self:
               $ref: '#/components/schemas/Link'
-              description: The URL to get this user
-    BaseSchema:
-      type: object
-      properties:
-        guid:
-          type: string
-          format: uuid
-          description: The unique identifier for the resource
-        created_at:
-          type: string
-          format: date-time
-          description: The ISO8601 compatible date and time when resource was created
-        updated_at:
-          type: string
-          format: date-time
-          description: The ISO8601 compatible date and time when resource was last updated
-      description: 'A resource represents an individual object within the system, such as an app or a service. It is represented as a JSON object.
-
-        A resource consists of several required resource fields and other attributes specific to the resource.
-
-        See Resources and Experimental Resources for specific resources.
+            related:
+              $ref: '#/components/schemas/Link'
+      description: 'Some relationships relate a resource to exactly one other resource. For example an app can belong to only one space.
 
         '
     Relationships:
@@ -1257,127 +1085,299 @@ components:
         The relationship object is a key-value pair that uniquely identifies a resource. In practice this is almost always the guid of a resource.
 
         '
-  responses:
-    Forbidden:
-      description: Forbidden
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    NotFound:
-      description: Not Found
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    UnprocessableEntity:
-      description: Unprocessable Entity
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    BadGateway:
-      description: Bad Gateway
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-    BadRequest:
-      description: Bad Request
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-        text/html:
-          schema:
+    IncludedResources:
+      type: object
+      description: Additional related resources included in the response when using the include parameter
+      properties:
+        spaces:
+          type: array
+          items:
+            $ref: '#/components/schemas/Space'
+          description: Array of included space resources
+        organizations:
+          type: array
+          items:
+            $ref: '#/components/schemas/Organization'
+          description: Array of included organization resources
+        domains:
+          type: array
+          items:
+            $ref: '#/components/schemas/Domain'
+          description: Array of included domain resources
+        service_offerings:
+          type: array
+          items:
+            $ref: '#/components/schemas/ServiceOffering'
+          description: Array of included service offering resources
+        service_instances:
+          type: array
+          items:
+            oneOf:
+            - $ref: '#/components/schemas/ManagedServiceInstance'
+            - $ref: '#/components/schemas/UserProvidedServiceInstance'
+            discriminator:
+              propertyName: type
+              mapping:
+                managed: '#/components/schemas/ManagedServiceInstance'
+                user-provided: '#/components/schemas/UserProvidedServiceInstance'
+          description: Array of included service instance resources
+        apps:
+          type: array
+          items:
+            $ref: '#/components/schemas/App'
+          description: Array of included app resources
+        routes:
+          type: array
+          items:
+            $ref: '#/components/schemas/Route'
+          description: Array of included route resources
+        users:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+          description: Array of included user resources
+      additionalProperties: false
+    StackList:
+      type: object
+      properties:
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+        resources:
+          type: array
+          items:
+            $ref: '#/components/schemas/Stack'
+    ManagedServiceInstance:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/BaseSchema'
+      - properties:
+          type:
             type: string
-    Unauthorized:
-      description: Unauthorized
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    Conflict:
-      description: Conflict
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    '500':
-      description: Internal Server Error
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    ServiceUnavailable:
-      description: Service Unavailable
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-  parameters:
-    OrderBy:
-      name: order_by
-      in: query
-      required: false
-      schema:
-        type: string
-      description: 'Value to sort by. Defaults to ascending; prepend with `-` to sort descending.
+            enum:
+            - managed
+            description: Type of service instance
+          name:
+            type: string
+            description: Name of the service instance
+          tags:
+            type: array
+            items:
+              type: string
+            description: Tags for the service instance
+          syslog_drain_url:
+            type:
+            - string
+            - 'null'
+            format: uri
+            description: URL for syslog drain
+          route_service_url:
+            type:
+            - string
+            - 'null'
+            format: uri
+            description: URL for route service
+          dashboard_url:
+            type:
+            - string
+            - 'null'
+            format: uri
+            description: URL for service dashboard
+          maintenance_info:
+            type: object
+            properties:
+              version:
+                type: string
+                description: Version of maintenance info
+              description:
+                type:
+                - string
+                - 'null'
+                description: Description of maintenance info
+          upgrade_available:
+            type: boolean
+            description: Whether an upgrade is available
+          last_operation:
+            $ref: '#/components/schemas/ServiceInstanceLastOperation'
+          relationships:
+            type: object
+            properties:
+              space:
+                $ref: '#/components/schemas/RelationshipToOne'
+              service_plan:
+                $ref: '#/components/schemas/RelationshipToOne'
+            description: Relationships for the service instance
+          links:
+            type: object
+            properties:
+              self:
+                $ref: '#/components/schemas/Link'
+              space:
+                $ref: '#/components/schemas/Link'
+              service_plan:
+                $ref: '#/components/schemas/Link'
+              parameters:
+                $ref: '#/components/schemas/Link'
+              service_credential_bindings:
+                $ref: '#/components/schemas/Link'
+              service_route_bindings:
+                $ref: '#/components/schemas/Link'
+              shared_spaces:
+                $ref: '#/components/schemas/Link'
+          metadata:
+            $ref: '#/components/schemas/Metadata'
+        required:
+        - type
+        - name
+        - relationships
+        - links
+    ServiceInstanceLastOperation:
+      type: object
+      properties:
+        type:
+          type: string
+          description: Type of the last operation
+          enum:
+          - create
+          - update
+          - delete
+        state:
+          type: string
+          description: State of the last operation
+          enum:
+          - initial
+          - in progress
+          - succeeded
+          - failed
+        description:
+          type:
+          - string
+          - 'null'
+          description: A textual explanation associated with this state
+        created_at:
+          type: string
+          format: date-time
+          description: When the last operation was created
+        updated_at:
+          type: string
+          format: date-time
+          description: When the last operation was last updated
+      description: The last operation object for service instances
+    Relationship:
+      type: object
+      properties:
+        guid:
+          type: string
+          format: uuid
+          description: The GUID of the resource
+    App:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/BaseSchema'
+      - properties:
+          name:
+            type: string
+            description: The name of the app
+          state:
+            type: string
+            description: Current desired state of the app
+            enum:
+            - STOPPED
+            - STARTED
+          lifecycle:
+            $ref: '#/components/schemas/Lifecycle'
+            description: Provides the default lifecycle object for the application. This lifecycle will be used when staging and running the application. The staging lifecycle can be overridden on builds
+          relationships:
+            $ref: '#/components/schemas/Relationships'
+          metadata:
+            $ref: '#/components/schemas/Metadata'
+          links:
+            type: object
+            properties:
+              self:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get this app
+              space:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get the space for this app
+              processes:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get the processes for this app
+              packages:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get the packages for this app
+              environment_variables:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get the environment variables for this app
+              current_droplet:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get the current droplet for this app
+              droplets:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get the droplets for this app
+              tasks:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get the tasks for this app
+              start:
+                $ref: '#/components/schemas/Link'
+                description: The URL to start the app
+              stop:
+                $ref: '#/components/schemas/Link'
+                description: The URL to stop the app
+              revisions:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get the revisions for this app
+              deployed_revisions:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get the deployed revisions for this app
+              features:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get the features for this app
+          included:
+            $ref: '#/components/schemas/IncludedResources'
+            description: Additional related resources included in the response when using the include parameter
+      description: 'Apps represent the core entities in the Cloud Foundry environment. They are the deployable units that run your code. Each app can have multiple processes, routes, and services associated with it. Apps can be scaled horizontally by increasing the number of instances. They can also be updated and restarted as needed.
 
         '
-      example: created_at
-    Guid:
-      name: guid
-      in: path
-      required: true
-      schema:
-        type: string
-        format: uuid
-      description: The unique identifier for the resource
-    PerPage:
-      name: per_page
-      in: query
-      required: false
-      schema:
-        type: integer
-      description: Number of results per page, valid values are 1 through 5000
-      example: 50
-    Page:
-      name: page
-      in: query
-      required: false
-      schema:
-        type: integer
-      description: Page to display; valid values are integers >= 1
-      example: 1
-    CreatedAts:
-      name: created_ats
-      in: query
-      required: false
-      schema:
-        type: string
-      description: 'Timestamp to filter by. When filtering on equality, several comma-delimited timestamps may be passed. Also supports filtering with [relational operators](#relational-operators).
+    Lifecycle:
+      type: object
+      properties:
+        type:
+          type: string
+          description: Type of the lifecycle; valid values are buildpack, cnb, docker
+        data:
+          type: object
+          additionalProperties: true
+          description: Data specific to the lifecycle
+          properties:
+            buildpacks:
+              type: array
+              items:
+                type: string
+              description: List of the names of buildpacks, URLs from which they may be downloaded, or null to auto-detect a suitable buildpack during staging (applicable for buildpack and cnb lifecycles)
+            stack:
+              type:
+              - string
+              - 'null'
+              description: The root filesystem to use with the buildpack, for example cflinuxfs4 (applicable for buildpack lifecycle)
+            credentials:
+              type: object
+              additionalProperties:
+                type: object
+                properties:
+                  username:
+                    type:
+                    - string
+                    - 'null'
+                  password:
+                    type:
+                    - string
+                    - 'null'
+                  token:
+                    type: string
+              description: Credentials used to download the configured buildpacks (applicable for cnb lifecycle)
+      description: 'The lifecycle type defines how the application droplet is created and run. The following lifecycle types are supported: - buildpack: Traditional buildpacks for Cloud Foundry applications. - cnb: Cloud Native Buildpacks that are OCI-compliant. - docker: Run pre-built Docker images.
 
         '
-      example: '2021-01-01T00:00:00Z'
-    UpdatedAts:
-      name: updated_ats
-      in: query
-      required: false
-      schema:
-        type: string
-      description: 'Timestamp to filter by. When filtering on equality, several comma-delimited timestamps may be passed. Also supports filtering with [relational operators](#relational-operators).
-
-        '
-      example: '2021-01-01T00:00:00Z'
-    LabelSelector:
-      name: label_selector
-      in: query
-      description: A query string containing a list of [label selector](#labels-and-selectors) requirements
-      required: false
-      schema:
-        type: string
-      example: environment=production
   requestBodies:
     StackCreateRequestBody:
       description: Stack object that needs to be created

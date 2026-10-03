@@ -805,7 +805,229 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 components:
+  parameters:
+    OrderBy:
+      name: order_by
+      in: query
+      required: false
+      schema:
+        type: string
+      description: 'Value to sort by. Defaults to ascending; prepend with `-` to sort descending.
+
+        '
+      example: created_at
+    PerPage:
+      name: per_page
+      in: query
+      required: false
+      schema:
+        type: integer
+      description: Number of results per page, valid values are 1 through 5000
+      example: 50
+    Page:
+      name: page
+      in: query
+      required: false
+      schema:
+        type: integer
+      description: Page to display; valid values are integers >= 1
+      example: 1
+    CreatedAts:
+      name: created_ats
+      in: query
+      required: false
+      schema:
+        type: string
+      description: 'Timestamp to filter by. When filtering on equality, several comma-delimited timestamps may be passed. Also supports filtering with [relational operators](#relational-operators).
+
+        '
+      example: '2021-01-01T00:00:00Z'
+    Guid:
+      name: guid
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: The unique identifier for the resource
+    UpdatedAts:
+      name: updated_ats
+      in: query
+      required: false
+      schema:
+        type: string
+      description: 'Timestamp to filter by. When filtering on equality, several comma-delimited timestamps may be passed. Also supports filtering with [relational operators](#relational-operators).
+
+        '
+      example: '2021-01-01T00:00:00Z'
+    LabelSelector:
+      name: label_selector
+      in: query
+      description: A query string containing a list of [label selector](#labels-and-selectors) requirements
+      required: false
+      schema:
+        type: string
+      example: environment=production
+  responses:
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    DropletGetResponse:
+      description: Successfully retrieved droplet
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Droplet'
+    Conflict:
+      description: Conflict
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    BadGateway:
+      description: Bad Gateway
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    BadRequest:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+        text/html:
+          schema:
+            type: string
+    NotFound:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    '500':
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    ServiceUnavailable:
+      description: Service Unavailable
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    UnprocessableEntity:
+      description: Unprocessable Entity
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
   schemas:
+    Droplet:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/BaseSchema'
+      - properties:
+          state:
+            type: string
+            description: State of the droplet; valid states are AWAITING_UPLOAD, PROCESSING_UPLOAD, STAGED, COPYING, FAILED, or EXPIRED
+          error:
+            type:
+            - string
+            - 'null'
+            description: A string describing the last error during the droplet lifecycle
+          lifecycle:
+            $ref: '#/components/schemas/Lifecycle'
+          execution_metadata:
+            type:
+            - string
+            - 'null'
+            description: Serialized JSON data resulting from staging for use when executing a droplet
+          process_types:
+            type: object
+            description: The process types (keys) and associated start commands (values) that will be created when the droplet is executed
+          metadata:
+            $ref: '#/components/schemas/Metadata'
+          links:
+            type: object
+            properties:
+              self:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get this droplet
+              package:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get the package for this droplet
+              app:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get the app for this droplet
+              assign_current_droplet:
+                $ref: '#/components/schemas/Link'
+                description: The URL to assign the droplet to an application
+              download:
+                $ref: '#/components/schemas/Link'
+                description: The URL to download the droplet
+              upload:
+                $ref: '#/components/schemas/Link'
+                description: The URL to upload the droplet
+          checksum:
+            type:
+            - object
+            - 'null'
+            properties:
+              type:
+                type: string
+                description: Hashing algorithm for checksum; supported algorithms are sha256 and sha1
+              value:
+                type: string
+                description: Checksum of the droplet
+          buildpacks:
+            type:
+            - array
+            - 'null'
+            items:
+              type: object
+              properties:
+                name:
+                  type:
+                  - string
+                  - 'null'
+                  description: System buildpack name
+                detect_output:
+                  type:
+                  - string
+                  - 'null'
+                  description: Output during buildpack detect process
+                version:
+                  type:
+                  - string
+                  - 'null'
+                  description: Version reported by the buildpack
+                buildpack_name:
+                  type:
+                  - string
+                  - 'null'
+                  description: Name reported by the buildpack
+          stack:
+            type:
+            - string
+            - 'null'
+            description: The root filesystem to use with the buildpack, for example cflinuxfs4
+          image:
+            type:
+            - string
+            - 'null'
+            description: Docker image name for Docker droplets
+      description: A droplet is the result of staging an application package. There are two types (lifecycles) of droplets buildpack and docker. In the case of the buildpacks, the droplet contains the bits produced by the buildpack, typically application code and dependencies.
     Link:
       type: object
       properties:
@@ -820,153 +1042,6 @@ components:
       description: 'Each link is keyed by its type and will include a href for the URL and an optional method for links that cannot be followed using GET.
 
         '
-    Relationship:
-      type: object
-      properties:
-        guid:
-          type: string
-          format: uuid
-          description: The GUID of the resource
-    Error:
-      type: object
-      properties:
-        code:
-          type: integer
-          description: A numeric code for this error
-        detail:
-          type: string
-          description: Detailed description of the error
-        title:
-          type: string
-          description: Name of the error
-    DropletList:
-      type: object
-      properties:
-        pagination:
-          $ref: '#/components/schemas/Pagination'
-        resources:
-          type: array
-          items:
-            $ref: '#/components/schemas/Droplet'
-    Errors:
-      type: object
-      properties:
-        errors:
-          type: array
-          items:
-            $ref: '#/components/schemas/Error'
-      description: 'An error response will always return a list of error objects. Errors appear on the job resource for asynchronous operations.
-
-        Clients should use the code and title fields for programmatically handling specific errors. The message in the detail field is subject to change over time.
-
-        '
-    Lifecycle:
-      type: object
-      properties:
-        type:
-          type: string
-          description: Type of the lifecycle; valid values are buildpack, cnb, docker
-        data:
-          type: object
-          additionalProperties: true
-          description: Data specific to the lifecycle
-          properties:
-            buildpacks:
-              type: array
-              items:
-                type: string
-              description: List of the names of buildpacks, URLs from which they may be downloaded, or null to auto-detect a suitable buildpack during staging (applicable for buildpack and cnb lifecycles)
-            stack:
-              type:
-              - string
-              - 'null'
-              description: The root filesystem to use with the buildpack, for example cflinuxfs4 (applicable for buildpack lifecycle)
-            credentials:
-              type: object
-              additionalProperties:
-                type: object
-                properties:
-                  username:
-                    type:
-                    - string
-                    - 'null'
-                  password:
-                    type:
-                    - string
-                    - 'null'
-                  token:
-                    type: string
-              description: Credentials used to download the configured buildpacks (applicable for cnb lifecycle)
-      description: 'The lifecycle type defines how the application droplet is created and run. The following lifecycle types are supported: - buildpack: Traditional buildpacks for Cloud Foundry applications. - cnb: Cloud Native Buildpacks that are OCI-compliant. - docker: Run pre-built Docker images.
-
-        '
-    RelationshipToOne:
-      type: object
-      properties:
-        data:
-          type:
-          - object
-          - 'null'
-          $ref: '#/components/schemas/Relationship'
-        links:
-          type: object
-          properties:
-            self:
-              $ref: '#/components/schemas/Link'
-            related:
-              $ref: '#/components/schemas/Link'
-      description: 'Some relationships relate a resource to exactly one other resource. For example an app can belong to only one space.
-
-        '
-    Job:
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/BaseSchema'
-      - properties:
-          operation:
-            type: string
-            description: The type of operation the job is performing
-          state:
-            type: string
-            description: The current state of the job
-            enum:
-            - PROCESSING
-            - COMPLETE
-            - FAILED
-            - POLLING
-          errors:
-            type: array
-            description: Any errors encountered during job execution
-            items:
-              $ref: '#/components/schemas/Error'
-          warnings:
-            type: array
-            description: Any warnings encountered during job execution
-            items:
-              $ref: '#/components/schemas/Warning'
-          links:
-            type: object
-            additionalProperties: true
-            properties:
-              self:
-                $ref: '#/components/schemas/Link'
-                description: The URL to get this job
-              manifest:
-                $ref: '#/components/schemas/Link'
-                description: The URL to get the manifest for this job
-              service_brokers:
-                $ref: '#/components/schemas/Link'
-                description: The URL to get the service broker for this job
-              service_credential_binding:
-                $ref: '#/components/schemas/Link'
-                description: The URL to get the service credential binding for this job
-              service_instances:
-                $ref: '#/components/schemas/Link'
-                description: The URL to get the service instance for this job
-              service_route_bindings:
-                $ref: '#/components/schemas/Link'
-                description: The URL to get the service route binding for this job
-      description: Jobs are created by the platform when performing certain asynchronous actions. Asynchronous jobs are commonly used for long-running tasks such as uploading large files, staging applications, or deleting resources.
     Pagination:
       type: object
       properties:
@@ -999,6 +1074,49 @@ components:
         The pagination object is a JSON object that contains information about the pagination state of the results. It includes the total number of results available, the total number of pages available, and links to the first, last, next, and previous pages of results.
 
         '
+    BaseSchema:
+      type: object
+      properties:
+        guid:
+          type: string
+          format: uuid
+          description: The unique identifier for the resource
+        created_at:
+          type: string
+          format: date-time
+          description: The ISO8601 compatible date and time when resource was created
+        updated_at:
+          type: string
+          format: date-time
+          description: The ISO8601 compatible date and time when resource was last updated
+      description: 'A resource represents an individual object within the system, such as an app or a service. It is represented as a JSON object.
+
+        A resource consists of several required resource fields and other attributes specific to the resource.
+
+        See Resources and Experimental Resources for specific resources.
+
+        '
+    DropletList:
+      type: object
+      properties:
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+        resources:
+          type: array
+          items:
+            $ref: '#/components/schemas/Droplet'
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: A numeric code for this error
+        detail:
+          type: string
+          description: Detailed description of the error
+        title:
+          type: string
+          description: Name of the error
     Metadata:
       type: object
       properties:
@@ -1129,256 +1247,138 @@ components:
         Metadata is included in the response body of a request to retrieve a resource.
 
         '
+    Errors:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/Error'
+      description: 'An error response will always return a list of error objects. Errors appear on the job resource for asynchronous operations.
+
+        Clients should use the code and title fields for programmatically handling specific errors. The message in the detail field is subject to change over time.
+
+        '
     Warning:
       type: object
       properties:
         detail:
           type: string
           description: Description of the warning
-    Droplet:
+    RelationshipToOne:
+      type: object
+      properties:
+        data:
+          type:
+          - object
+          - 'null'
+          $ref: '#/components/schemas/Relationship'
+        links:
+          type: object
+          properties:
+            self:
+              $ref: '#/components/schemas/Link'
+            related:
+              $ref: '#/components/schemas/Link'
+      description: 'Some relationships relate a resource to exactly one other resource. For example an app can belong to only one space.
+
+        '
+    Job:
       type: object
       allOf:
       - $ref: '#/components/schemas/BaseSchema'
       - properties:
+          operation:
+            type: string
+            description: The type of operation the job is performing
           state:
             type: string
-            description: State of the droplet; valid states are AWAITING_UPLOAD, PROCESSING_UPLOAD, STAGED, COPYING, FAILED, or EXPIRED
-          error:
-            type:
-            - string
-            - 'null'
-            description: A string describing the last error during the droplet lifecycle
-          lifecycle:
-            $ref: '#/components/schemas/Lifecycle'
-          execution_metadata:
-            type:
-            - string
-            - 'null'
-            description: Serialized JSON data resulting from staging for use when executing a droplet
-          process_types:
-            type: object
-            description: The process types (keys) and associated start commands (values) that will be created when the droplet is executed
-          metadata:
-            $ref: '#/components/schemas/Metadata'
+            description: The current state of the job
+            enum:
+            - PROCESSING
+            - COMPLETE
+            - FAILED
+            - POLLING
+          errors:
+            type: array
+            description: Any errors encountered during job execution
+            items:
+              $ref: '#/components/schemas/Error'
+          warnings:
+            type: array
+            description: Any warnings encountered during job execution
+            items:
+              $ref: '#/components/schemas/Warning'
           links:
             type: object
+            additionalProperties: true
             properties:
               self:
                 $ref: '#/components/schemas/Link'
-                description: The URL to get this droplet
-              package:
+                description: The URL to get this job
+              manifest:
                 $ref: '#/components/schemas/Link'
-                description: The URL to get the package for this droplet
-              app:
+                description: The URL to get the manifest for this job
+              service_brokers:
                 $ref: '#/components/schemas/Link'
-                description: The URL to get the app for this droplet
-              assign_current_droplet:
+                description: The URL to get the service broker for this job
+              service_credential_binding:
                 $ref: '#/components/schemas/Link'
-                description: The URL to assign the droplet to an application
-              download:
+                description: The URL to get the service credential binding for this job
+              service_instances:
                 $ref: '#/components/schemas/Link'
-                description: The URL to download the droplet
-              upload:
+                description: The URL to get the service instance for this job
+              service_route_bindings:
                 $ref: '#/components/schemas/Link'
-                description: The URL to upload the droplet
-          checksum:
-            type:
-            - object
-            - 'null'
-            properties:
-              type:
-                type: string
-                description: Hashing algorithm for checksum; supported algorithms are sha256 and sha1
-              value:
-                type: string
-                description: Checksum of the droplet
-          buildpacks:
-            type:
-            - array
-            - 'null'
-            items:
-              type: object
-              properties:
-                name:
-                  type:
-                  - string
-                  - 'null'
-                  description: System buildpack name
-                detect_output:
-                  type:
-                  - string
-                  - 'null'
-                  description: Output during buildpack detect process
-                version:
-                  type:
-                  - string
-                  - 'null'
-                  description: Version reported by the buildpack
-                buildpack_name:
-                  type:
-                  - string
-                  - 'null'
-                  description: Name reported by the buildpack
-          stack:
-            type:
-            - string
-            - 'null'
-            description: The root filesystem to use with the buildpack, for example cflinuxfs4
-          image:
-            type:
-            - string
-            - 'null'
-            description: Docker image name for Docker droplets
-      description: A droplet is the result of staging an application package. There are two types (lifecycles) of droplets buildpack and docker. In the case of the buildpacks, the droplet contains the bits produced by the buildpack, typically application code and dependencies.
-    BaseSchema:
+                description: The URL to get the service route binding for this job
+      description: Jobs are created by the platform when performing certain asynchronous actions. Asynchronous jobs are commonly used for long-running tasks such as uploading large files, staging applications, or deleting resources.
+    Relationship:
       type: object
       properties:
         guid:
           type: string
           format: uuid
-          description: The unique identifier for the resource
-        created_at:
+          description: The GUID of the resource
+    Lifecycle:
+      type: object
+      properties:
+        type:
           type: string
-          format: date-time
-          description: The ISO8601 compatible date and time when resource was created
-        updated_at:
-          type: string
-          format: date-time
-          description: The ISO8601 compatible date and time when resource was last updated
-      description: 'A resource represents an individual object within the system, such as an app or a service. It is represented as a JSON object.
-
-        A resource consists of several required resource fields and other attributes specific to the resource.
-
-        See Resources and Experimental Resources for specific resources.
-
-        '
-  responses:
-    Forbidden:
-      description: Forbidden
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    NotFound:
-      description: Not Found
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    UnprocessableEntity:
-      description: Unprocessable Entity
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    DropletGetResponse:
-      description: Successfully retrieved droplet
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Droplet'
-    BadGateway:
-      description: Bad Gateway
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-    BadRequest:
-      description: Bad Request
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-        text/html:
-          schema:
-            type: string
-    Unauthorized:
-      description: Unauthorized
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    Conflict:
-      description: Conflict
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    '500':
-      description: Internal Server Error
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    ServiceUnavailable:
-      description: Service Unavailable
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-  parameters:
-    OrderBy:
-      name: order_by
-      in: query
-      required: false
-      schema:
-        type: string
-      description: 'Value to sort by. Defaults to ascending; prepend with `-` to sort descending.
+          description: Type of the lifecycle; valid values are buildpack, cnb, docker
+        data:
+          type: object
+          additionalProperties: true
+          description: Data specific to the lifecycle
+          properties:
+            buildpacks:
+              type: array
+              items:
+                type: string
+              description: List of the names of buildpacks, URLs from which they may be downloaded, or null to auto-detect a suitable buildpack during staging (applicable for buildpack and cnb lifecycles)
+            stack:
+              type:
+              - string
+              - 'null'
+              description: The root filesystem to use with the buildpack, for example cflinuxfs4 (applicable for buildpack lifecycle)
+            credentials:
+              type: object
+              additionalProperties:
+                type: object
+                properties:
+                  username:
+                    type:
+                    - string
+                    - 'null'
+                  password:
+                    type:
+                    - string
+                    - 'null'
+                  token:
+                    type: string
+              description: Credentials used to download the configured buildpacks (applicable for cnb lifecycle)
+      description: 'The lifecycle type defines how the application droplet is created and run. The following lifecycle types are supported: - buildpack: Traditional buildpacks for Cloud Foundry applications. - cnb: Cloud Native Buildpacks that are OCI-compliant. - docker: Run pre-built Docker images.
 
         '
-      example: created_at
-    Guid:
-      name: guid
-      in: path
-      required: true
-      schema:
-        type: string
-        format: uuid
-      description: The unique identifier for the resource
-    PerPage:
-      name: per_page
-      in: query
-      required: false
-      schema:
-        type: integer
-      description: Number of results per page, valid values are 1 through 5000
-      example: 50
-    Page:
-      name: page
-      in: query
-      required: false
-      schema:
-        type: integer
-      description: Page to display; valid values are integers >= 1
-      example: 1
-    CreatedAts:
-      name: created_ats
-      in: query
-      required: false
-      schema:
-        type: string
-      description: 'Timestamp to filter by. When filtering on equality, several comma-delimited timestamps may be passed. Also supports filtering with [relational operators](#relational-operators).
-
-        '
-      example: '2021-01-01T00:00:00Z'
-    UpdatedAts:
-      name: updated_ats
-      in: query
-      required: false
-      schema:
-        type: string
-      description: 'Timestamp to filter by. When filtering on equality, several comma-delimited timestamps may be passed. Also supports filtering with [relational operators](#relational-operators).
-
-        '
-      example: '2021-01-01T00:00:00Z'
-    LabelSelector:
-      name: label_selector
-      in: query
-      description: A query string containing a list of [label selector](#labels-and-selectors) requirements
-      required: false
-      schema:
-        type: string
-      example: environment=production
   requestBodies:
     DropletCreateRequestBody:
       description: Droplet object that needs to be created

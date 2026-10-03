@@ -276,7 +276,149 @@ paths:
         '422':
           $ref: '#/components/responses/UnprocessableEntity'
 components:
+  parameters:
+    OrderBy:
+      name: order_by
+      in: query
+      required: false
+      schema:
+        type: string
+      description: 'Value to sort by. Defaults to ascending; prepend with `-` to sort descending.
+
+        '
+      example: created_at
+    PerPage:
+      name: per_page
+      in: query
+      required: false
+      schema:
+        type: integer
+      description: Number of results per page, valid values are 1 through 5000
+      example: 50
+    Page:
+      name: page
+      in: query
+      required: false
+      schema:
+        type: integer
+      description: Page to display; valid values are integers >= 1
+      example: 1
+    CreatedAts:
+      name: created_ats
+      in: query
+      required: false
+      schema:
+        type: string
+      description: 'Timestamp to filter by. When filtering on equality, several comma-delimited timestamps may be passed. Also supports filtering with [relational operators](#relational-operators).
+
+        '
+      example: '2021-01-01T00:00:00Z'
+    Guid:
+      name: guid
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: The unique identifier for the resource
+    UpdatedAts:
+      name: updated_ats
+      in: query
+      required: false
+      schema:
+        type: string
+      description: 'Timestamp to filter by. When filtering on equality, several comma-delimited timestamps may be passed. Also supports filtering with [relational operators](#relational-operators).
+
+        '
+      example: '2021-01-01T00:00:00Z'
+    LabelSelector:
+      name: label_selector
+      in: query
+      description: A query string containing a list of [label selector](#labels-and-selectors) requirements
+      required: false
+      schema:
+        type: string
+      example: environment=production
+  responses:
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    Conflict:
+      description: Conflict
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    BadGateway:
+      description: Bad Gateway
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    BadRequest:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+        text/html:
+          schema:
+            type: string
+    BuildpackGetResponse:
+      description: Successfully retrieved buildpack
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Buildpack'
+    NotFound:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    BuildpackCreateResponse:
+      description: Successfully created buildpack
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Buildpack'
+    '500':
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    ServiceUnavailable:
+      description: Service Unavailable
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    UnprocessableEntity:
+      description: Unprocessable Entity
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
   schemas:
+    BuildpackList:
+      type: object
+      properties:
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+        resources:
+          type: array
+          items:
+            $ref: '#/components/schemas/Buildpack'
     Link:
       type: object
       properties:
@@ -291,78 +433,6 @@ components:
       description: 'Each link is keyed by its type and will include a href for the URL and an optional method for links that cannot be followed using GET.
 
         '
-    Error:
-      type: object
-      properties:
-        code:
-          type: integer
-          description: A numeric code for this error
-        detail:
-          type: string
-          description: Detailed description of the error
-        title:
-          type: string
-          description: Name of the error
-    Errors:
-      type: object
-      properties:
-        errors:
-          type: array
-          items:
-            $ref: '#/components/schemas/Error'
-      description: 'An error response will always return a list of error objects. Errors appear on the job resource for asynchronous operations.
-
-        Clients should use the code and title fields for programmatically handling specific errors. The message in the detail field is subject to change over time.
-
-        '
-    Buildpack:
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/BaseSchema'
-      - properties:
-          name:
-            type: string
-            description: The name of the buildpack; to be used by app buildpack field (only alphanumeric characters)
-          state:
-            type: string
-            description: The state of the buildpack
-            enum:
-            - AWAITING_UPLOAD
-            - READY
-          stack:
-            type:
-            - string
-            - 'null'
-            description: The name of the stack that the buildpack uses
-          lifecycle:
-            type: string
-            description: The version of buildpacks the buildpack uses. `buildpack` indicates [Classic Buildpacks](https://docs.cloudfoundry.org/buildpacks/classic.html). `cnb` indicates [Cloud Native Buildpacks](https://docs.cloudfoundry.org/buildpacks/cnb/)
-          position:
-            type: integer
-            description: The order in which the buildpacks are checked during buildpack auto-detection
-          enabled:
-            type: boolean
-            description: Whether or not the buildpack can be used for staging
-          locked:
-            type: boolean
-            description: Whether or not the buildpack is locked to prevent updating the bits
-          filename:
-            type:
-            - string
-            - 'null'
-            description: The filename of the buildpack
-          metadata:
-            $ref: '#/components/schemas/Metadata'
-          links:
-            type: object
-            properties:
-              self:
-                $ref: '#/components/schemas/Link'
-                description: The URL of the buildpack
-              upload:
-                $ref: '#/components/schemas/Link'
-                description: The URL to upload the buildpack
-      description: A buildpack represents a set of scripts used to prepare an application for launch.
     Pagination:
       type: object
       properties:
@@ -395,6 +465,40 @@ components:
         The pagination object is a JSON object that contains information about the pagination state of the results. It includes the total number of results available, the total number of pages available, and links to the first, last, next, and previous pages of results.
 
         '
+    BaseSchema:
+      type: object
+      properties:
+        guid:
+          type: string
+          format: uuid
+          description: The unique identifier for the resource
+        created_at:
+          type: string
+          format: date-time
+          description: The ISO8601 compatible date and time when resource was created
+        updated_at:
+          type: string
+          format: date-time
+          description: The ISO8601 compatible date and time when resource was last updated
+      description: 'A resource represents an individual object within the system, such as an app or a service. It is represented as a JSON object.
+
+        A resource consists of several required resource fields and other attributes specific to the resource.
+
+        See Resources and Experimental Resources for specific resources.
+
+        '
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: A numeric code for this error
+        detail:
+          type: string
+          description: Detailed description of the error
+        title:
+          type: string
+          description: Name of the error
     Metadata:
       type: object
       properties:
@@ -525,38 +629,102 @@ components:
         Metadata is included in the response body of a request to retrieve a resource.
 
         '
-    BaseSchema:
+    Errors:
       type: object
       properties:
-        guid:
-          type: string
-          format: uuid
-          description: The unique identifier for the resource
-        created_at:
-          type: string
-          format: date-time
-          description: The ISO8601 compatible date and time when resource was created
-        updated_at:
-          type: string
-          format: date-time
-          description: The ISO8601 compatible date and time when resource was last updated
-      description: 'A resource represents an individual object within the system, such as an app or a service. It is represented as a JSON object.
-
-        A resource consists of several required resource fields and other attributes specific to the resource.
-
-        See Resources and Experimental Resources for specific resources.
-
-        '
-    BuildpackList:
-      type: object
-      properties:
-        pagination:
-          $ref: '#/components/schemas/Pagination'
-        resources:
+        errors:
           type: array
           items:
-            $ref: '#/components/schemas/Buildpack'
+            $ref: '#/components/schemas/Error'
+      description: 'An error response will always return a list of error objects. Errors appear on the job resource for asynchronous operations.
+
+        Clients should use the code and title fields for programmatically handling specific errors. The message in the detail field is subject to change over time.
+
+        '
+    Buildpack:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/BaseSchema'
+      - properties:
+          name:
+            type: string
+            description: The name of the buildpack; to be used by app buildpack field (only alphanumeric characters)
+          state:
+            type: string
+            description: The state of the buildpack
+            enum:
+            - AWAITING_UPLOAD
+            - READY
+          stack:
+            type:
+            - string
+            - 'null'
+            description: The name of the stack that the buildpack uses
+          lifecycle:
+            type: string
+            description: The version of buildpacks the buildpack uses. `buildpack` indicates [Classic Buildpacks](https://docs.cloudfoundry.org/buildpacks/classic.html). `cnb` indicates [Cloud Native Buildpacks](https://docs.cloudfoundry.org/buildpacks/cnb/)
+          position:
+            type: integer
+            description: The order in which the buildpacks are checked during buildpack auto-detection
+          enabled:
+            type: boolean
+            description: Whether or not the buildpack can be used for staging
+          locked:
+            type: boolean
+            description: Whether or not the buildpack is locked to prevent updating the bits
+          filename:
+            type:
+            - string
+            - 'null'
+            description: The filename of the buildpack
+          metadata:
+            $ref: '#/components/schemas/Metadata'
+          links:
+            type: object
+            properties:
+              self:
+                $ref: '#/components/schemas/Link'
+                description: The URL of the buildpack
+              upload:
+                $ref: '#/components/schemas/Link'
+                description: The URL to upload the buildpack
+      description: A buildpack represents a set of scripts used to prepare an application for launch.
   requestBodies:
+    BuildpackUpdateRequestBody:
+      description: Buildpack object that needs to be updated
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+                description: The name of the buildpack
+              position:
+                type: integer
+                description: The order in which the buildpacks are checked during buildpack auto-detection
+              enabled:
+                type: boolean
+                description: Whether or not the buildpack will be used for staging
+              locked:
+                type: boolean
+                description: Whether or not the buildpack is locked to prevent updating the bits
+              stack:
+                type: string
+                description: The name of the stack that the buildpack will use
+              metadata:
+                $ref: '#/components/schemas/Metadata'
+            description: Request schema for updating a buildpack
+          examples:
+            default:
+              summary: default
+              value:
+                name: ruby_buildpack
+                position: 42
+                enabled: true
+                locked: false
+                stack: windows64
     BuildpackCreateRequestBody:
       description: Buildpack object that needs to be added
       required: true
@@ -597,174 +765,6 @@ components:
                 enabled: true
                 locked: false
                 stack: windows64
-    BuildpackUpdateRequestBody:
-      description: Buildpack object that needs to be updated
-      required: true
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              name:
-                type: string
-                description: The name of the buildpack
-              position:
-                type: integer
-                description: The order in which the buildpacks are checked during buildpack auto-detection
-              enabled:
-                type: boolean
-                description: Whether or not the buildpack will be used for staging
-              locked:
-                type: boolean
-                description: Whether or not the buildpack is locked to prevent updating the bits
-              stack:
-                type: string
-                description: The name of the stack that the buildpack will use
-              metadata:
-                $ref: '#/components/schemas/Metadata'
-            description: Request schema for updating a buildpack
-          examples:
-            default:
-              summary: default
-              value:
-                name: ruby_buildpack
-                position: 42
-                enabled: true
-                locked: false
-                stack: windows64
-  responses:
-    Forbidden:
-      description: Forbidden
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    NotFound:
-      description: Not Found
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    UnprocessableEntity:
-      description: Unprocessable Entity
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    BadGateway:
-      description: Bad Gateway
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-    BadRequest:
-      description: Bad Request
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-        text/html:
-          schema:
-            type: string
-    Unauthorized:
-      description: Unauthorized
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    BuildpackCreateResponse:
-      description: Successfully created buildpack
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Buildpack'
-    BuildpackGetResponse:
-      description: Successfully retrieved buildpack
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Buildpack'
-    Conflict:
-      description: Conflict
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    '500':
-      description: Internal Server Error
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    ServiceUnavailable:
-      description: Service Unavailable
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-  parameters:
-    OrderBy:
-      name: order_by
-      in: query
-      required: false
-      schema:
-        type: string
-      description: 'Value to sort by. Defaults to ascending; prepend with `-` to sort descending.
-
-        '
-      example: created_at
-    Guid:
-      name: guid
-      in: path
-      required: true
-      schema:
-        type: string
-        format: uuid
-      description: The unique identifier for the resource
-    PerPage:
-      name: per_page
-      in: query
-      required: false
-      schema:
-        type: integer
-      description: Number of results per page, valid values are 1 through 5000
-      example: 50
-    Page:
-      name: page
-      in: query
-      required: false
-      schema:
-        type: integer
-      description: Page to display; valid values are integers >= 1
-      example: 1
-    CreatedAts:
-      name: created_ats
-      in: query
-      required: false
-      schema:
-        type: string
-      description: 'Timestamp to filter by. When filtering on equality, several comma-delimited timestamps may be passed. Also supports filtering with [relational operators](#relational-operators).
-
-        '
-      example: '2021-01-01T00:00:00Z'
-    UpdatedAts:
-      name: updated_ats
-      in: query
-      required: false
-      schema:
-        type: string
-      description: 'Timestamp to filter by. When filtering on equality, several comma-delimited timestamps may be passed. Also supports filtering with [relational operators](#relational-operators).
-
-        '
-      example: '2021-01-01T00:00:00Z'
-    LabelSelector:
-      name: label_selector
-      in: query
-      description: A query string containing a list of [label selector](#labels-and-selectors) requirements
-      required: false
-      schema:
-        type: string
-      example: environment=production
   securitySchemes:
     oauth:
       type: oauth2
