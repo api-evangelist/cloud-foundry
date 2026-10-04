@@ -1387,6 +1387,9 @@ apis:
   - type: Source Code
     url: https://github.com/cloudfoundry/app-autoscaler
 common:
+- type: CapabilityMap
+  url: capabilities/cloud-foundry-capability-edges.yml
+  name: Cloud Foundry Business Capability Map
 - type: OAuthScopes
   url: scopes/cloud-foundry-scopes.yml
 - type: AgenticAccess
