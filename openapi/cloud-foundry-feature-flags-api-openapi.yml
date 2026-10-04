@@ -236,6 +236,15 @@ paths:
           $ref: '#/components/responses/ServiceUnavailable'
 components:
   schemas:
+    FeatureFlagList:
+      type: object
+      properties:
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+        resources:
+          type: array
+          items:
+            $ref: '#/components/schemas/FeatureFlag'
     Error:
       type: object
       properties:
@@ -248,15 +257,6 @@ components:
         title:
           type: string
           description: Name of the error
-    FeatureFlagList:
-      type: object
-      properties:
-        pagination:
-          $ref: '#/components/schemas/Pagination'
-        resources:
-          type: array
-          items:
-            $ref: '#/components/schemas/FeatureFlag'
     Errors:
       type: object
       properties:
@@ -267,49 +267,6 @@ components:
       description: 'An error response will always return a list of error objects. Errors appear on the job resource for asynchronous operations.
 
         Clients should use the code and title fields for programmatically handling specific errors. The message in the detail field is subject to change over time.
-
-        '
-    FeatureFlag:
-      type: object
-      properties:
-        name:
-          type: string
-          description: The name of the feature flag
-        enabled:
-          type: boolean
-          description: Whether the feature flag is enabled
-        updated_at:
-          type:
-          - string
-          - 'null'
-          format: date-time
-          description: The time the feature flag was last updated; this will be blank for feature flags that have not been configured
-        custom_error_message:
-          type:
-          - string
-          - 'null'
-          description: The error string returned by the API when a client performs an action disabled by the feature flag
-        links:
-          type: object
-          properties:
-            self:
-              $ref: '#/components/schemas/Link'
-              description: The URL to get this feature flag
-      description: 'Feature flags are runtime flags that enable or disable functionality on the API.
-
-        '
-    Link:
-      type: object
-      properties:
-        href:
-          type: string
-          description: The URL of the link
-        method:
-          type: string
-          description: An optional field containing the HTTP method to be used when following the URL
-      required:
-      - href
-      description: 'Each link is keyed by its type and will include a href for the URL and an optional method for links that cannot be followed using GET.
 
         '
     Pagination:
@@ -344,36 +301,58 @@ components:
         The pagination object is a JSON object that contains information about the pagination state of the results. It includes the total number of results available, the total number of pages available, and links to the first, last, next, and previous pages of results.
 
         '
-  parameters:
-    OrderBy:
-      name: order_by
-      in: query
-      required: false
-      schema:
-        type: string
-      description: 'Value to sort by. Defaults to ascending; prepend with `-` to sort descending.
+    Link:
+      type: object
+      properties:
+        href:
+          type: string
+          description: The URL of the link
+        method:
+          type: string
+          description: An optional field containing the HTTP method to be used when following the URL
+      required:
+      - href
+      description: 'Each link is keyed by its type and will include a href for the URL and an optional method for links that cannot be followed using GET.
 
         '
-      example: created_at
-    PerPage:
-      name: per_page
-      in: query
-      required: false
-      schema:
-        type: integer
-      description: Number of results per page, valid values are 1 through 5000
-      example: 50
-    Page:
-      name: page
-      in: query
-      required: false
-      schema:
-        type: integer
-      description: Page to display; valid values are integers >= 1
-      example: 1
+    FeatureFlag:
+      type: object
+      properties:
+        name:
+          type: string
+          description: The name of the feature flag
+        enabled:
+          type: boolean
+          description: Whether the feature flag is enabled
+        updated_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+          description: The time the feature flag was last updated; this will be blank for feature flags that have not been configured
+        custom_error_message:
+          type:
+          - string
+          - 'null'
+          description: The error string returned by the API when a client performs an action disabled by the feature flag
+        links:
+          type: object
+          properties:
+            self:
+              $ref: '#/components/schemas/Link'
+              description: The URL to get this feature flag
+      description: 'Feature flags are runtime flags that enable or disable functionality on the API.
+
+        '
   responses:
-    Unauthorized:
-      description: Unauthorized
+    NotFound:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    UnprocessableEntity:
+      description: Unprocessable Entity
       content:
         application/json:
           schema:
@@ -405,14 +384,14 @@ components:
         text/html:
           schema:
             type: string
-    NotFound:
-      description: Not Found
+    '500':
+      description: Internal Server Error
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Errors'
-    '500':
-      description: Internal Server Error
+    Unauthorized:
+      description: Unauthorized
       content:
         application/json:
           schema:
@@ -423,12 +402,33 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Errors'
-    UnprocessableEntity:
-      description: Unprocessable Entity
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
+  parameters:
+    Page:
+      name: page
+      in: query
+      required: false
+      schema:
+        type: integer
+      description: Page to display; valid values are integers >= 1
+      example: 1
+    OrderBy:
+      name: order_by
+      in: query
+      required: false
+      schema:
+        type: string
+      description: 'Value to sort by. Defaults to ascending; prepend with `-` to sort descending.
+
+        '
+      example: created_at
+    PerPage:
+      name: per_page
+      in: query
+      required: false
+      schema:
+        type: integer
+      description: Number of results per page, valid values are 1 through 5000
+      example: 50
   securitySchemes:
     oauth:
       type: oauth2

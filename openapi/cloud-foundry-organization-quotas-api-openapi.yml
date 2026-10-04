@@ -403,32 +403,6 @@ paths:
           $ref: '#/components/responses/UnprocessableEntity'
 components:
   parameters:
-    OrderBy:
-      name: order_by
-      in: query
-      required: false
-      schema:
-        type: string
-      description: 'Value to sort by. Defaults to ascending; prepend with `-` to sort descending.
-
-        '
-      example: created_at
-    PerPage:
-      name: per_page
-      in: query
-      required: false
-      schema:
-        type: integer
-      description: Number of results per page, valid values are 1 through 5000
-      example: 50
-    Page:
-      name: page
-      in: query
-      required: false
-      schema:
-        type: integer
-      description: Page to display; valid values are integers >= 1
-      example: 1
     CreatedAts:
       name: created_ats
       in: query
@@ -439,6 +413,14 @@ components:
 
         '
       example: '2021-01-01T00:00:00Z'
+    Page:
+      name: page
+      in: query
+      required: false
+      schema:
+        type: integer
+      description: Page to display; valid values are integers >= 1
+      example: 1
     Guid:
       name: guid
       in: path
@@ -447,6 +429,24 @@ components:
         type: string
         format: uuid
       description: The unique identifier for the resource
+    PerPage:
+      name: per_page
+      in: query
+      required: false
+      schema:
+        type: integer
+      description: Number of results per page, valid values are 1 through 5000
+      example: 50
+    OrderBy:
+      name: order_by
+      in: query
+      required: false
+      schema:
+        type: string
+      description: 'Value to sort by. Defaults to ascending; prepend with `-` to sort descending.
+
+        '
+      example: created_at
     UpdatedAts:
       name: updated_ats
       in: query
@@ -457,186 +457,19 @@ components:
 
         '
       example: '2021-01-01T00:00:00Z'
-  responses:
-    Unauthorized:
-      description: Unauthorized
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    Forbidden:
-      description: Forbidden
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    Conflict:
-      description: Conflict
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    BadGateway:
-      description: Bad Gateway
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-    BadRequest:
-      description: Bad Request
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-        text/html:
-          schema:
-            type: string
-    NotFound:
-      description: Not Found
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    '500':
-      description: Internal Server Error
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    ServiceUnavailable:
-      description: Service Unavailable
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    UnprocessableEntity:
-      description: Unprocessable Entity
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
   schemas:
-    OrganizationQuota:
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/BaseSchema'
-      - properties:
-          name:
-            type: string
-            description: Name of the quota
-          apps:
-            type: object
-            description: Quotas that affect applications and application sub-resources
-            properties:
-              per_process_memory_in_mb:
-                type:
-                - integer
-                - 'null'
-                description: Maximum memory for a single process or task
-              total_memory_in_mb:
-                type:
-                - integer
-                - 'null'
-                description: Total memory allowed for all the started processes and running tasks in an organization
-              total_instances:
-                type:
-                - integer
-                - 'null'
-                description: Total instances of all the started processes allowed in an organization
-              log_rate_limit_in_bytes_per_second:
-                type:
-                - integer
-                - 'null'
-                description: Total log rate limit allowed for all the started processes and running tasks in an organization
-              per_app_tasks:
-                type:
-                - integer
-                - 'null'
-                description: Maximum number of running tasks in an organization
-          services:
-            type: object
-            description: Quotas that affect services
-            properties:
-              paid_services_allowed:
-                type: boolean
-                description: Specifies whether instances of paid service plans can be created
-              total_service_instances:
-                type:
-                - integer
-                - 'null'
-                description: Total number of service instances allowed in an organization
-              total_service_keys:
-                type:
-                - integer
-                - 'null'
-                description: Total number of service keys allowed in an organization
-          routes:
-            type: object
-            description: Quotas that affect routes
-            properties:
-              total_routes:
-                type:
-                - integer
-                - 'null'
-                description: Total number of routes allowed in an organization
-              total_reserved_ports:
-                type:
-                - integer
-                - 'null'
-                description: Total number of ports that are reservable by routes in an organization
-          domains:
-            type: object
-            description: Quotas that affect domains
-            properties:
-              total_domains:
-                type:
-                - integer
-                - 'null'
-                description: Total number of domains that can be scoped to an organization
-          relationships:
-            type: object
-            properties:
-              organizations:
-                $ref: '#/components/schemas/RelationshipToMany'
-            description: A relationship to the organizations where the quota is applied
-          metadata:
-            $ref: '#/components/schemas/Metadata'
-          links:
-            type: object
-            properties:
-              self:
-                $ref: '#/components/schemas/Link'
-                description: The URL to get this organization quota
-              organizations:
-                $ref: '#/components/schemas/Link'
-                description: The URL to get the organizations for this quota
-      description: 'Organization quotas are named sets of memory, log rate, service, and instance usage quotas. For example, one organization quota might allow up to 10 services, 10 routes, and 2 GB of RAM, while another might offer 100 services, 100 routes, and 10 GB of RAM.
-
-        '
-    OrganizationQuotaList:
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/Pagination'
-      - properties:
-          resources:
-            type: array
-            items:
-              $ref: '#/components/schemas/OrganizationQuota'
-      description: A paginated list of organization quotas
-    Link:
+    Error:
       type: object
       properties:
-        href:
+        code:
+          type: integer
+          description: A numeric code for this error
+        detail:
           type: string
-          description: The URL of the link
-        method:
+          description: Detailed description of the error
+        title:
           type: string
-          description: An optional field containing the HTTP method to be used when following the URL
-      required:
-      - href
-      description: 'Each link is keyed by its type and will include a href for the URL and an optional method for links that cannot be followed using GET.
-
-        '
+          description: Name of the error
     Pagination:
       type: object
       properties:
@@ -669,40 +502,20 @@ components:
         The pagination object is a JSON object that contains information about the pagination state of the results. It includes the total number of results available, the total number of pages available, and links to the first, last, next, and previous pages of results.
 
         '
-    BaseSchema:
+    Link:
       type: object
       properties:
-        guid:
+        href:
           type: string
-          format: uuid
-          description: The unique identifier for the resource
-        created_at:
+          description: The URL of the link
+        method:
           type: string
-          format: date-time
-          description: The ISO8601 compatible date and time when resource was created
-        updated_at:
-          type: string
-          format: date-time
-          description: The ISO8601 compatible date and time when resource was last updated
-      description: 'A resource represents an individual object within the system, such as an app or a service. It is represented as a JSON object.
-
-        A resource consists of several required resource fields and other attributes specific to the resource.
-
-        See Resources and Experimental Resources for specific resources.
+          description: An optional field containing the HTTP method to be used when following the URL
+      required:
+      - href
+      description: 'Each link is keyed by its type and will include a href for the URL and an optional method for links that cannot be followed using GET.
 
         '
-    Error:
-      type: object
-      properties:
-        code:
-          type: integer
-          description: A numeric code for this error
-        detail:
-          type: string
-          description: Detailed description of the error
-        title:
-          type: string
-          description: Name of the error
     Metadata:
       type: object
       properties:
@@ -862,6 +675,28 @@ components:
       description: 'Some relationships relate a resource to several other resources. For example, an isolation segment can be entitled to multiple organizations.
 
         '
+    BaseSchema:
+      type: object
+      properties:
+        guid:
+          type: string
+          format: uuid
+          description: The unique identifier for the resource
+        created_at:
+          type: string
+          format: date-time
+          description: The ISO8601 compatible date and time when resource was created
+        updated_at:
+          type: string
+          format: date-time
+          description: The ISO8601 compatible date and time when resource was last updated
+      description: 'A resource represents an individual object within the system, such as an app or a service. It is represented as a JSON object.
+
+        A resource consists of several required resource fields and other attributes specific to the resource.
+
+        See Resources and Experimental Resources for specific resources.
+
+        '
     Relationship:
       type: object
       properties:
@@ -869,6 +704,171 @@ components:
           type: string
           format: uuid
           description: The GUID of the resource
+    OrganizationQuotaList:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/Pagination'
+      - properties:
+          resources:
+            type: array
+            items:
+              $ref: '#/components/schemas/OrganizationQuota'
+      description: A paginated list of organization quotas
+    OrganizationQuota:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/BaseSchema'
+      - properties:
+          name:
+            type: string
+            description: Name of the quota
+          apps:
+            type: object
+            description: Quotas that affect applications and application sub-resources
+            properties:
+              per_process_memory_in_mb:
+                type:
+                - integer
+                - 'null'
+                description: Maximum memory for a single process or task
+              total_memory_in_mb:
+                type:
+                - integer
+                - 'null'
+                description: Total memory allowed for all the started processes and running tasks in an organization
+              total_instances:
+                type:
+                - integer
+                - 'null'
+                description: Total instances of all the started processes allowed in an organization
+              log_rate_limit_in_bytes_per_second:
+                type:
+                - integer
+                - 'null'
+                description: Total log rate limit allowed for all the started processes and running tasks in an organization
+              per_app_tasks:
+                type:
+                - integer
+                - 'null'
+                description: Maximum number of running tasks in an organization
+          services:
+            type: object
+            description: Quotas that affect services
+            properties:
+              paid_services_allowed:
+                type: boolean
+                description: Specifies whether instances of paid service plans can be created
+              total_service_instances:
+                type:
+                - integer
+                - 'null'
+                description: Total number of service instances allowed in an organization
+              total_service_keys:
+                type:
+                - integer
+                - 'null'
+                description: Total number of service keys allowed in an organization
+          routes:
+            type: object
+            description: Quotas that affect routes
+            properties:
+              total_routes:
+                type:
+                - integer
+                - 'null'
+                description: Total number of routes allowed in an organization
+              total_reserved_ports:
+                type:
+                - integer
+                - 'null'
+                description: Total number of ports that are reservable by routes in an organization
+          domains:
+            type: object
+            description: Quotas that affect domains
+            properties:
+              total_domains:
+                type:
+                - integer
+                - 'null'
+                description: Total number of domains that can be scoped to an organization
+          relationships:
+            type: object
+            properties:
+              organizations:
+                $ref: '#/components/schemas/RelationshipToMany'
+            description: A relationship to the organizations where the quota is applied
+          metadata:
+            $ref: '#/components/schemas/Metadata'
+          links:
+            type: object
+            properties:
+              self:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get this organization quota
+              organizations:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get the organizations for this quota
+      description: 'Organization quotas are named sets of memory, log rate, service, and instance usage quotas. For example, one organization quota might allow up to 10 services, 10 routes, and 2 GB of RAM, while another might offer 100 services, 100 routes, and 10 GB of RAM.
+
+        '
+  responses:
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    BadGateway:
+      description: Bad Gateway
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    ServiceUnavailable:
+      description: Service Unavailable
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    '500':
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    NotFound:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    UnprocessableEntity:
+      description: Unprocessable Entity
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    Conflict:
+      description: Conflict
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    BadRequest:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+        text/html:
+          schema:
+            type: string
   requestBodies:
     OrganizationQuotaCreateRequestBody:
       description: Organization quota object that needs to be created

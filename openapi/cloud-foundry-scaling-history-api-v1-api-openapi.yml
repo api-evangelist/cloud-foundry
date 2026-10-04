@@ -104,6 +104,10 @@ paths:
       x-operation-id-source: derived
 components:
   schemas:
+    HistorySuccessEntry:
+      description: Description of a successful scaling event event in history.
+      type: object
+      properties: {}
     History:
       description: Object containing scaling history.
       type: object
@@ -133,10 +137,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/HistoryEntry'
-    HistorySuccessEntry:
-      description: Description of a successful scaling event event in history.
-      type: object
-      properties: {}
     HistoryErrorEntry:
       description: Description of a failed scaling even in history.
       type: object

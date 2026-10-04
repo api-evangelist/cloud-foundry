@@ -103,6 +103,35 @@ paths:
       x-operation-id-source: derived
 components:
   schemas:
+    Application_Metrics:
+      description: Object containing Application Metrics
+      type: object
+      properties:
+        total_results:
+          type: integer
+          format: int64
+          description: Number of history entries found for the given query
+          example: 2
+        total_pages:
+          type: integer
+          format: int64
+          description: Number of Pages from the query
+          example: 1
+        page:
+          type: integer
+          format: int64
+          description: Number of the current page
+          example: 1
+        prev_url:
+          type: string
+          format: uri
+        next_url:
+          type: string
+          format: uri
+        resources:
+          type: array
+          items:
+            $ref: '#/components/schemas/ApplicationMetric'
     ApplicationMetric:
       description: Object containing metric history
       type: object
@@ -136,35 +165,6 @@ components:
         unit:
           type: string
           example: megabytes
-    Application_Metrics:
-      description: Object containing Application Metrics
-      type: object
-      properties:
-        total_results:
-          type: integer
-          format: int64
-          description: Number of history entries found for the given query
-          example: 2
-        total_pages:
-          type: integer
-          format: int64
-          description: Number of Pages from the query
-          example: 1
-        page:
-          type: integer
-          format: int64
-          description: Number of the current page
-          example: 1
-        prev_url:
-          type: string
-          format: uri
-        next_url:
-          type: string
-          format: uri
-        resources:
-          type: array
-          items:
-            $ref: '#/components/schemas/ApplicationMetric'
   securitySchemes:
     bearerAuth:
       type: http

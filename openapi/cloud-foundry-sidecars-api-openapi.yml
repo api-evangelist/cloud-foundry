@@ -342,65 +342,19 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 components:
-  responses:
-    Unauthorized:
-      description: Unauthorized
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    Forbidden:
-      description: Forbidden
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    Conflict:
-      description: Conflict
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    BadGateway:
-      description: Bad Gateway
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-    BadRequest:
-      description: Bad Request
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-        text/html:
-          schema:
-            type: string
-    NotFound:
-      description: Not Found
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    '500':
-      description: Internal Server Error
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    ServiceUnavailable:
-      description: Service Unavailable
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    UnprocessableEntity:
-      description: Unprocessable Entity
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
   schemas:
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: A numeric code for this error
+        detail:
+          type: string
+          description: Detailed description of the error
+        title:
+          type: string
+          description: Name of the error
     Pagination:
       type: object
       properties:
@@ -433,6 +387,33 @@ components:
         The pagination object is a JSON object that contains information about the pagination state of the results. It includes the total number of results available, the total number of pages available, and links to the first, last, next, and previous pages of results.
 
         '
+    RelationshipToOne:
+      type: object
+      properties:
+        data:
+          type:
+          - object
+          - 'null'
+          $ref: '#/components/schemas/Relationship'
+        links:
+          type: object
+          properties:
+            self:
+              $ref: '#/components/schemas/Link'
+            related:
+              $ref: '#/components/schemas/Link'
+      description: 'Some relationships relate a resource to exactly one other resource. For example an app can belong to only one space.
+
+        '
+    SidecarList:
+      type: object
+      properties:
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+        resources:
+          type: array
+          items:
+            $ref: '#/components/schemas/Sidecar'
     Link:
       type: object
       properties:
@@ -447,98 +428,6 @@ components:
       description: 'Each link is keyed by its type and will include a href for the URL and an optional method for links that cannot be followed using GET.
 
         '
-    BaseSchema:
-      type: object
-      properties:
-        guid:
-          type: string
-          format: uuid
-          description: The unique identifier for the resource
-        created_at:
-          type: string
-          format: date-time
-          description: The ISO8601 compatible date and time when resource was created
-        updated_at:
-          type: string
-          format: date-time
-          description: The ISO8601 compatible date and time when resource was last updated
-      description: 'A resource represents an individual object within the system, such as an app or a service. It is represented as a JSON object.
-
-        A resource consists of several required resource fields and other attributes specific to the resource.
-
-        See Resources and Experimental Resources for specific resources.
-
-        '
-    Sidecar:
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/BaseSchema'
-      - properties:
-          name:
-            type: string
-            description: Name of the sidecar
-          command:
-            type: string
-            description: Command to run for the sidecar
-          process_types:
-            type: array
-            items:
-              type: string
-            description: Process types that the sidecar applies to
-          memory_in_mb:
-            type:
-            - integer
-            - 'null'
-            description: Memory limit for the sidecar in MB
-          origin:
-            type:
-            - string
-            - 'null'
-            description: Origin of the sidecar
-            enum:
-            - user
-            - buildpack
-          relationships:
-            type: object
-            properties:
-              app:
-                $ref: '#/components/schemas/RelationshipToOne'
-            description: Relationships for the sidecar
-          links:
-            type: object
-            properties:
-              self:
-                $ref: '#/components/schemas/Link'
-              app:
-                $ref: '#/components/schemas/Link'
-          metadata:
-            $ref: '#/components/schemas/Metadata'
-        required:
-        - name
-        - command
-        - process_types
-        - relationships
-    SidecarList:
-      type: object
-      properties:
-        pagination:
-          $ref: '#/components/schemas/Pagination'
-        resources:
-          type: array
-          items:
-            $ref: '#/components/schemas/Sidecar'
-    Error:
-      type: object
-      properties:
-        code:
-          type: integer
-          description: A numeric code for this error
-        detail:
-          type: string
-          description: Detailed description of the error
-        title:
-          type: string
-          description: Name of the error
     Metadata:
       type: object
       properties:
@@ -681,24 +570,77 @@ components:
         Clients should use the code and title fields for programmatically handling specific errors. The message in the detail field is subject to change over time.
 
         '
-    RelationshipToOne:
+    BaseSchema:
       type: object
       properties:
-        data:
-          type:
-          - object
-          - 'null'
-          $ref: '#/components/schemas/Relationship'
-        links:
-          type: object
-          properties:
-            self:
-              $ref: '#/components/schemas/Link'
-            related:
-              $ref: '#/components/schemas/Link'
-      description: 'Some relationships relate a resource to exactly one other resource. For example an app can belong to only one space.
+        guid:
+          type: string
+          format: uuid
+          description: The unique identifier for the resource
+        created_at:
+          type: string
+          format: date-time
+          description: The ISO8601 compatible date and time when resource was created
+        updated_at:
+          type: string
+          format: date-time
+          description: The ISO8601 compatible date and time when resource was last updated
+      description: 'A resource represents an individual object within the system, such as an app or a service. It is represented as a JSON object.
+
+        A resource consists of several required resource fields and other attributes specific to the resource.
+
+        See Resources and Experimental Resources for specific resources.
 
         '
+    Sidecar:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/BaseSchema'
+      - properties:
+          name:
+            type: string
+            description: Name of the sidecar
+          command:
+            type: string
+            description: Command to run for the sidecar
+          process_types:
+            type: array
+            items:
+              type: string
+            description: Process types that the sidecar applies to
+          memory_in_mb:
+            type:
+            - integer
+            - 'null'
+            description: Memory limit for the sidecar in MB
+          origin:
+            type:
+            - string
+            - 'null'
+            description: Origin of the sidecar
+            enum:
+            - user
+            - buildpack
+          relationships:
+            type: object
+            properties:
+              app:
+                $ref: '#/components/schemas/RelationshipToOne'
+            description: Relationships for the sidecar
+          links:
+            type: object
+            properties:
+              self:
+                $ref: '#/components/schemas/Link'
+              app:
+                $ref: '#/components/schemas/Link'
+          metadata:
+            $ref: '#/components/schemas/Metadata'
+        required:
+        - name
+        - command
+        - process_types
+        - relationships
     Relationship:
       type: object
       properties:
@@ -706,6 +648,64 @@ components:
           type: string
           format: uuid
           description: The GUID of the resource
+  responses:
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    BadGateway:
+      description: Bad Gateway
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    ServiceUnavailable:
+      description: Service Unavailable
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    '500':
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    NotFound:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    UnprocessableEntity:
+      description: Unprocessable Entity
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    Conflict:
+      description: Conflict
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    BadRequest:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+        text/html:
+          schema:
+            type: string
   parameters:
     Guid:
       name: guid
@@ -716,6 +716,37 @@ components:
         format: uuid
       description: The unique identifier for the resource
   requestBodies:
+    SidecarCreate:
+      description: Sidecar to create
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+                description: Name of the sidecar
+              command:
+                type: string
+                description: Command to run for the sidecar
+              process_types:
+                type: array
+                items:
+                  type: string
+                description: Process types that the sidecar applies to
+              memory_in_mb:
+                type: integer
+                description: Memory limit for the sidecar in MB
+          examples:
+            default:
+              summary: default
+              value:
+                name: auth-sidecar
+                command: bundle exec rackup
+                process_types:
+                - web
+                - worker
+                memory_in_mb: 300
     SidecarUpdateRequestBody:
       description: Sidecar object that needs to be updated
       required: true
@@ -738,37 +769,6 @@ components:
               memory_in_mb:
                 type: integer
                 description: Reserved memory for sidecar
-          examples:
-            default:
-              summary: default
-              value:
-                name: auth-sidecar
-                command: bundle exec rackup
-                process_types:
-                - web
-                - worker
-                memory_in_mb: 300
-    SidecarCreate:
-      description: Sidecar to create
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              name:
-                type: string
-                description: Name of the sidecar
-              command:
-                type: string
-                description: Command to run for the sidecar
-              process_types:
-                type: array
-                items:
-                  type: string
-                description: Process types that the sidecar applies to
-              memory_in_mb:
-                type: integer
-                description: Memory limit for the sidecar in MB
           examples:
             default:
               summary: default

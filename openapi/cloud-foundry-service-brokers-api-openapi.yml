@@ -305,32 +305,6 @@ paths:
           $ref: '#/components/responses/500'
 components:
   parameters:
-    OrderBy:
-      name: order_by
-      in: query
-      required: false
-      schema:
-        type: string
-      description: 'Value to sort by. Defaults to ascending; prepend with `-` to sort descending.
-
-        '
-      example: created_at
-    PerPage:
-      name: per_page
-      in: query
-      required: false
-      schema:
-        type: integer
-      description: Number of results per page, valid values are 1 through 5000
-      example: 50
-    Page:
-      name: page
-      in: query
-      required: false
-      schema:
-        type: integer
-      description: Page to display; valid values are integers >= 1
-      example: 1
     CreatedAts:
       name: created_ats
       in: query
@@ -341,6 +315,14 @@ components:
 
         '
       example: '2021-01-01T00:00:00Z'
+    Page:
+      name: page
+      in: query
+      required: false
+      schema:
+        type: integer
+      description: Page to display; valid values are integers >= 1
+      example: 1
     Guid:
       name: guid
       in: path
@@ -349,6 +331,32 @@ components:
         type: string
         format: uuid
       description: The unique identifier for the resource
+    PerPage:
+      name: per_page
+      in: query
+      required: false
+      schema:
+        type: integer
+      description: Number of results per page, valid values are 1 through 5000
+      example: 50
+    OrderBy:
+      name: order_by
+      in: query
+      required: false
+      schema:
+        type: string
+      description: 'Value to sort by. Defaults to ascending; prepend with `-` to sort descending.
+
+        '
+      example: created_at
+    LabelSelector:
+      name: label_selector
+      in: query
+      description: A query string containing a list of [label selector](#labels-and-selectors) requirements
+      required: false
+      schema:
+        type: string
+      example: environment=production
     UpdatedAts:
       name: updated_ats
       in: query
@@ -359,87 +367,139 @@ components:
 
         '
       example: '2021-01-01T00:00:00Z'
-    LabelSelector:
-      name: label_selector
-      in: query
-      description: A query string containing a list of [label selector](#labels-and-selectors) requirements
-      required: false
-      schema:
-        type: string
-      example: environment=production
-  responses:
-    Unauthorized:
-      description: Unauthorized
+  requestBodies:
+    ServiceBrokerUpdateRequestBody:
+      description: Service broker object that needs to be updated
+      required: true
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Errors'
-    Forbidden:
-      description: Forbidden
+            type: object
+            properties:
+              name:
+                type: string
+                description: Name of the service broker
+              url:
+                type: string
+                description: URL of the service broker
+              authentication:
+                type: object
+                description: Credentials used to authenticate against the service broker
+                properties:
+                  type:
+                    type: string
+                    enum:
+                    - basic
+                    description: Authentication type
+                  credentials:
+                    type: object
+                    description: Authentication credentials
+                    properties:
+                      username:
+                        type: string
+                        description: Username for basic authentication
+                      password:
+                        type: string
+                        description: Password for basic authentication
+                    required:
+                    - username
+                    - password
+                required:
+                - type
+                - credentials
+              metadata:
+                $ref: '#/components/schemas/Metadata'
+          examples:
+            default:
+              summary: default
+              value:
+                name: my_service_broker
+                url: https://example.service-broker.com
+                authentication:
+                  type: basic
+                  credentials:
+                    username: us3rn4me
+                    password: p4ssw0rd
+                metadata:
+                  labels:
+                    key: value
+                  annotations:
+                    note: detailed information
+    ServiceBrokerCreate:
+      description: Service broker to create
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Errors'
-    Conflict:
-      description: Conflict
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    BadGateway:
-      description: Bad Gateway
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-    BadRequest:
-      description: Bad Request
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-        text/html:
-          schema:
-            type: string
-    NotFound:
-      description: Not Found
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    '500':
-      description: Internal Server Error
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    ServiceUnavailable:
-      description: Service Unavailable
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    UnprocessableEntity:
-      description: Unprocessable Entity
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
+            type: object
+            properties:
+              name:
+                type: string
+                description: Name of the service broker
+              url:
+                type: string
+                format: uri
+                description: URL of the service broker
+              authentication:
+                type: object
+                properties:
+                  type:
+                    type: string
+                    enum:
+                    - basic
+                    description: Type of authentication
+                  credentials:
+                    type: object
+                    properties:
+                      username:
+                        type: string
+                      password:
+                        type: string
+                    required:
+                    - username
+                    - password
+                required:
+                - type
+                - credentials
+                description: Authentication details for the service broker
+              relationships:
+                type: object
+                properties:
+                  space:
+                    $ref: '#/components/schemas/RelationshipToOne'
+                description: Relationships for the service broker
+              metadata:
+                $ref: '#/components/schemas/Metadata'
+            required:
+            - name
+            - url
+          examples:
+            default:
+              summary: default
+              value:
+                name: my_service_broker
+                url: https://example.service-broker.com
+                authentication:
+                  type: basic
+                  credentials:
+                    username: us3rn4me
+                    password: p4ssw0rd
+                relationships:
+                  space:
+                    data:
+                      guid: 123e4567-e89b-12d3-a456-426614174000
   schemas:
-    Link:
+    Error:
       type: object
       properties:
-        href:
+        code:
+          type: integer
+          description: A numeric code for this error
+        detail:
           type: string
-          description: The URL of the link
-        method:
+          description: Detailed description of the error
+        title:
           type: string
-          description: An optional field containing the HTTP method to be used when following the URL
-      required:
-      - href
-      description: 'Each link is keyed by its type and will include a href for the URL and an optional method for links that cannot be followed using GET.
-
-        '
+          description: Name of the error
     Pagination:
       type: object
       properties:
@@ -472,40 +532,47 @@ components:
         The pagination object is a JSON object that contains information about the pagination state of the results. It includes the total number of results available, the total number of pages available, and links to the first, last, next, and previous pages of results.
 
         '
-    BaseSchema:
+    RelationshipToOne:
       type: object
       properties:
-        guid:
-          type: string
-          format: uuid
-          description: The unique identifier for the resource
-        created_at:
-          type: string
-          format: date-time
-          description: The ISO8601 compatible date and time when resource was created
-        updated_at:
-          type: string
-          format: date-time
-          description: The ISO8601 compatible date and time when resource was last updated
-      description: 'A resource represents an individual object within the system, such as an app or a service. It is represented as a JSON object.
-
-        A resource consists of several required resource fields and other attributes specific to the resource.
-
-        See Resources and Experimental Resources for specific resources.
+        data:
+          type:
+          - object
+          - 'null'
+          $ref: '#/components/schemas/Relationship'
+        links:
+          type: object
+          properties:
+            self:
+              $ref: '#/components/schemas/Link'
+            related:
+              $ref: '#/components/schemas/Link'
+      description: 'Some relationships relate a resource to exactly one other resource. For example an app can belong to only one space.
 
         '
-    Error:
+    Link:
       type: object
       properties:
-        code:
-          type: integer
-          description: A numeric code for this error
-        detail:
+        href:
           type: string
-          description: Detailed description of the error
-        title:
+          description: The URL of the link
+        method:
           type: string
-          description: Name of the error
+          description: An optional field containing the HTTP method to be used when following the URL
+      required:
+      - href
+      description: 'Each link is keyed by its type and will include a href for the URL and an optional method for links that cannot be followed using GET.
+
+        '
+    ServiceBrokerList:
+      type: object
+      properties:
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+        resources:
+          type: array
+          items:
+            $ref: '#/components/schemas/ServiceBroker'
     Metadata:
       type: object
       properties:
@@ -648,22 +715,26 @@ components:
         Clients should use the code and title fields for programmatically handling specific errors. The message in the detail field is subject to change over time.
 
         '
-    RelationshipToOne:
+    BaseSchema:
       type: object
       properties:
-        data:
-          type:
-          - object
-          - 'null'
-          $ref: '#/components/schemas/Relationship'
-        links:
-          type: object
-          properties:
-            self:
-              $ref: '#/components/schemas/Link'
-            related:
-              $ref: '#/components/schemas/Link'
-      description: 'Some relationships relate a resource to exactly one other resource. For example an app can belong to only one space.
+        guid:
+          type: string
+          format: uuid
+          description: The unique identifier for the resource
+        created_at:
+          type: string
+          format: date-time
+          description: The ISO8601 compatible date and time when resource was created
+        updated_at:
+          type: string
+          format: date-time
+          description: The ISO8601 compatible date and time when resource was last updated
+      description: 'A resource represents an individual object within the system, such as an app or a service. It is represented as a JSON object.
+
+        A resource consists of several required resource fields and other attributes specific to the resource.
+
+        See Resources and Experimental Resources for specific resources.
 
         '
     ServiceBroker:
@@ -706,135 +777,64 @@ components:
           type: string
           format: uuid
           description: The GUID of the resource
-    ServiceBrokerList:
-      type: object
-      properties:
-        pagination:
-          $ref: '#/components/schemas/Pagination'
-        resources:
-          type: array
-          items:
-            $ref: '#/components/schemas/ServiceBroker'
-  requestBodies:
-    ServiceBrokerUpdateRequestBody:
-      description: Service broker object that needs to be updated
-      required: true
+  responses:
+    Forbidden:
+      description: Forbidden
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              name:
-                type: string
-                description: Name of the service broker
-              url:
-                type: string
-                description: URL of the service broker
-              authentication:
-                type: object
-                description: Credentials used to authenticate against the service broker
-                properties:
-                  type:
-                    type: string
-                    enum:
-                    - basic
-                    description: Authentication type
-                  credentials:
-                    type: object
-                    description: Authentication credentials
-                    properties:
-                      username:
-                        type: string
-                        description: Username for basic authentication
-                      password:
-                        type: string
-                        description: Password for basic authentication
-                    required:
-                    - username
-                    - password
-                required:
-                - type
-                - credentials
-              metadata:
-                $ref: '#/components/schemas/Metadata'
-          examples:
-            default:
-              summary: default
-              value:
-                name: my_service_broker
-                url: https://example.service-broker.com
-                authentication:
-                  type: basic
-                  credentials:
-                    username: us3rn4me
-                    password: p4ssw0rd
-                metadata:
-                  labels:
-                    key: value
-                  annotations:
-                    note: detailed information
-    ServiceBrokerCreate:
-      description: Service broker to create
+            $ref: '#/components/schemas/Errors'
+    BadGateway:
+      description: Bad Gateway
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              name:
-                type: string
-                description: Name of the service broker
-              url:
-                type: string
-                format: uri
-                description: URL of the service broker
-              authentication:
-                type: object
-                properties:
-                  type:
-                    type: string
-                    enum:
-                    - basic
-                    description: Type of authentication
-                  credentials:
-                    type: object
-                    properties:
-                      username:
-                        type: string
-                      password:
-                        type: string
-                    required:
-                    - username
-                    - password
-                required:
-                - type
-                - credentials
-                description: Authentication details for the service broker
-              relationships:
-                type: object
-                properties:
-                  space:
-                    $ref: '#/components/schemas/RelationshipToOne'
-                description: Relationships for the service broker
-              metadata:
-                $ref: '#/components/schemas/Metadata'
-            required:
-            - name
-            - url
-          examples:
-            default:
-              summary: default
-              value:
-                name: my_service_broker
-                url: https://example.service-broker.com
-                authentication:
-                  type: basic
-                  credentials:
-                    username: us3rn4me
-                    password: p4ssw0rd
-                relationships:
-                  space:
-                    data:
-                      guid: 123e4567-e89b-12d3-a456-426614174000
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    ServiceUnavailable:
+      description: Service Unavailable
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    '500':
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    NotFound:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    UnprocessableEntity:
+      description: Unprocessable Entity
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    Conflict:
+      description: Conflict
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    BadRequest:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+        text/html:
+          schema:
+            type: string
   securitySchemes:
     oauth:
       type: oauth2

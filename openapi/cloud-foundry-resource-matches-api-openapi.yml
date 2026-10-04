@@ -122,18 +122,6 @@ components:
         title:
           type: string
           description: Name of the error
-    Errors:
-      type: object
-      properties:
-        errors:
-          type: array
-          items:
-            $ref: '#/components/schemas/Error'
-      description: 'An error response will always return a list of error objects. Errors appear on the job resource for asynchronous operations.
-
-        Clients should use the code and title fields for programmatically handling specific errors. The message in the detail field is subject to change over time.
-
-        '
     ResourceMatch:
       type: object
       properties:
@@ -153,9 +141,21 @@ components:
                 type: string
               mode:
                 type: string
+    Errors:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/Error'
+      description: 'An error response will always return a list of error objects. Errors appear on the job resource for asynchronous operations.
+
+        Clients should use the code and title fields for programmatically handling specific errors. The message in the detail field is subject to change over time.
+
+        '
   responses:
-    Unauthorized:
-      description: Unauthorized
+    UnprocessableEntity:
+      description: Unprocessable Entity
       content:
         application/json:
           schema:
@@ -187,14 +187,14 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Errors'
-    ServiceUnavailable:
-      description: Service Unavailable
+    Unauthorized:
+      description: Unauthorized
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Errors'
-    UnprocessableEntity:
-      description: Unprocessable Entity
+    ServiceUnavailable:
+      description: Service Unavailable
       content:
         application/json:
           schema:

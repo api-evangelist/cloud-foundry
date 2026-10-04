@@ -287,6 +287,45 @@ paths:
                 $ref: '#/components/schemas/Error'
 components:
   schemas:
+    LastOperationResource:
+      type: object
+      required:
+      - state
+      properties:
+        state:
+          type: string
+          enum:
+          - in progress
+          - succeeded
+          - failed
+        description:
+          type: string
+        instance_usable:
+          type: boolean
+        update_repeatable:
+          type: boolean
+    ServiceBindingEndpoint:
+      type: object
+      required:
+      - host
+      - ports
+      properties:
+        host:
+          type: string
+        ports:
+          type: array
+          items:
+            type: string
+        protocol:
+          type: string
+          enum:
+          - tcp
+          - udp
+          - all
+          default: tcp
+    Context:
+      description: See [Context Conventions](https://github.com/openservicebrokerapi/servicebroker/blob/master/profile.md#context-object) for more details.
+      type: object
     Error:
       description: See [Service Broker Errors](https://github.com/openservicebrokerapi/servicebroker/blob/master/spec.md#service-broker-errors) for more details.
       type: object
@@ -299,9 +338,6 @@ components:
           type: boolean
         update_repeatable:
           type: boolean
-    Context:
-      description: See [Context Conventions](https://github.com/openservicebrokerapi/servicebroker/blob/master/profile.md#context-object) for more details.
-      type: object
     ServiceBindingRequest:
       type: object
       required:
@@ -323,13 +359,6 @@ components:
           $ref: '#/components/schemas/Object'
         predecessor_binding_id:
           type: string
-    Object:
-      type: object
-    AsyncOperation:
-      type: object
-      properties:
-        operation:
-          type: string
     ServiceBindingResponse:
       type: object
       properties:
@@ -349,30 +378,31 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ServiceBindingEndpoint'
-    LastOperationResource:
+    Object:
+      type: object
+    AsyncOperation:
+      type: object
+      properties:
+        operation:
+          type: string
+    ServiceBindingMetadata:
+      type: object
+      properties:
+        expires_at:
+          type: string
+        renew_before:
+          type: string
+    ServiceBindingVolumeMountDevice:
       type: object
       required:
-      - state
+      - volume_id
       properties:
-        state:
+        volume_id:
           type: string
-          enum:
-          - in progress
-          - succeeded
-          - failed
-        description:
-          type: string
-        instance_usable:
-          type: boolean
-        update_repeatable:
-          type: boolean
-    ServiceBindingResouceObject:
-      type: object
-      properties:
-        app_guid:
-          type: string
-        route:
-          type: string
+        mount_config:
+          $ref: '#/components/schemas/Object'
+        device_config:
+          $ref: '#/components/schemas/Object'
     ServiceBindingVolumeMount:
       type: object
       required:
@@ -397,17 +427,6 @@ components:
           - shared
         device:
           $ref: '#/components/schemas/ServiceBindingVolumeMountDevice'
-    ServiceBindingVolumeMountDevice:
-      type: object
-      required:
-      - volume_id
-      properties:
-        volume_id:
-          type: string
-        mount_config:
-          $ref: '#/components/schemas/Object'
-        device_config:
-          $ref: '#/components/schemas/Object'
     ServiceBindingResource:
       type: object
       properties:
@@ -429,33 +448,20 @@ components:
             $ref: '#/components/schemas/ServiceBindingEndpoint'
         parameters:
           $ref: '#/components/schemas/Object'
-    ServiceBindingMetadata:
+    ServiceBindingResouceObject:
       type: object
       properties:
-        expires_at:
+        app_guid:
           type: string
-        renew_before:
+        route:
           type: string
-    ServiceBindingEndpoint:
-      type: object
-      required:
-      - host
-      - ports
-      properties:
-        host:
-          type: string
-        ports:
-          type: array
-          items:
-            type: string
-        protocol:
-          type: string
-          enum:
-          - tcp
-          - udp
-          - all
-          default: tcp
   parameters:
+    OriginatingIdentity:
+      name: X-Broker-API-Originating-Identity
+      in: header
+      description: identity of the user that initiated the request from the Platform
+      schema:
+        type: string
     APIVersion:
       name: X-Broker-API-Version
       in: header
@@ -464,12 +470,6 @@ components:
       schema:
         type: string
         default: '2.13'
-    OriginatingIdentity:
-      name: X-Broker-API-Originating-Identity
-      in: header
-      description: identity of the user that initiated the request from the Platform
-      schema:
-        type: string
   securitySchemes:
     basicAuth:
       type: http
