@@ -110,18 +110,6 @@ paths:
           $ref: '#/components/responses/ServiceUnavailable'
 components:
   schemas:
-    Error:
-      type: object
-      properties:
-        code:
-          type: integer
-          description: A numeric code for this error
-        detail:
-          type: string
-          description: Detailed description of the error
-        title:
-          type: string
-          description: Name of the error
     ResourceMatch:
       type: object
       properties:
@@ -141,6 +129,18 @@ components:
                 type: string
               mode:
                 type: string
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: A numeric code for this error
+        detail:
+          type: string
+          description: Detailed description of the error
+        title:
+          type: string
+          description: Name of the error
     Errors:
       type: object
       properties:
@@ -154,6 +154,18 @@ components:
 
         '
   responses:
+    '500':
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    ServiceUnavailable:
+      description: Service Unavailable
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
     UnprocessableEntity:
       description: Unprocessable Entity
       content:
@@ -162,12 +174,6 @@ components:
             $ref: '#/components/schemas/Errors'
     Conflict:
       description: Conflict
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    Forbidden:
-      description: Forbidden
       content:
         application/json:
           schema:
@@ -181,20 +187,14 @@ components:
         text/html:
           schema:
             type: string
-    '500':
-      description: Internal Server Error
+    Forbidden:
+      description: Forbidden
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Errors'
     Unauthorized:
       description: Unauthorized
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    ServiceUnavailable:
-      description: Service Unavailable
       content:
         application/json:
           schema:

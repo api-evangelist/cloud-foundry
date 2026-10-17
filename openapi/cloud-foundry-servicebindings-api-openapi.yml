@@ -286,7 +286,93 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 components:
+  parameters:
+    APIVersion:
+      name: X-Broker-API-Version
+      in: header
+      description: version number of the Service Broker API that the Platform will use
+      required: true
+      schema:
+        type: string
+        default: '2.13'
+    OriginatingIdentity:
+      name: X-Broker-API-Originating-Identity
+      in: header
+      description: identity of the user that initiated the request from the Platform
+      schema:
+        type: string
   schemas:
+    ServiceBindingVolumeMount:
+      type: object
+      required:
+      - driver
+      - container_dir
+      - mode
+      - device_type
+      - device
+      properties:
+        driver:
+          type: string
+        container_dir:
+          type: string
+        mode:
+          type: string
+          enum:
+          - r
+          - rw
+        device_type:
+          type: string
+          enum:
+          - shared
+        device:
+          $ref: '#/components/schemas/ServiceBindingVolumeMountDevice'
+    ServiceBindingRequest:
+      type: object
+      required:
+      - service_id
+      - plan_id
+      properties:
+        context:
+          $ref: '#/components/schemas/Context'
+        service_id:
+          type: string
+        plan_id:
+          type: string
+        app_guid:
+          type: string
+          deprecated: true
+        bind_resource:
+          $ref: '#/components/schemas/ServiceBindingResouceObject'
+        parameters:
+          $ref: '#/components/schemas/Object'
+        predecessor_binding_id:
+          type: string
+    ServiceBindingResouceObject:
+      type: object
+      properties:
+        app_guid:
+          type: string
+        route:
+          type: string
+    ServiceBindingResponse:
+      type: object
+      properties:
+        metadata:
+          $ref: '#/components/schemas/ServiceBindingMetadata'
+        credentials:
+          $ref: '#/components/schemas/Object'
+        syslog_drain_url:
+          type: string
+        route_service_url:
+          type: string
+        volume_mounts:
+          type: array
+          items:
+            $ref: '#/components/schemas/ServiceBindingVolumeMount'
+        endpoints:
+          type: array
+          items:
+            $ref: '#/components/schemas/ServiceBindingEndpoint'
     LastOperationResource:
       type: object
       required:
@@ -298,6 +384,64 @@ components:
           - in progress
           - succeeded
           - failed
+        description:
+          type: string
+        instance_usable:
+          type: boolean
+        update_repeatable:
+          type: boolean
+    ServiceBindingVolumeMountDevice:
+      type: object
+      required:
+      - volume_id
+      properties:
+        volume_id:
+          type: string
+        mount_config:
+          $ref: '#/components/schemas/Object'
+        device_config:
+          $ref: '#/components/schemas/Object'
+    Object:
+      type: object
+    AsyncOperation:
+      type: object
+      properties:
+        operation:
+          type: string
+    ServiceBindingResource:
+      type: object
+      properties:
+        metadata:
+          $ref: '#/components/schemas/ServiceBindingMetadata'
+        credentials:
+          $ref: '#/components/schemas/Object'
+        syslog_drain_url:
+          type: string
+        route_service_url:
+          type: string
+        volume_mounts:
+          type: array
+          items:
+            $ref: '#/components/schemas/ServiceBindingVolumeMount'
+        endpoints:
+          type: array
+          items:
+            $ref: '#/components/schemas/ServiceBindingEndpoint'
+        parameters:
+          $ref: '#/components/schemas/Object'
+    ServiceBindingMetadata:
+      type: object
+      properties:
+        expires_at:
+          type: string
+        renew_before:
+          type: string
+    Error:
+      description: See [Service Broker Errors](https://github.com/openservicebrokerapi/servicebroker/blob/master/spec.md#service-broker-errors) for more details.
+      type: object
+      properties:
+        error:
+          type: string
         description:
           type: string
         instance_usable:
@@ -326,150 +470,6 @@ components:
     Context:
       description: See [Context Conventions](https://github.com/openservicebrokerapi/servicebroker/blob/master/profile.md#context-object) for more details.
       type: object
-    Error:
-      description: See [Service Broker Errors](https://github.com/openservicebrokerapi/servicebroker/blob/master/spec.md#service-broker-errors) for more details.
-      type: object
-      properties:
-        error:
-          type: string
-        description:
-          type: string
-        instance_usable:
-          type: boolean
-        update_repeatable:
-          type: boolean
-    ServiceBindingRequest:
-      type: object
-      required:
-      - service_id
-      - plan_id
-      properties:
-        context:
-          $ref: '#/components/schemas/Context'
-        service_id:
-          type: string
-        plan_id:
-          type: string
-        app_guid:
-          type: string
-          deprecated: true
-        bind_resource:
-          $ref: '#/components/schemas/ServiceBindingResouceObject'
-        parameters:
-          $ref: '#/components/schemas/Object'
-        predecessor_binding_id:
-          type: string
-    ServiceBindingResponse:
-      type: object
-      properties:
-        metadata:
-          $ref: '#/components/schemas/ServiceBindingMetadata'
-        credentials:
-          $ref: '#/components/schemas/Object'
-        syslog_drain_url:
-          type: string
-        route_service_url:
-          type: string
-        volume_mounts:
-          type: array
-          items:
-            $ref: '#/components/schemas/ServiceBindingVolumeMount'
-        endpoints:
-          type: array
-          items:
-            $ref: '#/components/schemas/ServiceBindingEndpoint'
-    Object:
-      type: object
-    AsyncOperation:
-      type: object
-      properties:
-        operation:
-          type: string
-    ServiceBindingMetadata:
-      type: object
-      properties:
-        expires_at:
-          type: string
-        renew_before:
-          type: string
-    ServiceBindingVolumeMountDevice:
-      type: object
-      required:
-      - volume_id
-      properties:
-        volume_id:
-          type: string
-        mount_config:
-          $ref: '#/components/schemas/Object'
-        device_config:
-          $ref: '#/components/schemas/Object'
-    ServiceBindingVolumeMount:
-      type: object
-      required:
-      - driver
-      - container_dir
-      - mode
-      - device_type
-      - device
-      properties:
-        driver:
-          type: string
-        container_dir:
-          type: string
-        mode:
-          type: string
-          enum:
-          - r
-          - rw
-        device_type:
-          type: string
-          enum:
-          - shared
-        device:
-          $ref: '#/components/schemas/ServiceBindingVolumeMountDevice'
-    ServiceBindingResource:
-      type: object
-      properties:
-        metadata:
-          $ref: '#/components/schemas/ServiceBindingMetadata'
-        credentials:
-          $ref: '#/components/schemas/Object'
-        syslog_drain_url:
-          type: string
-        route_service_url:
-          type: string
-        volume_mounts:
-          type: array
-          items:
-            $ref: '#/components/schemas/ServiceBindingVolumeMount'
-        endpoints:
-          type: array
-          items:
-            $ref: '#/components/schemas/ServiceBindingEndpoint'
-        parameters:
-          $ref: '#/components/schemas/Object'
-    ServiceBindingResouceObject:
-      type: object
-      properties:
-        app_guid:
-          type: string
-        route:
-          type: string
-  parameters:
-    OriginatingIdentity:
-      name: X-Broker-API-Originating-Identity
-      in: header
-      description: identity of the user that initiated the request from the Platform
-      schema:
-        type: string
-    APIVersion:
-      name: X-Broker-API-Version
-      in: header
-      description: version number of the Service Broker API that the Platform will use
-      required: true
-      schema:
-        type: string
-        default: '2.13'
   securitySchemes:
     basicAuth:
       type: http

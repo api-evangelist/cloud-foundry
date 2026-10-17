@@ -235,6 +235,91 @@ paths:
         '503':
           $ref: '#/components/responses/ServiceUnavailable'
 components:
+  responses:
+    NotFound:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    '500':
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    ServiceUnavailable:
+      description: Service Unavailable
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    UnprocessableEntity:
+      description: Unprocessable Entity
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    Conflict:
+      description: Conflict
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    BadRequest:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+        text/html:
+          schema:
+            type: string
+    BadGateway:
+      description: Bad Gateway
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+  parameters:
+    Page:
+      name: page
+      in: query
+      required: false
+      schema:
+        type: integer
+      description: Page to display; valid values are integers >= 1
+      example: 1
+    PerPage:
+      name: per_page
+      in: query
+      required: false
+      schema:
+        type: integer
+      description: Number of results per page, valid values are 1 through 5000
+      example: 50
+    OrderBy:
+      name: order_by
+      in: query
+      required: false
+      schema:
+        type: string
+      description: 'Value to sort by. Defaults to ascending; prepend with `-` to sort descending.
+
+        '
+      example: created_at
   schemas:
     FeatureFlagList:
       type: object
@@ -301,20 +386,6 @@ components:
         The pagination object is a JSON object that contains information about the pagination state of the results. It includes the total number of results available, the total number of pages available, and links to the first, last, next, and previous pages of results.
 
         '
-    Link:
-      type: object
-      properties:
-        href:
-          type: string
-          description: The URL of the link
-        method:
-          type: string
-          description: An optional field containing the HTTP method to be used when following the URL
-      required:
-      - href
-      description: 'Each link is keyed by its type and will include a href for the URL and an optional method for links that cannot be followed using GET.
-
-        '
     FeatureFlag:
       type: object
       properties:
@@ -344,91 +415,20 @@ components:
       description: 'Feature flags are runtime flags that enable or disable functionality on the API.
 
         '
-  responses:
-    NotFound:
-      description: Not Found
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    UnprocessableEntity:
-      description: Unprocessable Entity
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    Conflict:
-      description: Conflict
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    Forbidden:
-      description: Forbidden
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    BadGateway:
-      description: Bad Gateway
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-    BadRequest:
-      description: Bad Request
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-        text/html:
-          schema:
-            type: string
-    '500':
-      description: Internal Server Error
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    Unauthorized:
-      description: Unauthorized
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    ServiceUnavailable:
-      description: Service Unavailable
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-  parameters:
-    Page:
-      name: page
-      in: query
-      required: false
-      schema:
-        type: integer
-      description: Page to display; valid values are integers >= 1
-      example: 1
-    OrderBy:
-      name: order_by
-      in: query
-      required: false
-      schema:
-        type: string
-      description: 'Value to sort by. Defaults to ascending; prepend with `-` to sort descending.
+    Link:
+      type: object
+      properties:
+        href:
+          type: string
+          description: The URL of the link
+        method:
+          type: string
+          description: An optional field containing the HTTP method to be used when following the URL
+      required:
+      - href
+      description: 'Each link is keyed by its type and will include a href for the URL and an optional method for links that cannot be followed using GET.
 
         '
-      example: created_at
-    PerPage:
-      name: per_page
-      in: query
-      required: false
-      schema:
-        type: integer
-      description: Number of results per page, valid values are 1 through 5000
-      example: 50
   securitySchemes:
     oauth:
       type: oauth2

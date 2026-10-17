@@ -36,39 +36,16 @@ paths:
               schema:
                 $ref: '#/components/schemas/Catalog'
 components:
+  parameters:
+    APIVersion:
+      name: X-Broker-API-Version
+      in: header
+      description: version number of the Service Broker API that the Platform will use
+      required: true
+      schema:
+        type: string
+        default: '2.13'
   schemas:
-    MaintenanceInfo:
-      type: object
-      required:
-      - version
-      properties:
-        version:
-          type: string
-        description:
-          type: string
-    Schemas:
-      type: object
-      properties:
-        service_instance:
-          $ref: '#/components/schemas/ServiceInstanceSchema'
-        service_binding:
-          $ref: '#/components/schemas/ServiceBindingSchema'
-    Metadata:
-      description: See [Service Metadata Conventions](https://github.com/openservicebrokerapi/servicebroker/blob/master/profile.md#service-metadata) for more details.
-      type: object
-    ServiceInstanceSchema:
-      type: object
-      properties:
-        create:
-          type: object
-          properties:
-            parameters:
-              type: object
-        update:
-          type: object
-          properties:
-            parameters:
-              type: object
     DashboardClient:
       type: object
       properties:
@@ -78,6 +55,15 @@ components:
           type: string
         redirect_uri:
           type: string
+    MaintenanceInfo:
+      type: object
+      required:
+      - version
+      properties:
+        version:
+          type: string
+        description:
+          type: string
     Catalog:
       type: object
       properties:
@@ -85,14 +71,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Service'
-    ServiceBindingSchema:
-      type: object
-      properties:
-        create:
-          type: object
-          properties:
-            parameters:
-              type: object
     Plan:
       type: object
       required:
@@ -124,6 +102,24 @@ components:
         binding_rotatable:
           type: boolean
           default: false
+    Schemas:
+      type: object
+      properties:
+        service_instance:
+          $ref: '#/components/schemas/ServiceInstanceSchema'
+        service_binding:
+          $ref: '#/components/schemas/ServiceBindingSchema'
+    ServiceBindingSchema:
+      type: object
+      properties:
+        create:
+          type: object
+          properties:
+            parameters:
+              type: object
+    Metadata:
+      description: See [Service Metadata Conventions](https://github.com/openservicebrokerapi/servicebroker/blob/master/profile.md#service-metadata) for more details.
+      type: object
     Service:
       type: object
       required:
@@ -165,15 +161,19 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Plan'
-  parameters:
-    APIVersion:
-      name: X-Broker-API-Version
-      in: header
-      description: version number of the Service Broker API that the Platform will use
-      required: true
-      schema:
-        type: string
-        default: '2.13'
+    ServiceInstanceSchema:
+      type: object
+      properties:
+        create:
+          type: object
+          properties:
+            parameters:
+              type: object
+        update:
+          type: object
+          properties:
+            parameters:
+              type: object
   securitySchemes:
     basicAuth:
       type: http

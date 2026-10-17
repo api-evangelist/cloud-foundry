@@ -195,6 +195,18 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Errors'
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    ServiceUnavailable:
+      description: Service Unavailable
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
     UnprocessableEntity:
       description: Unprocessable Entity
       content:
@@ -207,18 +219,6 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Errors'
-    Forbidden:
-      description: Forbidden
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    BadGateway:
-      description: Bad Gateway
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
     BadRequest:
       description: Bad Request
       content:
@@ -228,20 +228,20 @@ components:
         text/html:
           schema:
             type: string
+    BadGateway:
+      description: Bad Gateway
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
     '500':
       description: Internal Server Error
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    Unauthorized:
-      description: Unauthorized
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    ServiceUnavailable:
-      description: Service Unavailable
       content:
         application/json:
           schema:
@@ -259,6 +259,18 @@ components:
         title:
           type: string
           description: Name of the error
+    Errors:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/Error'
+      description: 'An error response will always return a list of error objects. Errors appear on the job resource for asynchronous operations.
+
+        Clients should use the code and title fields for programmatically handling specific errors. The message in the detail field is subject to change over time.
+
+        '
     Link:
       type: object
       properties:
@@ -271,18 +283,6 @@ components:
       required:
       - href
       description: 'Each link is keyed by its type and will include a href for the URL and an optional method for links that cannot be followed using GET.
-
-        '
-    Errors:
-      type: object
-      properties:
-        errors:
-          type: array
-          items:
-            $ref: '#/components/schemas/Error'
-      description: 'An error response will always return a list of error objects. Errors appear on the job resource for asynchronous operations.
-
-        Clients should use the code and title fields for programmatically handling specific errors. The message in the detail field is subject to change over time.
 
         '
   securitySchemes:

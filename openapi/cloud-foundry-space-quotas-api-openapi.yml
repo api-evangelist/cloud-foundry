@@ -467,138 +467,227 @@ paths:
         '422':
           $ref: '#/components/responses/UnprocessableEntity'
 components:
-  parameters:
-    CreatedAts:
-      name: created_ats
-      in: query
-      required: false
-      schema:
-        type: string
-      description: 'Timestamp to filter by. When filtering on equality, several comma-delimited timestamps may be passed. Also supports filtering with [relational operators](#relational-operators).
-
-        '
-      example: '2021-01-01T00:00:00Z'
-    Page:
-      name: page
-      in: query
-      required: false
-      schema:
-        type: integer
-      description: Page to display; valid values are integers >= 1
-      example: 1
-    Guid:
-      name: guid
-      in: path
-      required: true
-      schema:
-        type: string
-        format: uuid
-      description: The unique identifier for the resource
-    PerPage:
-      name: per_page
-      in: query
-      required: false
-      schema:
-        type: integer
-      description: Number of results per page, valid values are 1 through 5000
-      example: 50
-    OrderBy:
-      name: order_by
-      in: query
-      required: false
-      schema:
-        type: string
-      description: 'Value to sort by. Defaults to ascending; prepend with `-` to sort descending.
-
-        '
-      example: created_at
-    UpdatedAts:
-      name: updated_ats
-      in: query
-      required: false
-      schema:
-        type: string
-      description: 'Timestamp to filter by. When filtering on equality, several comma-delimited timestamps may be passed. Also supports filtering with [relational operators](#relational-operators).
-
-        '
-      example: '2021-01-01T00:00:00Z'
+  requestBodies:
+    SpaceQuotaCreate:
+      description: Space quota to create
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+                description: Name of the space quota
+              apps:
+                type: object
+                properties:
+                  total_memory_in_mb:
+                    type: integer
+                    description: Total memory allowed for all apps in MB
+                  per_process_memory_in_mb:
+                    type: integer
+                    description: Maximum memory per process in MB
+                  log_rate_limit_in_bytes_per_second:
+                    type: integer
+                    description: Log rate limit in bytes per second
+                  total_instances:
+                    type: integer
+                    description: Total number of app instances allowed
+                  per_app_tasks:
+                    type: integer
+                    description: Maximum number of tasks per app
+                description: App limits for the space quota
+              services:
+                type: object
+                properties:
+                  paid_services_allowed:
+                    type: boolean
+                    description: Whether paid services are allowed
+                  total_service_instances:
+                    type: integer
+                    description: Total number of service instances allowed
+                  total_service_keys:
+                    type: integer
+                    description: Total number of service keys allowed
+                description: Service limits for the space quota
+              routes:
+                type: object
+                properties:
+                  total_routes:
+                    type: integer
+                    description: Total number of routes allowed
+                  total_reserved_ports:
+                    type: integer
+                    description: Total number of reserved ports allowed
+                description: Route limits for the space quota
+              relationships:
+                type: object
+                properties:
+                  organization:
+                    $ref: '#/components/schemas/RelationshipToOne'
+                  spaces:
+                    $ref: '#/components/schemas/RelationshipToMany'
+                description: Relationships for the space quota
+              metadata:
+                $ref: '#/components/schemas/Metadata'
+            required:
+            - name
+          examples:
+            default:
+              summary: default
+              value:
+                name: production
+                relationships:
+                  organization:
+                    data:
+                      guid: 123e4567-e89b-12d3-a456-426614174000
+    SpaceQuotaUpdate:
+      description: Space quota to update
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+                description: Name of the space quota
+              apps:
+                type: object
+                properties:
+                  total_memory_in_mb:
+                    type: integer
+                    description: Total memory allowed for all apps in MB
+                  per_process_memory_in_mb:
+                    type: integer
+                    description: Maximum memory per process in MB
+                  log_rate_limit_in_bytes_per_second:
+                    type: integer
+                    description: Log rate limit in bytes per second
+                  total_instances:
+                    type: integer
+                    description: Total number of app instances allowed
+                  per_app_tasks:
+                    type: integer
+                    description: Maximum number of tasks per app
+                description: App limits for the space quota
+              services:
+                type: object
+                properties:
+                  paid_services_allowed:
+                    type: boolean
+                    description: Whether paid services are allowed
+                  total_service_instances:
+                    type: integer
+                    description: Total number of service instances allowed
+                  total_service_keys:
+                    type: integer
+                    description: Total number of service keys allowed
+                description: Service limits for the space quota
+              routes:
+                type: object
+                properties:
+                  total_routes:
+                    type: integer
+                    description: Total number of routes allowed
+                  total_reserved_ports:
+                    type: integer
+                    description: Total number of reserved ports allowed
+                description: Route limits for the space quota
+              metadata:
+                $ref: '#/components/schemas/Metadata'
   schemas:
-    Error:
+    SpaceQuota:
       type: object
-      properties:
-        code:
-          type: integer
-          description: A numeric code for this error
-        detail:
-          type: string
-          description: Detailed description of the error
-        title:
-          type: string
-          description: Name of the error
-    Pagination:
-      type: object
-      properties:
-        total_results:
-          type: integer
-          description: The total number of results available
-        total_pages:
-          type: integer
-          description: The total number of pages available
-        first:
-          allOf:
-          - $ref: '#/components/schemas/Link'
-          - description: The first page of results
-        last:
-          allOf:
-          - $ref: '#/components/schemas/Link'
-          - description: The last page of results
-        next:
-          oneOf:
-          - $ref: '#/components/schemas/Link'
-          - type: 'null'
-          description: The next page of results
-        previous:
-          oneOf:
-          - $ref: '#/components/schemas/Link'
-          - type: 'null'
-          description: The previous page of results
-      description: 'Pagination is a technique used to divide a large set of results into smaller, more manageable sets. This allows clients to retrieve results in smaller chunks, reducing the amount of data transferred and improving performance.
-
-        The pagination object is a JSON object that contains information about the pagination state of the results. It includes the total number of results available, the total number of pages available, and links to the first, last, next, and previous pages of results.
-
-        '
-    RelationshipToOne:
-      type: object
-      properties:
-        data:
-          type:
-          - object
-          - 'null'
-          $ref: '#/components/schemas/Relationship'
-        links:
-          type: object
-          properties:
-            self:
-              $ref: '#/components/schemas/Link'
-            related:
-              $ref: '#/components/schemas/Link'
-      description: 'Some relationships relate a resource to exactly one other resource. For example an app can belong to only one space.
-
-        '
-    Link:
-      type: object
-      properties:
-        href:
-          type: string
-          description: The URL of the link
-        method:
-          type: string
-          description: An optional field containing the HTTP method to be used when following the URL
-      required:
-      - href
-      description: 'Each link is keyed by its type and will include a href for the URL and an optional method for links that cannot be followed using GET.
-
-        '
+      allOf:
+      - $ref: '#/components/schemas/BaseSchema'
+      - properties:
+          name:
+            type: string
+            description: Name of the space quota
+          apps:
+            type: object
+            properties:
+              total_memory_in_mb:
+                type:
+                - integer
+                - 'null'
+                description: Total memory allowed for all apps in MB
+              per_process_memory_in_mb:
+                type:
+                - integer
+                - 'null'
+                description: Maximum memory per process in MB
+              log_rate_limit_in_bytes_per_second:
+                type:
+                - integer
+                - 'null'
+                description: Log rate limit in bytes per second
+              total_instances:
+                type:
+                - integer
+                - 'null'
+                description: Total number of app instances allowed
+              per_app_tasks:
+                type:
+                - integer
+                - 'null'
+                description: Maximum number of tasks per app
+            description: App limits for the space quota
+          services:
+            type: object
+            properties:
+              paid_services_allowed:
+                type: boolean
+                description: Whether paid services are allowed
+              total_service_instances:
+                type:
+                - integer
+                - 'null'
+                description: Total number of service instances allowed
+              total_service_keys:
+                type:
+                - integer
+                - 'null'
+                description: Total number of service keys allowed
+            description: Service limits for the space quota
+          routes:
+            type: object
+            properties:
+              total_routes:
+                type:
+                - integer
+                - 'null'
+                description: Total number of routes allowed
+              total_reserved_ports:
+                type:
+                - integer
+                - 'null'
+                description: Total number of reserved ports allowed
+            description: Route limits for the space quota
+          relationships:
+            type: object
+            properties:
+              organization:
+                $ref: '#/components/schemas/RelationshipToOne'
+              spaces:
+                $ref: '#/components/schemas/RelationshipToMany'
+            description: Relationships for the space quota
+          links:
+            type: object
+            properties:
+              self:
+                $ref: '#/components/schemas/Link'
+              organization:
+                $ref: '#/components/schemas/Link'
+          metadata:
+            $ref: '#/components/schemas/Metadata'
+        required:
+        - name
+        - apps
+        - services
+        - routes
+        - relationships
+        - links
     Metadata:
       type: object
       properties:
@@ -729,119 +818,6 @@ components:
         Metadata is included in the response body of a request to retrieve a resource.
 
         '
-    Errors:
-      type: object
-      properties:
-        errors:
-          type: array
-          items:
-            $ref: '#/components/schemas/Error'
-      description: 'An error response will always return a list of error objects. Errors appear on the job resource for asynchronous operations.
-
-        Clients should use the code and title fields for programmatically handling specific errors. The message in the detail field is subject to change over time.
-
-        '
-    SpaceQuotaList:
-      type: object
-      properties:
-        pagination:
-          $ref: '#/components/schemas/Pagination'
-        resources:
-          type: array
-          items:
-            $ref: '#/components/schemas/SpaceQuota'
-    SpaceQuota:
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/BaseSchema'
-      - properties:
-          name:
-            type: string
-            description: Name of the space quota
-          apps:
-            type: object
-            properties:
-              total_memory_in_mb:
-                type:
-                - integer
-                - 'null'
-                description: Total memory allowed for all apps in MB
-              per_process_memory_in_mb:
-                type:
-                - integer
-                - 'null'
-                description: Maximum memory per process in MB
-              log_rate_limit_in_bytes_per_second:
-                type:
-                - integer
-                - 'null'
-                description: Log rate limit in bytes per second
-              total_instances:
-                type:
-                - integer
-                - 'null'
-                description: Total number of app instances allowed
-              per_app_tasks:
-                type:
-                - integer
-                - 'null'
-                description: Maximum number of tasks per app
-            description: App limits for the space quota
-          services:
-            type: object
-            properties:
-              paid_services_allowed:
-                type: boolean
-                description: Whether paid services are allowed
-              total_service_instances:
-                type:
-                - integer
-                - 'null'
-                description: Total number of service instances allowed
-              total_service_keys:
-                type:
-                - integer
-                - 'null'
-                description: Total number of service keys allowed
-            description: Service limits for the space quota
-          routes:
-            type: object
-            properties:
-              total_routes:
-                type:
-                - integer
-                - 'null'
-                description: Total number of routes allowed
-              total_reserved_ports:
-                type:
-                - integer
-                - 'null'
-                description: Total number of reserved ports allowed
-            description: Route limits for the space quota
-          relationships:
-            type: object
-            properties:
-              organization:
-                $ref: '#/components/schemas/RelationshipToOne'
-              spaces:
-                $ref: '#/components/schemas/RelationshipToMany'
-            description: Relationships for the space quota
-          links:
-            type: object
-            properties:
-              self:
-                $ref: '#/components/schemas/Link'
-              organization:
-                $ref: '#/components/schemas/Link'
-          metadata:
-            $ref: '#/components/schemas/Metadata'
-        required:
-        - name
-        - apps
-        - services
-        - routes
-        - relationships
-        - links
     RelationshipToMany:
       type: object
       properties:
@@ -859,6 +835,45 @@ components:
       description: 'Some relationships relate a resource to several other resources. For example, an isolation segment can be entitled to multiple organizations.
 
         '
+    SpaceQuotaList:
+      type: object
+      properties:
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+        resources:
+          type: array
+          items:
+            $ref: '#/components/schemas/SpaceQuota'
+    RelationshipToOne:
+      type: object
+      properties:
+        data:
+          type:
+          - object
+          - 'null'
+          $ref: '#/components/schemas/Relationship'
+        links:
+          type: object
+          properties:
+            self:
+              $ref: '#/components/schemas/Link'
+            related:
+              $ref: '#/components/schemas/Link'
+      description: 'Some relationships relate a resource to exactly one other resource. For example an app can belong to only one space.
+
+        '
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: A numeric code for this error
+        detail:
+          type: string
+          description: Detailed description of the error
+        title:
+          type: string
+          description: Name of the error
     BaseSchema:
       type: object
       properties:
@@ -881,6 +896,18 @@ components:
         See Resources and Experimental Resources for specific resources.
 
         '
+    Errors:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/Error'
+      description: 'An error response will always return a list of error objects. Errors appear on the job resource for asynchronous operations.
+
+        Clients should use the code and title fields for programmatically handling specific errors. The message in the detail field is subject to change over time.
+
+        '
     Relationship:
       type: object
       properties:
@@ -888,13 +915,108 @@ components:
           type: string
           format: uuid
           description: The GUID of the resource
+    Pagination:
+      type: object
+      properties:
+        total_results:
+          type: integer
+          description: The total number of results available
+        total_pages:
+          type: integer
+          description: The total number of pages available
+        first:
+          allOf:
+          - $ref: '#/components/schemas/Link'
+          - description: The first page of results
+        last:
+          allOf:
+          - $ref: '#/components/schemas/Link'
+          - description: The last page of results
+        next:
+          oneOf:
+          - $ref: '#/components/schemas/Link'
+          - type: 'null'
+          description: The next page of results
+        previous:
+          oneOf:
+          - $ref: '#/components/schemas/Link'
+          - type: 'null'
+          description: The previous page of results
+      description: 'Pagination is a technique used to divide a large set of results into smaller, more manageable sets. This allows clients to retrieve results in smaller chunks, reducing the amount of data transferred and improving performance.
+
+        The pagination object is a JSON object that contains information about the pagination state of the results. It includes the total number of results available, the total number of pages available, and links to the first, last, next, and previous pages of results.
+
+        '
+    Link:
+      type: object
+      properties:
+        href:
+          type: string
+          description: The URL of the link
+        method:
+          type: string
+          description: An optional field containing the HTTP method to be used when following the URL
+      required:
+      - href
+      description: 'Each link is keyed by its type and will include a href for the URL and an optional method for links that cannot be followed using GET.
+
+        '
+  parameters:
+    Guid:
+      name: guid
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: The unique identifier for the resource
+    OrderBy:
+      name: order_by
+      in: query
+      required: false
+      schema:
+        type: string
+      description: 'Value to sort by. Defaults to ascending; prepend with `-` to sort descending.
+
+        '
+      example: created_at
+    Page:
+      name: page
+      in: query
+      required: false
+      schema:
+        type: integer
+      description: Page to display; valid values are integers >= 1
+      example: 1
+    UpdatedAts:
+      name: updated_ats
+      in: query
+      required: false
+      schema:
+        type: string
+      description: 'Timestamp to filter by. When filtering on equality, several comma-delimited timestamps may be passed. Also supports filtering with [relational operators](#relational-operators).
+
+        '
+      example: '2021-01-01T00:00:00Z'
+    PerPage:
+      name: per_page
+      in: query
+      required: false
+      schema:
+        type: integer
+      description: Number of results per page, valid values are 1 through 5000
+      example: 50
+    CreatedAts:
+      name: created_ats
+      in: query
+      required: false
+      schema:
+        type: string
+      description: 'Timestamp to filter by. When filtering on equality, several comma-delimited timestamps may be passed. Also supports filtering with [relational operators](#relational-operators).
+
+        '
+      example: '2021-01-01T00:00:00Z'
   responses:
-    Forbidden:
-      description: Forbidden
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
     BadGateway:
       description: Bad Gateway
       content:
@@ -903,24 +1025,6 @@ components:
             $ref: '#/components/schemas/Error'
     Unauthorized:
       description: Unauthorized
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    ServiceUnavailable:
-      description: Service Unavailable
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    '500':
-      description: Internal Server Error
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    NotFound:
-      description: Not Found
       content:
         application/json:
           schema:
@@ -937,6 +1041,24 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Errors'
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    NotFound:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    ServiceUnavailable:
+      description: Service Unavailable
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
     BadRequest:
       description: Bad Request
       content:
@@ -946,134 +1068,12 @@ components:
         text/html:
           schema:
             type: string
-  requestBodies:
-    SpaceQuotaUpdate:
-      description: Space quota to update
+    '500':
+      description: Internal Server Error
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              name:
-                type: string
-                description: Name of the space quota
-              apps:
-                type: object
-                properties:
-                  total_memory_in_mb:
-                    type: integer
-                    description: Total memory allowed for all apps in MB
-                  per_process_memory_in_mb:
-                    type: integer
-                    description: Maximum memory per process in MB
-                  log_rate_limit_in_bytes_per_second:
-                    type: integer
-                    description: Log rate limit in bytes per second
-                  total_instances:
-                    type: integer
-                    description: Total number of app instances allowed
-                  per_app_tasks:
-                    type: integer
-                    description: Maximum number of tasks per app
-                description: App limits for the space quota
-              services:
-                type: object
-                properties:
-                  paid_services_allowed:
-                    type: boolean
-                    description: Whether paid services are allowed
-                  total_service_instances:
-                    type: integer
-                    description: Total number of service instances allowed
-                  total_service_keys:
-                    type: integer
-                    description: Total number of service keys allowed
-                description: Service limits for the space quota
-              routes:
-                type: object
-                properties:
-                  total_routes:
-                    type: integer
-                    description: Total number of routes allowed
-                  total_reserved_ports:
-                    type: integer
-                    description: Total number of reserved ports allowed
-                description: Route limits for the space quota
-              metadata:
-                $ref: '#/components/schemas/Metadata'
-    SpaceQuotaCreate:
-      description: Space quota to create
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              name:
-                type: string
-                description: Name of the space quota
-              apps:
-                type: object
-                properties:
-                  total_memory_in_mb:
-                    type: integer
-                    description: Total memory allowed for all apps in MB
-                  per_process_memory_in_mb:
-                    type: integer
-                    description: Maximum memory per process in MB
-                  log_rate_limit_in_bytes_per_second:
-                    type: integer
-                    description: Log rate limit in bytes per second
-                  total_instances:
-                    type: integer
-                    description: Total number of app instances allowed
-                  per_app_tasks:
-                    type: integer
-                    description: Maximum number of tasks per app
-                description: App limits for the space quota
-              services:
-                type: object
-                properties:
-                  paid_services_allowed:
-                    type: boolean
-                    description: Whether paid services are allowed
-                  total_service_instances:
-                    type: integer
-                    description: Total number of service instances allowed
-                  total_service_keys:
-                    type: integer
-                    description: Total number of service keys allowed
-                description: Service limits for the space quota
-              routes:
-                type: object
-                properties:
-                  total_routes:
-                    type: integer
-                    description: Total number of routes allowed
-                  total_reserved_ports:
-                    type: integer
-                    description: Total number of reserved ports allowed
-                description: Route limits for the space quota
-              relationships:
-                type: object
-                properties:
-                  organization:
-                    $ref: '#/components/schemas/RelationshipToOne'
-                  spaces:
-                    $ref: '#/components/schemas/RelationshipToMany'
-                description: Relationships for the space quota
-              metadata:
-                $ref: '#/components/schemas/Metadata'
-            required:
-            - name
-          examples:
-            default:
-              summary: default
-              value:
-                name: production
-                relationships:
-                  organization:
-                    data:
-                      guid: 123e4567-e89b-12d3-a456-426614174000
+            $ref: '#/components/schemas/Errors'
   securitySchemes:
     oauth:
       type: oauth2

@@ -560,144 +560,42 @@ paths:
         '422':
           $ref: '#/components/responses/UnprocessableEntity'
 components:
-  parameters:
-    CreatedAts:
-      name: created_ats
-      in: query
-      required: false
-      schema:
-        type: string
-      description: 'Timestamp to filter by. When filtering on equality, several comma-delimited timestamps may be passed. Also supports filtering with [relational operators](#relational-operators).
-
-        '
-      example: '2021-01-01T00:00:00Z'
-    Page:
-      name: page
-      in: query
-      required: false
-      schema:
-        type: integer
-      description: Page to display; valid values are integers >= 1
-      example: 1
-    Guid:
-      name: guid
-      in: path
-      required: true
-      schema:
-        type: string
-        format: uuid
-      description: The unique identifier for the resource
-    PerPage:
-      name: per_page
-      in: query
-      required: false
-      schema:
-        type: integer
-      description: Number of results per page, valid values are 1 through 5000
-      example: 50
-    OrderBy:
-      name: order_by
-      in: query
-      required: false
-      schema:
-        type: string
-      description: 'Value to sort by. Defaults to ascending; prepend with `-` to sort descending.
-
-        '
-      example: created_at
-    LabelSelector:
-      name: label_selector
-      in: query
-      description: A query string containing a list of [label selector](#labels-and-selectors) requirements
-      required: false
-      schema:
-        type: string
-      example: environment=production
-    UpdatedAts:
-      name: updated_ats
-      in: query
-      required: false
-      schema:
-        type: string
-      description: 'Timestamp to filter by. When filtering on equality, several comma-delimited timestamps may be passed. Also supports filtering with [relational operators](#relational-operators).
-
-        '
-      example: '2021-01-01T00:00:00Z'
   schemas:
-    Error:
+    Organization:
       type: object
-      properties:
-        code:
-          type: integer
-          description: A numeric code for this error
-        detail:
-          type: string
-          description: Detailed description of the error
-        title:
-          type: string
-          description: Name of the error
-    Pagination:
-      type: object
-      properties:
-        total_results:
-          type: integer
-          description: The total number of results available
-        total_pages:
-          type: integer
-          description: The total number of pages available
-        first:
-          allOf:
-          - $ref: '#/components/schemas/Link'
-          - description: The first page of results
-        last:
-          allOf:
-          - $ref: '#/components/schemas/Link'
-          - description: The last page of results
-        next:
-          oneOf:
-          - $ref: '#/components/schemas/Link'
-          - type: 'null'
-          description: The next page of results
-        previous:
-          oneOf:
-          - $ref: '#/components/schemas/Link'
-          - type: 'null'
-          description: The previous page of results
-      description: 'Pagination is a technique used to divide a large set of results into smaller, more manageable sets. This allows clients to retrieve results in smaller chunks, reducing the amount of data transferred and improving performance.
-
-        The pagination object is a JSON object that contains information about the pagination state of the results. It includes the total number of results available, the total number of pages available, and links to the first, last, next, and previous pages of results.
-
-        '
-    RelationshipToOne:
-      type: object
-      properties:
-        data:
-          type:
-          - object
-          - 'null'
-          $ref: '#/components/schemas/Relationship'
-        links:
-          type: object
-          properties:
-            self:
-              $ref: '#/components/schemas/Link'
-            related:
-              $ref: '#/components/schemas/Link'
-      description: 'Some relationships relate a resource to exactly one other resource. For example an app can belong to only one space.
-
-        '
-    Link:
-      type: object
-      properties:
-        href:
-          type: string
-          description: The URL of the link
-        method:
-          type: string
-          description: An optional field containing the HTTP method to be used when following the URL
-      required:
-      - href
-      description: 'Each link is keyed by its type and will include a href for the URL and an optional method for links that cannot be followed using GET.
+      allOf:
+      - $ref: '#/components/schemas/BaseSchema'
+      - properties:
+          name:
+            type: string
+            description: Name of the organization
+          suspended:
+            type: boolean
+            description: Whether an organization is suspended or not; non-admins will be blocked from creating, updating, or deleting resources in a suspended organization
+          relationships:
+            type: object
+            properties:
+              quota:
+                $ref: '#/components/schemas/RelationshipToOne'
+            description: The quota applied to the organization
+          metadata:
+            $ref: '#/components/schemas/Metadata'
+          links:
+            type: object
+            properties:
+              self:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get this organization
+              domains:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get the domains for this organization
+              quota:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get the quota for this organization
+              default_domain:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get the default domain for this organization
+      description: 'An org is a development account that an individual or multiple collaborators can own and use. All collaborators access an org with user accounts. Collaborators in an org share a resource quota plan, applications, services availability, and custom domains.
 
         '
     Metadata:
@@ -830,25 +728,6 @@ components:
         Metadata is included in the response body of a request to retrieve a resource.
 
         '
-    Relationships:
-      type: object
-      description: 'Relationships represent associations between resources. When relationships are mutable, they can be used to create, read, update, and delete these associations. An app’s relationship to its current droplet is mutable, but an app’s relationship to its space is not.
-
-
-        Relationships do not affect the fundamental properties of a resource, but may affect their behavior and permissions logic. Relationships are tied to the lifecycles of the associated resources and will be removed if either of the associated resources are deleted. For example, if a user is removed from an organization, both the user and the organization persist, but the relationship between them does not.
-
-
-        Not all resources implement every relationship operation demonstrated in the examples below. See the docs for each resource to see how it interacts with its relationships.
-
-
-        Endpoints that return relationship data list this information under the relationships key.
-
-
-        The relationship object
-
-        The relationship object is a key-value pair that uniquely identifies a resource. In practice this is almost always the guid of a resource.
-
-        '
     OrganizationList:
       type: object
       properties:
@@ -859,64 +738,36 @@ components:
           items:
             $ref: '#/components/schemas/Organization'
       description: A paginated list of organizations
-    Errors:
+    RelationshipToOne:
       type: object
       properties:
-        errors:
-          type: array
-          items:
-            $ref: '#/components/schemas/Error'
-      description: 'An error response will always return a list of error objects. Errors appear on the job resource for asynchronous operations.
-
-        Clients should use the code and title fields for programmatically handling specific errors. The message in the detail field is subject to change over time.
-
-        '
-    Organization:
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/BaseSchema'
-      - properties:
-          name:
-            type: string
-            description: Name of the organization
-          suspended:
-            type: boolean
-            description: Whether an organization is suspended or not; non-admins will be blocked from creating, updating, or deleting resources in a suspended organization
-          relationships:
-            type: object
-            properties:
-              quota:
-                $ref: '#/components/schemas/RelationshipToOne'
-            description: The quota applied to the organization
-          metadata:
-            $ref: '#/components/schemas/Metadata'
-          links:
-            type: object
-            properties:
-              self:
-                $ref: '#/components/schemas/Link'
-                description: The URL to get this organization
-              domains:
-                $ref: '#/components/schemas/Link'
-                description: The URL to get the domains for this organization
-              quota:
-                $ref: '#/components/schemas/Link'
-                description: The URL to get the quota for this organization
-              default_domain:
-                $ref: '#/components/schemas/Link'
-                description: The URL to get the default domain for this organization
-      description: 'An org is a development account that an individual or multiple collaborators can own and use. All collaborators access an org with user accounts. Collaborators in an org share a resource quota plan, applications, services availability, and custom domains.
+        data:
+          type:
+          - object
+          - 'null'
+          $ref: '#/components/schemas/Relationship'
+        links:
+          type: object
+          properties:
+            self:
+              $ref: '#/components/schemas/Link'
+            related:
+              $ref: '#/components/schemas/Link'
+      description: 'Some relationships relate a resource to exactly one other resource. For example an app can belong to only one space.
 
         '
-    UserList:
+    Error:
       type: object
       properties:
-        pagination:
-          $ref: '#/components/schemas/Pagination'
-        resources:
-          type: array
-          items:
-            $ref: '#/components/schemas/User'
+        code:
+          type: integer
+          description: A numeric code for this error
+        detail:
+          type: string
+          description: Detailed description of the error
+        title:
+          type: string
+          description: Name of the error
     BaseSchema:
       type: object
       properties:
@@ -937,6 +788,79 @@ components:
         A resource consists of several required resource fields and other attributes specific to the resource.
 
         See Resources and Experimental Resources for specific resources.
+
+        '
+    Errors:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/Error'
+      description: 'An error response will always return a list of error objects. Errors appear on the job resource for asynchronous operations.
+
+        Clients should use the code and title fields for programmatically handling specific errors. The message in the detail field is subject to change over time.
+
+        '
+    User:
+      type: object
+      properties:
+        guid:
+          type: string
+          description: Unique identifier for the user, matching either a UAA user id or client id. A client id may not be a uuid.
+        created_at:
+          type: string
+          format: date-time
+          description: The ISO8601 compatible date and time when resource was created
+        updated_at:
+          type: string
+          format: date-time
+          description: The ISO8601 compatible date and time when resource was last updated
+        username:
+          type:
+          - string
+          - 'null'
+          description: The username of the user
+        presentation_name:
+          type: string
+          description: The presentation name of the user
+        origin:
+          type:
+          - string
+          - 'null'
+          description: The origin of the user
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+        links:
+          type: object
+          properties:
+            self:
+              $ref: '#/components/schemas/Link'
+              description: The URL to get this user
+    Relationship:
+      type: object
+      properties:
+        guid:
+          type: string
+          format: uuid
+          description: The GUID of the resource
+    Relationships:
+      type: object
+      description: 'Relationships represent associations between resources. When relationships are mutable, they can be used to create, read, update, and delete these associations. An app’s relationship to its current droplet is mutable, but an app’s relationship to its space is not.
+
+
+        Relationships do not affect the fundamental properties of a resource, but may affect their behavior and permissions logic. Relationships are tied to the lifecycles of the associated resources and will be removed if either of the associated resources are deleted. For example, if a user is removed from an organization, both the user and the organization persist, but the relationship between them does not.
+
+
+        Not all resources implement every relationship operation demonstrated in the examples below. See the docs for each resource to see how it interacts with its relationships.
+
+
+        Endpoints that return relationship data list this information under the relationships key.
+
+
+        The relationship object
+
+        The relationship object is a key-value pair that uniquely identifies a resource. In practice this is almost always the guid of a resource.
 
         '
     Domain:
@@ -992,129 +916,62 @@ components:
       description: 'A domain is a fully qualified domain name that is used for application routes. A domain can be scoped to an organization, meaning it can be used to create routes for spaces inside that organization, or be left unscoped to allow all organizations access.
 
         '
-    User:
+    UserList:
       type: object
       properties:
-        guid:
-          type: string
-          description: Unique identifier for the user, matching either a UAA user id or client id. A client id may not be a uuid.
-        created_at:
-          type: string
-          format: date-time
-          description: The ISO8601 compatible date and time when resource was created
-        updated_at:
-          type: string
-          format: date-time
-          description: The ISO8601 compatible date and time when resource was last updated
-        username:
-          type:
-          - string
-          - 'null'
-          description: The username of the user
-        presentation_name:
-          type: string
-          description: The presentation name of the user
-        origin:
-          type:
-          - string
-          - 'null'
-          description: The origin of the user
-        metadata:
-          $ref: '#/components/schemas/Metadata'
-        links:
-          type: object
-          properties:
-            self:
-              $ref: '#/components/schemas/Link'
-              description: The URL to get this user
-    Relationship:
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+        resources:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+    Link:
       type: object
       properties:
-        guid:
+        href:
           type: string
-          format: uuid
-          description: The GUID of the resource
-  responses:
-    Forbidden:
-      description: Forbidden
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    BadGateway:
-      description: Bad Gateway
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-    Unauthorized:
-      description: Unauthorized
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    ServiceUnavailable:
-      description: Service Unavailable
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    '500':
-      description: Internal Server Error
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    NotFound:
-      description: Not Found
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    UnprocessableEntity:
-      description: Unprocessable Entity
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    Conflict:
-      description: Conflict
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    BadRequest:
-      description: Bad Request
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-        text/html:
-          schema:
-            type: string
+          description: The URL of the link
+        method:
+          type: string
+          description: An optional field containing the HTTP method to be used when following the URL
+      required:
+      - href
+      description: 'Each link is keyed by its type and will include a href for the URL and an optional method for links that cannot be followed using GET.
+
+        '
+    Pagination:
+      type: object
+      properties:
+        total_results:
+          type: integer
+          description: The total number of results available
+        total_pages:
+          type: integer
+          description: The total number of pages available
+        first:
+          allOf:
+          - $ref: '#/components/schemas/Link'
+          - description: The first page of results
+        last:
+          allOf:
+          - $ref: '#/components/schemas/Link'
+          - description: The last page of results
+        next:
+          oneOf:
+          - $ref: '#/components/schemas/Link'
+          - type: 'null'
+          description: The next page of results
+        previous:
+          oneOf:
+          - $ref: '#/components/schemas/Link'
+          - type: 'null'
+          description: The previous page of results
+      description: 'Pagination is a technique used to divide a large set of results into smaller, more manageable sets. This allows clients to retrieve results in smaller chunks, reducing the amount of data transferred and improving performance.
+
+        The pagination object is a JSON object that contains information about the pagination state of the results. It includes the total number of results available, the total number of pages available, and links to the first, last, next, and previous pages of results.
+
+        '
   requestBodies:
-    OrganizationUpdateRequestBody:
-      description: Organization object that needs to be updated
-      required: true
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              name:
-                type: string
-                description: Organization name
-              suspended:
-                type: boolean
-                description: Whether an organization is suspended or not
-              metadata:
-                $ref: '#/components/schemas/Metadata'
-            description: Request schema for updating an organization
-          examples:
-            default:
-              summary: default
-              value:
-                name: my-organization
     OrganizationCreateRequestBody:
       description: Organization object that needs to be created
       required: true
@@ -1139,6 +996,149 @@ components:
               summary: default
               value:
                 name: my-organization
+    OrganizationUpdateRequestBody:
+      description: Organization object that needs to be updated
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+                description: Organization name
+              suspended:
+                type: boolean
+                description: Whether an organization is suspended or not
+              metadata:
+                $ref: '#/components/schemas/Metadata'
+            description: Request schema for updating an organization
+          examples:
+            default:
+              summary: default
+              value:
+                name: my-organization
+  parameters:
+    Guid:
+      name: guid
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: The unique identifier for the resource
+    OrderBy:
+      name: order_by
+      in: query
+      required: false
+      schema:
+        type: string
+      description: 'Value to sort by. Defaults to ascending; prepend with `-` to sort descending.
+
+        '
+      example: created_at
+    Page:
+      name: page
+      in: query
+      required: false
+      schema:
+        type: integer
+      description: Page to display; valid values are integers >= 1
+      example: 1
+    LabelSelector:
+      name: label_selector
+      in: query
+      description: A query string containing a list of [label selector](#labels-and-selectors) requirements
+      required: false
+      schema:
+        type: string
+      example: environment=production
+    PerPage:
+      name: per_page
+      in: query
+      required: false
+      schema:
+        type: integer
+      description: Number of results per page, valid values are 1 through 5000
+      example: 50
+    CreatedAts:
+      name: created_ats
+      in: query
+      required: false
+      schema:
+        type: string
+      description: 'Timestamp to filter by. When filtering on equality, several comma-delimited timestamps may be passed. Also supports filtering with [relational operators](#relational-operators).
+
+        '
+      example: '2021-01-01T00:00:00Z'
+    UpdatedAts:
+      name: updated_ats
+      in: query
+      required: false
+      schema:
+        type: string
+      description: 'Timestamp to filter by. When filtering on equality, several comma-delimited timestamps may be passed. Also supports filtering with [relational operators](#relational-operators).
+
+        '
+      example: '2021-01-01T00:00:00Z'
+  responses:
+    BadGateway:
+      description: Bad Gateway
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    UnprocessableEntity:
+      description: Unprocessable Entity
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    Conflict:
+      description: Conflict
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    NotFound:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    ServiceUnavailable:
+      description: Service Unavailable
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    BadRequest:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+        text/html:
+          schema:
+            type: string
+    '500':
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
   securitySchemes:
     oauth:
       type: oauth2

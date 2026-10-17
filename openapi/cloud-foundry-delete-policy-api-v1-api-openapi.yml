@@ -45,6 +45,44 @@ paths:
       x-operation-id-source: derived
 components:
   schemas:
+    Policy:
+      description: Object containing policy and optional configuration
+      type: object
+      required:
+      - instance_min_count
+      - instance_max_count
+      properties:
+        instance_min_count:
+          type: integer
+          format: int64
+          description: minimal number of instance count
+          example: 2
+        instance_max_count:
+          type: integer
+          format: int64
+          description: maximal number of instance count
+          example: 4
+        scaling_rules:
+          type: array
+          items:
+            $ref: '#/components/schemas/ScalingRule'
+        configuration:
+          type: object
+          properties:
+            custom_metrics:
+              type: object
+              properties:
+                metric_submission_strategy:
+                  type: object
+                  properties:
+                    allow_from:
+                      type: string
+                      enum:
+                      - bound_app
+                  required:
+                  - allow_from
+              required:
+              - metric_submission_strategy
     Schedules:
       type: object
       required:
@@ -58,39 +96,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/RecurringSchedule'
-    SpecificDate:
-      type: object
-      required:
-      - start_date_time
-      - end_date_time
-      - instance_min_count
-      - instance_max_count
-      properties:
-        start_date_time:
-          description: the start time of the schedule. Must be a future time
-          type: string
-          pattern: /[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1]) (2[0-3]|[01][0-9]):[0-5][0-9]/
-          example: 2015-01-04T20:00
-        end_date_time:
-          description: the start time of the schedule. Must be a future time
-          type: string
-          pattern: /[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1]) (2[0-3]|[01][0-9]):[0-5][0-9]/
-          example: 2015-01-04T20:00
-        instance_min_count:
-          description: minimal number of instance count for this schedule
-          type: integer
-          format: int64
-          example: 2
-        instance_max_count:
-          description: maximal number of instance count for this schedule
-          type: integer
-          format: int64
-          example: 5
-        instance_min_instance_count:
-          description: the initial minimal number of instance count for this schedule
-          type: integer
-          format: int64
-          example: 3
     ScalingRule:
       type: object
       required:
@@ -144,44 +149,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Schedules'
-    Policy:
-      description: Object containing policy and optional configuration
-      type: object
-      required:
-      - instance_min_count
-      - instance_max_count
-      properties:
-        instance_min_count:
-          type: integer
-          format: int64
-          description: minimal number of instance count
-          example: 2
-        instance_max_count:
-          type: integer
-          format: int64
-          description: maximal number of instance count
-          example: 4
-        scaling_rules:
-          type: array
-          items:
-            $ref: '#/components/schemas/ScalingRule'
-        configuration:
-          type: object
-          properties:
-            custom_metrics:
-              type: object
-              properties:
-                metric_submission_strategy:
-                  type: object
-                  properties:
-                    allow_from:
-                      type: string
-                      enum:
-                      - bound_app
-                  required:
-                  - allow_from
-              required:
-              - metric_submission_strategy
     RecurringSchedule:
       type: object
       required:
@@ -240,6 +207,39 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/SpecificDate'
+    SpecificDate:
+      type: object
+      required:
+      - start_date_time
+      - end_date_time
+      - instance_min_count
+      - instance_max_count
+      properties:
+        start_date_time:
+          description: the start time of the schedule. Must be a future time
+          type: string
+          pattern: /[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1]) (2[0-3]|[01][0-9]):[0-5][0-9]/
+          example: 2015-01-04T20:00
+        end_date_time:
+          description: the start time of the schedule. Must be a future time
+          type: string
+          pattern: /[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1]) (2[0-3]|[01][0-9]):[0-5][0-9]/
+          example: 2015-01-04T20:00
+        instance_min_count:
+          description: minimal number of instance count for this schedule
+          type: integer
+          format: int64
+          example: 2
+        instance_max_count:
+          description: maximal number of instance count for this schedule
+          type: integer
+          format: int64
+          example: 5
+        instance_min_instance_count:
+          description: the initial minimal number of instance count for this schedule
+          type: integer
+          format: int64
+          example: 3
   securitySchemes:
     bearerAuth:
       type: http

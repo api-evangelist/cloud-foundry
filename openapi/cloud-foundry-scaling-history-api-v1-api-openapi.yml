@@ -104,10 +104,16 @@ paths:
       x-operation-id-source: derived
 components:
   schemas:
-    HistorySuccessEntry:
-      description: Description of a successful scaling event event in history.
+    HistoryErrorEntry:
+      description: Description of a failed scaling even in history.
       type: object
-      properties: {}
+      properties:
+        error:
+          type: string
+          description: 'In case the scaling failed, the reason is provided in this field.
+
+            '
+          example: failed to compute new app instances
     History:
       description: Object containing scaling history.
       type: object
@@ -137,16 +143,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/HistoryEntry'
-    HistoryErrorEntry:
-      description: Description of a failed scaling even in history.
-      type: object
-      properties:
-        error:
-          type: string
-          description: 'In case the scaling failed, the reason is provided in this field.
-
-            '
-          example: failed to compute new app instances
     HistoryEntry:
       description: Properties common for each entry in the scaling history.
       type: object
@@ -200,6 +196,10 @@ components:
           type: string
           description: Textual information about the scaling event.
           example: app
+    HistorySuccessEntry:
+      description: Description of a successful scaling event event in history.
+      type: object
+      properties: {}
     HistoryIgnoreEntry:
       description: Description of an ignored scaling event in history.
       type: object

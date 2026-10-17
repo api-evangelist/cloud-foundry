@@ -203,24 +203,6 @@ paths:
           $ref: '#/components/responses/ServiceUnavailable'
 components:
   parameters:
-    CreatedAts:
-      name: created_ats
-      in: query
-      required: false
-      schema:
-        type: string
-      description: 'Timestamp to filter by. When filtering on equality, several comma-delimited timestamps may be passed. Also supports filtering with [relational operators](#relational-operators).
-
-        '
-      example: '2021-01-01T00:00:00Z'
-    Page:
-      name: page
-      in: query
-      required: false
-      schema:
-        type: integer
-      description: Page to display; valid values are integers >= 1
-      example: 1
     Guid:
       name: guid
       in: path
@@ -229,14 +211,6 @@ components:
         type: string
         format: uuid
       description: The unique identifier for the resource
-    PerPage:
-      name: per_page
-      in: query
-      required: false
-      schema:
-        type: integer
-      description: Number of results per page, valid values are 1 through 5000
-      example: 50
     OrderBy:
       name: order_by
       in: query
@@ -247,7 +221,122 @@ components:
 
         '
       example: created_at
+    Page:
+      name: page
+      in: query
+      required: false
+      schema:
+        type: integer
+      description: Page to display; valid values are integers >= 1
+      example: 1
+    PerPage:
+      name: per_page
+      in: query
+      required: false
+      schema:
+        type: integer
+      description: Number of results per page, valid values are 1 through 5000
+      example: 50
+    CreatedAts:
+      name: created_ats
+      in: query
+      required: false
+      schema:
+        type: string
+      description: 'Timestamp to filter by. When filtering on equality, several comma-delimited timestamps may be passed. Also supports filtering with [relational operators](#relational-operators).
+
+        '
+      example: '2021-01-01T00:00:00Z'
+  responses:
+    BadGateway:
+      description: Bad Gateway
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '500':
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    UnprocessableEntity:
+      description: Unprocessable Entity
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    Conflict:
+      description: Conflict
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    NotFound:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    ServiceUnavailable:
+      description: Service Unavailable
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    BadRequest:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+        text/html:
+          schema:
+            type: string
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
   schemas:
+    ServiceUsageEventList:
+      type: object
+      properties:
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+        resources:
+          type: array
+          items:
+            $ref: '#/components/schemas/ServiceUsageEvent'
+    BaseSchema:
+      type: object
+      properties:
+        guid:
+          type: string
+          format: uuid
+          description: The unique identifier for the resource
+        created_at:
+          type: string
+          format: date-time
+          description: The ISO8601 compatible date and time when resource was created
+        updated_at:
+          type: string
+          format: date-time
+          description: The ISO8601 compatible date and time when resource was last updated
+      description: 'A resource represents an individual object within the system, such as an app or a service. It is represented as a JSON object.
+
+        A resource consists of several required resource fields and other attributes specific to the resource.
+
+        See Resources and Experimental Resources for specific resources.
+
+        '
     Error:
       type: object
       properties:
@@ -260,6 +349,29 @@ components:
         title:
           type: string
           description: Name of the error
+    Errors:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/Error'
+      description: 'An error response will always return a list of error objects. Errors appear on the job resource for asynchronous operations.
+
+        Clients should use the code and title fields for programmatically handling specific errors. The message in the detail field is subject to change over time.
+
+        '
+    ServiceUsageEvent:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/BaseSchema'
+      - properties:
+          links:
+            type: object
+            properties:
+              self:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get this service usage event
     Pagination:
       type: object
       properties:
@@ -292,17 +404,6 @@ components:
         The pagination object is a JSON object that contains information about the pagination state of the results. It includes the total number of results available, the total number of pages available, and links to the first, last, next, and previous pages of results.
 
         '
-    ServiceUsageEvent:
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/BaseSchema'
-      - properties:
-          links:
-            type: object
-            properties:
-              self:
-                $ref: '#/components/schemas/Link'
-                description: The URL to get this service usage event
     Link:
       type: object
       properties:
@@ -317,107 +418,6 @@ components:
       description: 'Each link is keyed by its type and will include a href for the URL and an optional method for links that cannot be followed using GET.
 
         '
-    Errors:
-      type: object
-      properties:
-        errors:
-          type: array
-          items:
-            $ref: '#/components/schemas/Error'
-      description: 'An error response will always return a list of error objects. Errors appear on the job resource for asynchronous operations.
-
-        Clients should use the code and title fields for programmatically handling specific errors. The message in the detail field is subject to change over time.
-
-        '
-    ServiceUsageEventList:
-      type: object
-      properties:
-        pagination:
-          $ref: '#/components/schemas/Pagination'
-        resources:
-          type: array
-          items:
-            $ref: '#/components/schemas/ServiceUsageEvent'
-    BaseSchema:
-      type: object
-      properties:
-        guid:
-          type: string
-          format: uuid
-          description: The unique identifier for the resource
-        created_at:
-          type: string
-          format: date-time
-          description: The ISO8601 compatible date and time when resource was created
-        updated_at:
-          type: string
-          format: date-time
-          description: The ISO8601 compatible date and time when resource was last updated
-      description: 'A resource represents an individual object within the system, such as an app or a service. It is represented as a JSON object.
-
-        A resource consists of several required resource fields and other attributes specific to the resource.
-
-        See Resources and Experimental Resources for specific resources.
-
-        '
-  responses:
-    Forbidden:
-      description: Forbidden
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    BadGateway:
-      description: Bad Gateway
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-    Unauthorized:
-      description: Unauthorized
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    ServiceUnavailable:
-      description: Service Unavailable
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    '500':
-      description: Internal Server Error
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    NotFound:
-      description: Not Found
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    UnprocessableEntity:
-      description: Unprocessable Entity
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    Conflict:
-      description: Conflict
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    BadRequest:
-      description: Bad Request
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-        text/html:
-          schema:
-            type: string
   securitySchemes:
     oauth:
       type: oauth2

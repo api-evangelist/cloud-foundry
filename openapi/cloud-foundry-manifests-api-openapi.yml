@@ -62,6 +62,18 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Errors'
+    '500':
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    ServiceUnavailable:
+      description: Service Unavailable
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
     UnprocessableEntity:
       description: Unprocessable Entity
       content:
@@ -74,18 +86,6 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Errors'
-    Forbidden:
-      description: Forbidden
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    BadGateway:
-      description: Bad Gateway
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
     BadRequest:
       description: Bad Request
       content:
@@ -95,20 +95,20 @@ components:
         text/html:
           schema:
             type: string
-    '500':
-      description: Internal Server Error
+    BadGateway:
+      description: Bad Gateway
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Forbidden:
+      description: Forbidden
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Errors'
     Unauthorized:
       description: Unauthorized
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    ServiceUnavailable:
-      description: Service Unavailable
       content:
         application/json:
           schema:

@@ -549,144 +549,42 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 components:
-  parameters:
-    CreatedAts:
-      name: created_ats
-      in: query
-      required: false
-      schema:
-        type: string
-      description: 'Timestamp to filter by. When filtering on equality, several comma-delimited timestamps may be passed. Also supports filtering with [relational operators](#relational-operators).
-
-        '
-      example: '2021-01-01T00:00:00Z'
-    Page:
-      name: page
-      in: query
-      required: false
-      schema:
-        type: integer
-      description: Page to display; valid values are integers >= 1
-      example: 1
-    Guid:
-      name: guid
-      in: path
-      required: true
-      schema:
-        type: string
-        format: uuid
-      description: The unique identifier for the resource
-    PerPage:
-      name: per_page
-      in: query
-      required: false
-      schema:
-        type: integer
-      description: Number of results per page, valid values are 1 through 5000
-      example: 50
-    OrderBy:
-      name: order_by
-      in: query
-      required: false
-      schema:
-        type: string
-      description: 'Value to sort by. Defaults to ascending; prepend with `-` to sort descending.
-
-        '
-      example: created_at
-    LabelSelector:
-      name: label_selector
-      in: query
-      description: A query string containing a list of [label selector](#labels-and-selectors) requirements
-      required: false
-      schema:
-        type: string
-      example: environment=production
-    UpdatedAts:
-      name: updated_ats
-      in: query
-      required: false
-      schema:
-        type: string
-      description: 'Timestamp to filter by. When filtering on equality, several comma-delimited timestamps may be passed. Also supports filtering with [relational operators](#relational-operators).
-
-        '
-      example: '2021-01-01T00:00:00Z'
   schemas:
-    Error:
+    Organization:
       type: object
-      properties:
-        code:
-          type: integer
-          description: A numeric code for this error
-        detail:
-          type: string
-          description: Detailed description of the error
-        title:
-          type: string
-          description: Name of the error
-    Pagination:
-      type: object
-      properties:
-        total_results:
-          type: integer
-          description: The total number of results available
-        total_pages:
-          type: integer
-          description: The total number of pages available
-        first:
-          allOf:
-          - $ref: '#/components/schemas/Link'
-          - description: The first page of results
-        last:
-          allOf:
-          - $ref: '#/components/schemas/Link'
-          - description: The last page of results
-        next:
-          oneOf:
-          - $ref: '#/components/schemas/Link'
-          - type: 'null'
-          description: The next page of results
-        previous:
-          oneOf:
-          - $ref: '#/components/schemas/Link'
-          - type: 'null'
-          description: The previous page of results
-      description: 'Pagination is a technique used to divide a large set of results into smaller, more manageable sets. This allows clients to retrieve results in smaller chunks, reducing the amount of data transferred and improving performance.
-
-        The pagination object is a JSON object that contains information about the pagination state of the results. It includes the total number of results available, the total number of pages available, and links to the first, last, next, and previous pages of results.
-
-        '
-    RelationshipToOne:
-      type: object
-      properties:
-        data:
-          type:
-          - object
-          - 'null'
-          $ref: '#/components/schemas/Relationship'
-        links:
-          type: object
-          properties:
-            self:
-              $ref: '#/components/schemas/Link'
-            related:
-              $ref: '#/components/schemas/Link'
-      description: 'Some relationships relate a resource to exactly one other resource. For example an app can belong to only one space.
-
-        '
-    Link:
-      type: object
-      properties:
-        href:
-          type: string
-          description: The URL of the link
-        method:
-          type: string
-          description: An optional field containing the HTTP method to be used when following the URL
-      required:
-      - href
-      description: 'Each link is keyed by its type and will include a href for the URL and an optional method for links that cannot be followed using GET.
+      allOf:
+      - $ref: '#/components/schemas/BaseSchema'
+      - properties:
+          name:
+            type: string
+            description: Name of the organization
+          suspended:
+            type: boolean
+            description: Whether an organization is suspended or not; non-admins will be blocked from creating, updating, or deleting resources in a suspended organization
+          relationships:
+            type: object
+            properties:
+              quota:
+                $ref: '#/components/schemas/RelationshipToOne'
+            description: The quota applied to the organization
+          metadata:
+            $ref: '#/components/schemas/Metadata'
+          links:
+            type: object
+            properties:
+              self:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get this organization
+              domains:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get the domains for this organization
+              quota:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get the quota for this organization
+              default_domain:
+                $ref: '#/components/schemas/Link'
+                description: The URL to get the default domain for this organization
+      description: 'An org is a development account that an individual or multiple collaborators can own and use. All collaborators access an org with user accounts. Collaborators in an org share a resource quota plan, applications, services availability, and custom domains.
 
         '
     Metadata:
@@ -839,74 +737,6 @@ components:
                 $ref: '#/components/schemas/Link'
                 description: The URL to get the organizations for this isolation segment
       description: An isolation segment provides a dedicated pool of compute resources for an organization or space.
-    OrganizationList:
-      type: object
-      properties:
-        pagination:
-          $ref: '#/components/schemas/Pagination'
-        resources:
-          type: array
-          items:
-            $ref: '#/components/schemas/Organization'
-      description: A paginated list of organizations
-    Errors:
-      type: object
-      properties:
-        errors:
-          type: array
-          items:
-            $ref: '#/components/schemas/Error'
-      description: 'An error response will always return a list of error objects. Errors appear on the job resource for asynchronous operations.
-
-        Clients should use the code and title fields for programmatically handling specific errors. The message in the detail field is subject to change over time.
-
-        '
-    IsolationSegmentList:
-      type: object
-      properties:
-        pagination:
-          $ref: '#/components/schemas/Pagination'
-        resources:
-          type: array
-          items:
-            $ref: '#/components/schemas/IsolationSegment'
-    Organization:
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/BaseSchema'
-      - properties:
-          name:
-            type: string
-            description: Name of the organization
-          suspended:
-            type: boolean
-            description: Whether an organization is suspended or not; non-admins will be blocked from creating, updating, or deleting resources in a suspended organization
-          relationships:
-            type: object
-            properties:
-              quota:
-                $ref: '#/components/schemas/RelationshipToOne'
-            description: The quota applied to the organization
-          metadata:
-            $ref: '#/components/schemas/Metadata'
-          links:
-            type: object
-            properties:
-              self:
-                $ref: '#/components/schemas/Link'
-                description: The URL to get this organization
-              domains:
-                $ref: '#/components/schemas/Link'
-                description: The URL to get the domains for this organization
-              quota:
-                $ref: '#/components/schemas/Link'
-                description: The URL to get the quota for this organization
-              default_domain:
-                $ref: '#/components/schemas/Link'
-                description: The URL to get the default domain for this organization
-      description: 'An org is a development account that an individual or multiple collaborators can own and use. All collaborators access an org with user accounts. Collaborators in an org share a resource quota plan, applications, services availability, and custom domains.
-
-        '
     RelationshipToMany:
       type: object
       properties:
@@ -924,6 +754,46 @@ components:
       description: 'Some relationships relate a resource to several other resources. For example, an isolation segment can be entitled to multiple organizations.
 
         '
+    OrganizationList:
+      type: object
+      properties:
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+        resources:
+          type: array
+          items:
+            $ref: '#/components/schemas/Organization'
+      description: A paginated list of organizations
+    RelationshipToOne:
+      type: object
+      properties:
+        data:
+          type:
+          - object
+          - 'null'
+          $ref: '#/components/schemas/Relationship'
+        links:
+          type: object
+          properties:
+            self:
+              $ref: '#/components/schemas/Link'
+            related:
+              $ref: '#/components/schemas/Link'
+      description: 'Some relationships relate a resource to exactly one other resource. For example an app can belong to only one space.
+
+        '
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: A numeric code for this error
+        detail:
+          type: string
+          description: Detailed description of the error
+        title:
+          type: string
+          description: Name of the error
     BaseSchema:
       type: object
       properties:
@@ -946,6 +816,27 @@ components:
         See Resources and Experimental Resources for specific resources.
 
         '
+    Errors:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/Error'
+      description: 'An error response will always return a list of error objects. Errors appear on the job resource for asynchronous operations.
+
+        Clients should use the code and title fields for programmatically handling specific errors. The message in the detail field is subject to change over time.
+
+        '
+    IsolationSegmentList:
+      type: object
+      properties:
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+        resources:
+          type: array
+          items:
+            $ref: '#/components/schemas/IsolationSegment'
     Relationship:
       type: object
       properties:
@@ -953,13 +844,116 @@ components:
           type: string
           format: uuid
           description: The GUID of the resource
+    Pagination:
+      type: object
+      properties:
+        total_results:
+          type: integer
+          description: The total number of results available
+        total_pages:
+          type: integer
+          description: The total number of pages available
+        first:
+          allOf:
+          - $ref: '#/components/schemas/Link'
+          - description: The first page of results
+        last:
+          allOf:
+          - $ref: '#/components/schemas/Link'
+          - description: The last page of results
+        next:
+          oneOf:
+          - $ref: '#/components/schemas/Link'
+          - type: 'null'
+          description: The next page of results
+        previous:
+          oneOf:
+          - $ref: '#/components/schemas/Link'
+          - type: 'null'
+          description: The previous page of results
+      description: 'Pagination is a technique used to divide a large set of results into smaller, more manageable sets. This allows clients to retrieve results in smaller chunks, reducing the amount of data transferred and improving performance.
+
+        The pagination object is a JSON object that contains information about the pagination state of the results. It includes the total number of results available, the total number of pages available, and links to the first, last, next, and previous pages of results.
+
+        '
+    Link:
+      type: object
+      properties:
+        href:
+          type: string
+          description: The URL of the link
+        method:
+          type: string
+          description: An optional field containing the HTTP method to be used when following the URL
+      required:
+      - href
+      description: 'Each link is keyed by its type and will include a href for the URL and an optional method for links that cannot be followed using GET.
+
+        '
+  parameters:
+    Guid:
+      name: guid
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: The unique identifier for the resource
+    OrderBy:
+      name: order_by
+      in: query
+      required: false
+      schema:
+        type: string
+      description: 'Value to sort by. Defaults to ascending; prepend with `-` to sort descending.
+
+        '
+      example: created_at
+    Page:
+      name: page
+      in: query
+      required: false
+      schema:
+        type: integer
+      description: Page to display; valid values are integers >= 1
+      example: 1
+    LabelSelector:
+      name: label_selector
+      in: query
+      description: A query string containing a list of [label selector](#labels-and-selectors) requirements
+      required: false
+      schema:
+        type: string
+      example: environment=production
+    UpdatedAts:
+      name: updated_ats
+      in: query
+      required: false
+      schema:
+        type: string
+      description: 'Timestamp to filter by. When filtering on equality, several comma-delimited timestamps may be passed. Also supports filtering with [relational operators](#relational-operators).
+
+        '
+      example: '2021-01-01T00:00:00Z'
+    PerPage:
+      name: per_page
+      in: query
+      required: false
+      schema:
+        type: integer
+      description: Number of results per page, valid values are 1 through 5000
+      example: 50
+    CreatedAts:
+      name: created_ats
+      in: query
+      required: false
+      schema:
+        type: string
+      description: 'Timestamp to filter by. When filtering on equality, several comma-delimited timestamps may be passed. Also supports filtering with [relational operators](#relational-operators).
+
+        '
+      example: '2021-01-01T00:00:00Z'
   responses:
-    Forbidden:
-      description: Forbidden
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
     BadGateway:
       description: Bad Gateway
       content:
@@ -968,24 +962,6 @@ components:
             $ref: '#/components/schemas/Error'
     Unauthorized:
       description: Unauthorized
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    ServiceUnavailable:
-      description: Service Unavailable
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    '500':
-      description: Internal Server Error
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errors'
-    NotFound:
-      description: Not Found
       content:
         application/json:
           schema:
@@ -1002,6 +978,24 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Errors'
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    NotFound:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    ServiceUnavailable:
+      description: Service Unavailable
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
     BadRequest:
       description: Bad Request
       content:
@@ -1011,6 +1005,12 @@ components:
         text/html:
           schema:
             type: string
+    '500':
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
   requestBodies:
     IsolationSegmentCreate:
       description: Isolation segment to create
