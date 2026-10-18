@@ -398,6 +398,8 @@ apis:
   humanURL: https://v3-apidocs.cloudfoundry.org/
   baseURL: https://api.{system-domain}
   tags:
+  - Cloud Native Buildpacks
+  tags_raw:
   - Buildpacks
   properties:
   - type: OpenAPI
