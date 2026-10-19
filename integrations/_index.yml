@@ -88,3 +88,78 @@
     detected: '2026-10-18'
   status: not-a-workflow
   arazzo: null
+- slug: cloud-foundry-go-module-proxy
+  label: Go module proxy
+  partner_name: Go module proxy
+  category: official SDK (Go)
+  type: register
+  channel: package-registry
+  evidence: https://pkg.go.dev/code.cloudfoundry.org/cli
+  source: edge
+  relationship: distribution-channel
+  contract_reference:
+    register: Go module proxy (public registry JSON)
+    spec_file: null
+    language: Go
+    packages:
+    - name: code.cloudfoundry.org/cli
+      version: v6.53.0+incompatible
+      released: '2020-10-01'
+      released_field: Time
+      lapsed: true
+      page: https://pkg.go.dev/code.cloudfoundry.org/cli
+      repo_leg: domain:cloudfoundry.org
+      publisher_leg: module-path:cloudfoundry.org
+      matched_by: domain
+    - name: code.cloudfoundry.org/cli/v8
+      version: v8.19.1
+      released: '2026-10-13'
+      released_field: Time
+      lapsed: false
+      page: https://pkg.go.dev/code.cloudfoundry.org/cli/v8
+      repo_leg: domain:cloudfoundry.org
+      publisher_leg: module-path:cloudfoundry.org
+      matched_by: domain
+    - name: code.cloudfoundry.org/go-log-cache/v3
+      version: v3.1.2
+      released: '2026-05-05'
+      released_field: Time
+      lapsed: false
+      page: https://pkg.go.dev/code.cloudfoundry.org/go-log-cache/v3
+      repo_leg: domain:cloudfoundry.org
+      publisher_leg: module-path:cloudfoundry.org
+      matched_by: domain
+    - name: code.cloudfoundry.org/go-loggregator/v10
+      version: v10.3.1
+      released: '2026-03-05'
+      released_field: Time
+      lapsed: false
+      page: https://pkg.go.dev/code.cloudfoundry.org/go-loggregator/v10
+      repo_leg: domain:cloudfoundry.org
+      publisher_leg: module-path:cloudfoundry.org
+      matched_by: domain
+    - name: github.com/cloudfoundry/bosh-cli/v7
+      version: v7.11.1
+      released: '2026-10-10'
+      released_field: Time
+      lapsed: false
+      page: https://pkg.go.dev/github.com/cloudfoundry/bosh-cli/v7
+      repo_leg: github-org:cloudfoundry
+      publisher_leg: org:cloudfoundry
+      matched_by: github-org
+    - name: github.com/cloudfoundry/go-cfclient/v3
+      version: v3.0.0-beta.1
+      released: '2026-07-13'
+      released_field: Time
+      lapsed: false
+      page: https://pkg.go.dev/github.com/cloudfoundry/go-cfclient/v3
+      repo_leg: github-org:cloudfoundry
+      publisher_leg: org:cloudfoundry
+      matched_by: github-org
+    current: true
+    signal_note: 'an official package on the registry: distribution, not an integration; lapsed = no release in
+      24 months'
+    detected_by: sweep-official-sdks.py
+    detected: '2026-10-18'
+  status: not-a-workflow
+  arazzo: null

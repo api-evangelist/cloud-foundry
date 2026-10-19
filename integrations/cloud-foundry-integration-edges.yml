@@ -1,12 +1,19 @@
 generated: '2026-10-13'
 method: searched
 checked:
+- https://api.nuget.org/v3
+- https://crates.io/api/v1
 - https://focus.finops.org/data-generators/
 - https://github.com/cncf/k8s-conformance
 - https://github.com/cncf/landscape
 - https://github.com/istio/istio.io
 - https://github.com/open-telemetry/opentelemetry.io/blob/main/data/ecosystem/vendors.yaml
 - https://github.com/open-telemetry/opentelemetry.io/blob/main/data/registry/
+- https://proxy.golang.org
+- https://pypi.org/pypi
+- https://registry.npmjs.org
+- https://repo1.maven.org/maven2
+- https://rubygems.org/api/v1
 marketplace_apps: []
 edges:
 - partner_name: OpenTelemetry
@@ -90,6 +97,81 @@ edges:
     detected_by: sweep-api-management.py
     detected: '2026-10-18'
   detected_by: sweep-api-management.py
+  first_seen: '2026-10-18'
+- partner_name: Go module proxy
+  partner: null
+  partner_match: null
+  type: register
+  direction: provider-built
+  category: official SDK (Go)
+  evidence: https://pkg.go.dev/code.cloudfoundry.org/cli
+  channel: package-registry
+  relationship: distribution-channel
+  contract_reference:
+    register: Go module proxy (public registry JSON)
+    spec_file: null
+    language: Go
+    packages:
+    - name: code.cloudfoundry.org/cli
+      version: v6.53.0+incompatible
+      released: '2020-10-01'
+      released_field: Time
+      lapsed: true
+      page: https://pkg.go.dev/code.cloudfoundry.org/cli
+      repo_leg: domain:cloudfoundry.org
+      publisher_leg: module-path:cloudfoundry.org
+      matched_by: domain
+    - name: code.cloudfoundry.org/cli/v8
+      version: v8.19.1
+      released: '2026-10-13'
+      released_field: Time
+      lapsed: false
+      page: https://pkg.go.dev/code.cloudfoundry.org/cli/v8
+      repo_leg: domain:cloudfoundry.org
+      publisher_leg: module-path:cloudfoundry.org
+      matched_by: domain
+    - name: code.cloudfoundry.org/go-log-cache/v3
+      version: v3.1.2
+      released: '2026-05-05'
+      released_field: Time
+      lapsed: false
+      page: https://pkg.go.dev/code.cloudfoundry.org/go-log-cache/v3
+      repo_leg: domain:cloudfoundry.org
+      publisher_leg: module-path:cloudfoundry.org
+      matched_by: domain
+    - name: code.cloudfoundry.org/go-loggregator/v10
+      version: v10.3.1
+      released: '2026-03-05'
+      released_field: Time
+      lapsed: false
+      page: https://pkg.go.dev/code.cloudfoundry.org/go-loggregator/v10
+      repo_leg: domain:cloudfoundry.org
+      publisher_leg: module-path:cloudfoundry.org
+      matched_by: domain
+    - name: github.com/cloudfoundry/bosh-cli/v7
+      version: v7.11.1
+      released: '2026-10-10'
+      released_field: Time
+      lapsed: false
+      page: https://pkg.go.dev/github.com/cloudfoundry/bosh-cli/v7
+      repo_leg: github-org:cloudfoundry
+      publisher_leg: org:cloudfoundry
+      matched_by: github-org
+    - name: github.com/cloudfoundry/go-cfclient/v3
+      version: v3.0.0-beta.1
+      released: '2026-07-13'
+      released_field: Time
+      lapsed: false
+      page: https://pkg.go.dev/github.com/cloudfoundry/go-cfclient/v3
+      repo_leg: github-org:cloudfoundry
+      publisher_leg: org:cloudfoundry
+      matched_by: github-org
+    current: true
+    signal_note: 'an official package on the registry: distribution, not an integration; lapsed = no release in
+      24 months'
+    detected_by: sweep-official-sdks.py
+    detected: '2026-10-18'
+  detected_by: sweep-official-sdks.py
   first_seen: '2026-10-18'
 source:
 - https://github.com/open-telemetry/opentelemetry.io/blob/main/data/ecosystem/vendors.yaml
