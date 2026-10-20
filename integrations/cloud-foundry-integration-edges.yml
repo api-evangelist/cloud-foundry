@@ -38,66 +38,6 @@ edges:
     detected: '2026-10-13'
   detected_by: sweep-observability.py
   detected: '2026-10-13'
-- partner_name: CNCF (Cloud Native Landscape)
-  partner: cncf
-  partner_match: register
-  type: register
-  direction: partner-built
-  category: Cloud native landscape
-  evidence: https://github.com/cncf/landscape/blob/3a7d378b1824b82e729a453bb03fa6f1e37557e1/landscape.yml
-  channel: standard-directory
-  relationship: standard-participant
-  contract_reference:
-    register: CNCF Cloud Native Landscape (github.com/cncf/landscape landscape.yml @3a7d378b18)
-    spec_file: null
-    standard: Cloud Native (CNCF)
-    role: cncf-member (Nonprofit)
-    registered_name: Cloud Foundry Foundation
-    registered_names:
-    - Cloud Foundry Application Runtime
-    - Cloud Foundry Foundation
-    website: https://www.cloudfoundry.org/
-    matched_domain: cloudfoundry.org
-    matched_by: domain
-    member_tier: Nonprofit
-    joined: '2016-01-01'
-    end_user: false
-    cncf_projects: []
-    landscape_categories:
-    - Platform / PaaS/Container Service
-    landscape_entries: 1
-    signal_note: 'participation only: a landscape listing is standard-participant evidence, not depth. Entries,
-      categories, tier and projects are CONTEXT, never read (breadth is not credit)'
-    detected_by: sweep-cloud-native.py
-    detected: '2026-10-15'
-  detected_by: sweep-cloud-native.py
-  first_seen: '2026-10-15'
-- partner_name: Istio (ecosystem)
-  partner: istio
-  partner_match: register
-  type: register
-  direction: partner-built
-  category: Service mesh ecosystem
-  evidence: https://github.com/istio/istio.io/blob/a03df1cfd4fda35a88a37b7a6486141c1c153bea/data/companies.yml
-  channel: standard-directory
-  relationship: standard-participant
-  contract_reference:
-    register: Istio ecosystem (github.com/istio/istio.io data/companies.yml @a03df1cfd4)
-    spec_file: null
-    standard: Istio service mesh
-    role: istio-provider
-    registered_name: Cloud Foundry
-    registered_names:
-    - Cloud Foundry
-    website: https://github.com/cloudfoundry/cf-k8s-networking
-    matched_domain: cloudfoundry.org
-    matched_by: domain
-    identity_source: github-org-website
-    signal_note: 'participation only: the ecosystem lists are context, never read'
-    detected_by: sweep-api-management.py
-    detected: '2026-10-18'
-  detected_by: sweep-api-management.py
-  first_seen: '2026-10-18'
 - partner_name: Go module proxy
   partner: null
   partner_match: null
@@ -172,6 +112,66 @@ edges:
     detected_by: sweep-official-sdks.py
     detected: '2026-10-18'
   detected_by: sweep-official-sdks.py
+  first_seen: '2026-10-18'
+- partner_name: CNCF (Cloud Native Landscape)
+  partner: cncf
+  partner_match: register
+  type: register
+  direction: partner-built
+  category: Cloud native landscape
+  evidence: https://github.com/cncf/landscape/blob/42dd4cd91dad8ec8558ac02467a43f0805b9957a/landscape.yml
+  channel: standard-directory
+  relationship: standard-participant
+  contract_reference:
+    register: CNCF Cloud Native Landscape (github.com/cncf/landscape landscape.yml @42dd4cd91d)
+    spec_file: null
+    standard: Cloud Native (CNCF)
+    role: cncf-member (Nonprofit)
+    registered_name: Cloud Foundry Foundation
+    registered_names:
+    - Cloud Foundry Application Runtime
+    - Cloud Foundry Foundation
+    website: https://www.cloudfoundry.org/
+    matched_domain: cloudfoundry.org
+    matched_by: domain
+    member_tier: Nonprofit
+    joined: '2016-01-01'
+    end_user: false
+    cncf_projects: []
+    landscape_categories:
+    - Platform / PaaS/Container Service
+    landscape_entries: 1
+    signal_note: 'participation only: a landscape listing is standard-participant evidence, not depth. Entries,
+      categories, tier and projects are CONTEXT, never read (breadth is not credit)'
+    detected_by: sweep-cloud-native.py
+    detected: '2026-10-19'
+  detected_by: sweep-cloud-native.py
+  first_seen: '2026-10-15'
+- partner_name: Istio (ecosystem)
+  partner: istio
+  partner_match: register
+  type: register
+  direction: partner-built
+  category: Service mesh ecosystem
+  evidence: https://github.com/istio/istio.io/blob/3a0c0f3e81c007d7b6e55d02418877bb6d1b4022/data/companies.yml
+  channel: standard-directory
+  relationship: standard-participant
+  contract_reference:
+    register: Istio ecosystem (github.com/istio/istio.io data/companies.yml @3a0c0f3e81)
+    spec_file: null
+    standard: Istio service mesh
+    role: istio-provider
+    registered_name: Cloud Foundry
+    registered_names:
+    - Cloud Foundry
+    website: https://github.com/cloudfoundry/cf-k8s-networking
+    matched_domain: cloudfoundry.org
+    matched_by: domain
+    identity_source: github-org-website
+    signal_note: 'participation only: the ecosystem lists are context, never read'
+    detected_by: sweep-api-management.py
+    detected: '2026-10-19'
+  detected_by: sweep-api-management.py
   first_seen: '2026-10-18'
 source:
 - https://github.com/open-telemetry/opentelemetry.io/blob/main/data/ecosystem/vendors.yaml
