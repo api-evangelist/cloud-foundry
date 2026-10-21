@@ -163,3 +163,113 @@
     detected: '2026-10-19'
   status: not-a-workflow
   arazzo: null
+- slug: cloud-foundry-homebrew
+  label: Homebrew
+  partner: homebrew
+  partner_name: Homebrew
+  category: official CLI (Homebrew)
+  type: register
+  channel: package-registry
+  evidence: https://formulae.brew.sh/formula/bosh-cli
+  source: edge
+  relationship: distribution-channel
+  contract_reference:
+    register: Homebrew (public package index)
+    spec_file: null
+    packages:
+    - name: bosh-cli
+      kind: formula
+      version: 7.11.1
+      released: null
+      lapsed: false
+      page: https://formulae.brew.sh/formula/bosh-cli
+      cli: 'formula desc: Cloud Foundry BOSH CLI v2'
+      repo_leg: github-org:cloudfoundry
+      publisher_leg: artifact-github-org:cloudfoundry
+      matched_by: github-org
+    - name: cloudfoundry-cli
+      kind: formula
+      version: 8.19.1
+      released: null
+      lapsed: false
+      page: https://formulae.brew.sh/formula/cloudfoundry-cli
+      cli: 'formula desc: Official command-line client for Cloud Foundry'
+      repo_leg: domain:cloudfoundry.org
+      publisher_leg: artifact-github-org:cloudfoundry
+      matched_by: domain
+    current: true
+    signal_note: 'the provider''s own command-line tool on a package manager: distribution, not an integration;
+      lapsed = no release in 24 months or deprecated / disabled by the manager'
+    detected_by: sweep-official-clis.py
+    detected: '2026-10-20'
+  status: not-a-workflow
+  arazzo: null
+- slug: cloud-foundry-scoop
+  label: Scoop
+  partner_name: Scoop
+  category: official CLI (Scoop)
+  type: register
+  channel: package-registry
+  evidence: https://github.com/ScoopInstaller/Extras/blob/master/bucket/cloudfoundry-cli.json
+  source: edge
+  relationship: distribution-channel
+  contract_reference:
+    register: Scoop (public package index)
+    spec_file: null
+    packages:
+    - name: cloudfoundry-cli
+      kind: extras
+      version: 8.19.0
+      released: null
+      lapsed: false
+      page: https://github.com/ScoopInstaller/Extras/blob/master/bucket/cloudfoundry-cli.json
+      cli: 'scoop description: The official command line client for Cloud Foundry'
+      repo_leg: github-org:cloudfoundry
+      publisher_leg: artifact-github-org:cloudfoundry
+      matched_by: github-org
+    current: true
+    signal_note: 'the provider''s own command-line tool on a package manager: distribution, not an integration;
+      lapsed = no release in 24 months or deprecated / disabled by the manager'
+    detected_by: sweep-official-clis.py
+    detected: '2026-10-20'
+  status: not-a-workflow
+  arazzo: null
+- slug: cloud-foundry-opentofu-opentofu-registry
+  label: OpenTofu (opentofu-registry)
+  partner: opentofu
+  partner_name: OpenTofu (opentofu-registry)
+  category: infrastructure-as-code provider registry listing
+  type: marketplace
+  marketplace: opentofu-registry
+  channel: partner-built
+  evidence: https://search.opentofu.org/provider/cloudfoundry/cloudfoundry
+  source: edge
+  relationship: platform-app
+  status: not-a-workflow
+  arazzo: null
+- slug: cloud-foundry-pulumi-pulumi-registry
+  label: Pulumi (pulumi-registry)
+  partner: pulumi
+  partner_name: Pulumi (pulumi-registry)
+  category: infrastructure-as-code provider registry listing
+  type: marketplace
+  marketplace: pulumi-registry
+  channel: partner-built
+  evidence: https://www.pulumi.com/registry/packages/cloudfoundry/
+  source: edge
+  relationship: platform-app
+  status: not-a-workflow
+  arazzo: null
+- slug: cloud-foundry-terraform-terraform-registry
+  label: Terraform (terraform-registry)
+  partner: terraform
+  partner_name: Terraform (terraform-registry)
+  category: infrastructure-as-code provider registry listing
+  type: marketplace
+  marketplace: terraform-registry
+  channel: partner-built
+  evidence: https://registry.terraform.io/providers/cloudfoundry/cloudfoundry
+  source: edge
+  relationship: platform-app
+  status: not-a-workflow
+  arazzo: null
