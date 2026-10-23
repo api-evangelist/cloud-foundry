@@ -25,6 +25,9 @@ checked:
 - https://www.bestpractices.dev/en/projects.json
 - artifact-hub/integrations/artifact-hub-integration-edges.yml
 - https://www.bestpractices.dev/en/projects.json?page=N
+- https://aur.archlinux.org/cgit/aur.git/tree/.SRCINFO
+- https://aur.archlinux.org/packages-meta-ext-v1.json.gz
+- https://aur.archlinux.org/rpc/v5/info
 marketplace_apps: []
 edges:
 - partner_name: OpenTelemetry
@@ -325,6 +328,53 @@ edges:
   category: Artifact Hub listing (Helm chart)
   badges:
   - 'Verified publisher (Artifact Hub verified publisher: repository ownership proven)'
+- partner_name: Arch User Repository (AUR)
+  partner: null
+  partner_match: null
+  type: register
+  direction: provider-built
+  category: official CLI (Arch User Repository (AUR))
+  evidence: https://aur.archlinux.org/packages/cloudfoundry6-cli
+  channel: package-registry
+  relationship: distribution-channel
+  contract_reference:
+    register: Arch User Repository (AUR) (public package index)
+    spec_file: null
+    packages:
+    - name: cloudfoundry6-cli
+      kind: aur
+      version: 6.52.0-1
+      released: '2021-07-02'
+      released_field: AUR LastModified
+      out_of_date: false
+      lapsed: true
+      page: https://aur.archlinux.org/packages/cloudfoundry6-cli
+      upstream: https://github.com/cloudfoundry/cli
+      cli: 'AUR description: The official command line client for Cloud Foundry (stuck to version 6)'
+      repo_leg: github-org:cloudfoundry
+      publisher_leg: artifact-domain:cloudfoundry.org
+      matched_by: domain
+    - name: credhub-cli
+      kind: aur
+      version: 2.9.39-1
+      released: '2024-11-12'
+      released_field: AUR LastModified
+      out_of_date: false
+      lapsed: false
+      page: https://aur.archlinux.org/packages/credhub-cli
+      upstream: https://github.com/cloudfoundry/credhub-cli/releases/
+      cli: 'AUR description: CredHub CLI provides a command line interface to interact with CredHub servers'
+      repo_leg: github-org:cloudfoundry
+      publisher_leg: artifact-github-org:cloudfoundry
+      matched_by: github-org
+    current: true
+    signal_note: 'the provider''s own command-line tool packaged for Arch Linux (community-maintained PKGBUILD whose
+      upstream and source artifact are the provider''s): distribution, not an integration; lapsed = flagged out-of-date
+      or not updated in 24 months'
+    detected_by: sweep-aur-vendor-cli-packages.py
+    detected: '2026-10-23'
+  detected_by: sweep-aur-vendor-cli-packages.py
+  first_seen: '2026-10-23'
 source:
 - https://github.com/open-telemetry/opentelemetry.io/blob/main/data/ecosystem/vendors.yaml
 - https://github.com/open-telemetry/opentelemetry.io/blob/main/data/registry/
