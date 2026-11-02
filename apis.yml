@@ -29,8 +29,10 @@ accessModel:
   confidence: low
   source:
   - authentication
+  - scopes
+  - rate-limits
   - security
-  generated: '2026-09-03'
+  generated: '2026-11-02'
   method: derived
 image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/icons/cloud-foundry.png
 url: https://raw.githubusercontent.com/api-evangelist/cloud-foundry/refs/heads/main/apis.yml
